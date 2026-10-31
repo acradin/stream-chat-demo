@@ -11,9 +11,9 @@
 - 백엔드 설치와 내부 `/healthz`, 공개 HTTPS `/healthz`, 인증된 `/api/usage` 검사 통과. `check` 결과: `HTTPS and authenticated service verified`.
 - DuckDNS A 레코드는 `52.200.103.213`으로 반영됐습니다. 이 도메인을 쓰는 데 추가 도메인 구매나 Route 53 등록은 필요하지 않습니다.
 - Caddy 인증서 발급 완료. 치지직 콜백은 `https://tiki-chat.duckdns.org/oauth/chzzk/callback`이며 redirect URL 수정과 상대방 방송 계정의 승인·전송을 확인했습니다.
-- 루트 `/`는 최신 `feat/demo-frontend`를 통합한 React 프론트엔드입니다. 공개 웹에서 입력한 방송 설명과 페르소나로 OpenAI 텍스트 채팅을 생성합니다. 영상 분석·치지직 전송은 하지 않습니다. 데스크톱 생성·사용량·치지직 API는 계속 서비스 인증이 필요합니다. 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
+- 루트 `/`는 서비스 소개 랜딩이며 데모 버튼은 `/demo/index.html`의 기존 React 앱으로 연결합니다. 공개 웹에서 **동영상 1/2/3**을 재생하고 현재 장면 한 장·방송 설명·페르소나로 OpenAI 채팅을 생성합니다. 음성·사용자 화면 캡처·치지직 전송은 하지 않습니다. 데스크톱 생성·사용량·치지직 API는 계속 서비스 인증이 필요합니다. 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
 - 웹 세션은 Secure/HttpOnly 쿠키로 방문자마다 분리됩니다. 최대 128세션, 세션당 10회, 30분 비활동 만료이며 세션은 재배포 때 초기화됩니다. 전체 방문자 합계 UTC 하루 100회, 동시 OpenAI 호출 최대 2개입니다. 일일 호출 횟수만 상태 디스크에 저장해 재시작 후에도 한도를 유지하고 실패한 호출도 계산합니다. 웹 입력·채팅 내용은 서버 디스크에 기록하지 않습니다.
-- GitHub push는 AWS에 자동 반영되지 않습니다. 현재 Actions는 Mac/Linux 앱 빌드용이며, 웹 빌드 후 아래 `deploy` 명령으로 기존 EC2를 갱신합니다. 이번 재배포 후 HTTPS/인증 검사와 공개 웹 실제 AI 생성 1회를 통과했습니다.
+- GitHub push는 AWS에 자동 반영되지 않습니다. 현재 Actions는 Mac/Linux 앱 빌드용이며, 웹 빌드 후 아래 `deploy` 명령으로 기존 EC2를 갱신합니다. `ea41ad8` 수정본을 재배포하고 HTTPS/인증 검사, 공개 Chromium의 랜딩→데모 이동·영상 3개 재생/Range 응답·실제 이미지 AI 생성 1회(약 3.6초)를 확인했습니다. 브라우저 오류와 치지직 전송은 0회입니다.
 
 초기 Ubuntu 설치에서 APT의 `awscli` 패키지를 찾지 못한 문제는 공식 AWS CLI v2 설치 파일로 수정했습니다. 같은 서버에서 초기 설정을 복구하고 백엔드를 설치했습니다. 이전 cloud-init 실패 기록이 있어도 완료 표시 파일이 있는 경우에만 배포를 계속합니다.
 

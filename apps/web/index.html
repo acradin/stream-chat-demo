@@ -5,10 +5,14 @@
 <link rel="icon" type="image/svg+xml" href="/tiki-face.svg"/>
 <title>tiki — 방송의 첫 대화부터</title>
 <style>
+@font-face{font-family:Pretendard;font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/pretendard/Pretendard-Regular.ttf') format('truetype')}
+@font-face{font-family:Pretendard;font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/pretendard/Pretendard-SemiBold.ttf') format('truetype')}
+@font-face{font-family:Pretendard;font-style:normal;font-weight:700;font-display:swap;src:url('/fonts/pretendard/Pretendard-Bold.ttf') format('truetype')}
 :root{--bg:#061612;--panel:#10231f;--mint:#19e5aa;--text:#f5fff9;--muted:#a6b9b0}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.65}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,sans-serif;line-height:1.65}
+button,input,select,textarea{font:inherit}
 a{text-decoration:none;color:inherit}
 .container{width:min(1160px,calc(100% - 44px));margin:auto}
 header{position:sticky;top:0;z-index:20;background:rgba(6,22,18,.84);backdrop-filter:blur(16px);border-bottom:1px solid #ffffff14}
@@ -25,6 +29,8 @@ header{position:sticky;top:0;z-index:20;background:rgba(6,22,18,.84);backdrop-fi
 .eyebrow{color:var(--mint);font-size:13px;font-weight:850;letter-spacing:2px;text-transform:uppercase}
 .hero h1{font-size:clamp(42px,5.2vw,72px);line-height:1.18;letter-spacing:-3px;margin:24px 0}
 .hero h1 span,.accent{color:var(--mint)}
+.hero h1 .hero-title-intro{display:block;font-size:.7em;color:var(--text);letter-spacing:-.04em}
+.hero h1 .hero-title-primary{display:block}
 .lead{font-size:19px;color:#bbcfc5;max-width:560px;word-break:keep-all}
 .actions{display:flex;gap:12px;flex-wrap:wrap;margin:33px 0 20px}
 .disclaimer{color:#90aa9d;font-size:12px}
@@ -38,17 +44,15 @@ header{position:sticky;top:0;z-index:20;background:rgba(6,22,18,.84);backdrop-fi
 .gear{color:#8fa89d;font-size:16px}
 .orb{position:relative;margin:26px auto 22px;width:200px;aspect-ratio:1;border-radius:50%;display:grid;place-content:center;justify-items:center;text-align:center;background:radial-gradient(circle at 50% 32%,#2DFF8F,#12cf9f 55%,#07b892);box-shadow:inset 0 0 0 1.5px #ffffff59,0 0 48px -4px #2dff8f8c,0 18px 46px -16px #03ffd58c;animation:glow 3.2s ease-in-out infinite}
 .orb img{height:52px;width:auto;filter:drop-shadow(0 2px 4px #0003)}
-.orb strong{display:block;font-size:19px;font-weight:800;color:#06241b;margin-top:8px;letter-spacing:-.5px}
-.orb small{display:block;font-size:11px;color:#0a3327cc;font-weight:600}
+.orb strong{display:block;font-size:19px;font-weight:800;color:#fff;margin-top:8px;letter-spacing:-.5px}
+.orb small{display:block;font-size:11px;color:#fff;font-weight:600}
 .chatwrap{min-height:112px}
 .chat{background:#3b4440;border-radius:11px;padding:10px 13px;margin:9px 0;font-size:12px;opacity:0;transform:translateY(6px);animation:rise .5s ease forwards}
 .chat:nth-child(1){animation-delay:.3s}
 .chat:nth-child(2){animation-delay:1.3s}
 .chat:nth-child(3){animation-delay:2.3s}
 .meter{margin-top:20px;display:flex;justify-content:space-between;font-size:13px;font-weight:750}
-.bar{height:9px;border-radius:9px;background:#6b7470;margin-top:9px;position:relative;overflow:hidden}
-.bar:before{content:'';position:absolute;inset:0;width:28%;border-radius:9px;background:linear-gradient(90deg,#03FFD5,#2DFF8F)}
-.handle{position:absolute;top:50%;left:28%;width:16px;height:16px;border-radius:50%;background:#2DFF8F;border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 2px 6px #0006}
+.member-slider-preview{display:block;width:100%;height:auto;margin-top:9px}
 .mock-foot{font-size:11px;margin-top:13px;color:#a2c9b7}
 @keyframes rise{to{opacity:1;transform:translateY(0)}}
 @keyframes glow{0%,100%{box-shadow:inset 0 0 0 1.5px #ffffff59,0 0 40px -6px #2dff8f80,0 18px 46px -16px #03ffd580}50%{box-shadow:inset 0 0 0 1.5px #ffffff73,0 0 64px 0 #2dff8fb3,0 18px 50px -14px #03ffd5b3}}
@@ -99,7 +103,7 @@ footer .foot-left{display:flex;align-items:center;gap:12px}
 <section class="hero"><div class="container hero-grid">
   <div>
     <div class="eyebrow">AI STREAMING CHAT COMPANION</div>
-    <h1>채팅이 조용한 순간에도,<br/><span>방송은 계속 티키타카.</span></h1>
+    <h1><span class="hero-title-intro">채팅이 조용한 순간에도,</span><span class="hero-title-primary">방송은 계속 티키타카.</span></h1>
     <p class="lead">작은 방송에도 활기찬 대화가 이어지도록. tiki는 스트리머의 콘텐츠와 분위기에 어울리는 AI 채팅으로 첫 대화를 시작합니다.</p>
     <div class="actions"><a class="btn" href="/demo/">⚡ 지금 데모 체험하기 →</a><a class="btn ghost" href="#features">기능 살펴보기 ↓</a></div>
     <div class="disclaimer">※ 현재 공개된 체험은 MOCK 데모입니다. 실제 방송 연동 및 AI 기능과 차이가 있을 수 있습니다.</div>
@@ -116,7 +120,7 @@ footer .foot-left{display:flex;align-items:center;gap:12px}
       <div class="chat">[MOCK] 재미 담당 지원했습니다. 수습 기간은 없나요 ㅋㅋ</div>
     </div>
     <div class="meter"><span>채팅 멤버</span><span>1명</span></div>
-    <div class="bar"><span class="handle"></span></div>
+    <img class="member-slider-preview" src="/landing/count-slider.svg" width="178" height="32" alt="채팅 멤버 1명 선택 · 1~5명"/>
     <div class="mock-foot">데모 화면 미리보기 · 실제 체험 화면은 버튼을 눌러주세요</div>
   </div>
 </div></section>

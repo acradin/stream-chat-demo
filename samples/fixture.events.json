@@ -1,0 +1,15 @@
+{
+  "synthetic": true,
+  "purpose": "Pipeline scheduling checks only. Never feed this annotation file into model requests.",
+  "duration_s": 18.0,
+  "events": [
+    {
+      "video_s": 6.0,
+      "event": "Synthetic blue-to-red scene change and 660 Hz tone"
+    },
+    {
+      "video_s": 12.0,
+      "event": "Synthetic red-to-green scene change and 880 Hz tone"
+    }
+  ]
+}

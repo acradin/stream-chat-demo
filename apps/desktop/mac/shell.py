@@ -26,9 +26,8 @@ def mapped(root):
         if window.title() == root.title():
             # Tk can restore native chrome while mapping. Keep its focusable
             # document window, but extend content through the transparent title bar.
-            mask = window.styleMask() | NSWindowStyleMaskFullSizeContentView
-            if mask != window.styleMask():
-                window.setStyleMask_(mask)
+            # Tk already configured noTitleBar. Changing styleMask here
+            # re-enters Tk's Cocoa delegate and crashes Python 3.14.
             window.setTitleVisibility_(NSWindowTitleHidden)
             window.setTitlebarAppearsTransparent_(True)
             for kind in (NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton):

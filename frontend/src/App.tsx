@@ -4,6 +4,8 @@ import { useUiStore } from "./store/uiStore";
 import { MainScreen } from "./screens/MainScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
+import { PricingPage } from "./screens/PricingPage";
+import { CheckoutPage } from "./screens/CheckoutPage";
 
 export default function App() {
   const loadConfig = useSessionStore((s) => s.loadConfig);
@@ -24,5 +26,7 @@ export default function App() {
 
   if (screen === "onboarding") return <OnboardingScreen />;
   if (screen === "settings") return <SettingsScreen />;
+  if (screen === "pricing") return <PricingPage />;
+  if (screen === "checkout") return <CheckoutPage />;
   return <MainScreen />;
 }

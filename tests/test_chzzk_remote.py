@@ -126,6 +126,15 @@ class RemoteAuthTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(sorted(response.status for response in responses), [200, 400])
         self.assertEqual(self.requests.count("/auth/v1/token"), 1)
 
+    async def test_altered_link_is_not_reported_as_expired_or_consumed(self):
+        state = await self.invite()
+        altered = ("A" if state[0] != "A" else "a") + state[1:]
+        response = await self.callback(altered)
+        self.assertEqual(response.status, 400)
+        self.assertIn("일치하는 승인 요청", await response.text())
+        self.assertEqual(self.requests, [])
+        self.assertEqual((await self.callback(state)).status, 200)
+
     async def test_invite_rejects_extra_fields_and_large_or_invalid_bodies(self):
         for body in ({"channel_url": CHANNEL, "account": "bob"}, {"channel_url": "not-a-channel"}):
             response = await self.http.post("/api/chzzk/authorize", headers=self.headers, json=body)
@@ -153,6 +162,7 @@ class RemoteAuthTests(unittest.IsolatedAsyncioTestCase):
         response = await client.get(CALLBACK_PATH, headers={"Host": "stream.example.com"},
                                     params={"state": state, "code": "private-code"})
         self.assertEqual(response.status, 400)
+        self.assertIn("유효 시간(10분)", await response.text())
         self.assertEqual(self.requests, [])
 
     def test_public_origin_rejects_credentials_paths_and_insecure_urls(self):

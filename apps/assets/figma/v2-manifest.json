@@ -8,11 +8,27 @@
     ]
   },
   {
+    "file": "v2-arrow@3x.png",
+    "sha256": "816e9a2218677fb93c9e9fcd41ec70299cdbf396b9892ffcc2638e4f8dcb4c46",
+    "size": [
+      54,
+      60
+    ]
+  },
+  {
     "file": "v2-crown.png",
     "sha256": "cf32d4856220579241ebb4249f04e9c739d597687f5f609b92184fcbacf9ad3e",
     "size": [
       12,
       12
+    ]
+  },
+  {
+    "file": "v2-crown@3x.png",
+    "sha256": "03a41da4b5c865164da8dd7e77d22cc7836ef2ab339cebd60027bf9aa758bc17",
+    "size": [
+      36,
+      36
     ]
   },
   {
@@ -24,11 +40,27 @@
     ]
   },
   {
+    "file": "v2-edit@3x.png",
+    "sha256": "029d7e8c8615fa625ab6f275a815bdfd1a5529813d1ca421f945ae34f6956a28",
+    "size": [
+      42,
+      42
+    ]
+  },
+  {
     "file": "v2-header.png",
     "sha256": "ee468f6bfe562e30191da671621de8858f24a389749ba3a530cdb48828145377",
     "size": [
       70,
       21
+    ]
+  },
+  {
+    "file": "v2-header@3x.png",
+    "sha256": "96b87a4320ebea8b090de44125c5f8e85a0fe6230f2c0135b3d3de87cdd516f8",
+    "size": [
+      210,
+      63
     ]
   },
   {
@@ -56,6 +88,14 @@
     ]
   },
   {
+    "file": "v2-orb-face@3x.png",
+    "sha256": "701795e8ded3a0e5d51532ba812faa2c19d2bd03fdd4dd7ce72ec7abb30ad451",
+    "size": [
+      252,
+      240
+    ]
+  },
+  {
     "file": "v2-orb-glow.png",
     "sha256": "f379a4b8a8a81701979ad1047405a080ba92ca913762b9051fc88c1ae209ef47",
     "size": [
@@ -72,11 +112,27 @@
     ]
   },
   {
+    "file": "v2-persona-analyst@3x.png",
+    "sha256": "90d75f079a01251765bd48384486a163c62913662bc27c758801b9d72f0bffc6",
+    "size": [
+      153,
+      144
+    ]
+  },
+  {
     "file": "v2-persona-chatter.png",
     "sha256": "fb5ab21b7b7eb6a30ed1ae10982ae2911b9c50bf6f09326c370b0db2588efebe",
     "size": [
       51,
       48
+    ]
+  },
+  {
+    "file": "v2-persona-chatter@3x.png",
+    "sha256": "e85ddb39803144d6dbcdbeca02e153a748717c5d6b7fbc4fd8d1c1e7c3c0e298",
+    "size": [
+      153,
+      144
     ]
   },
   {
@@ -88,11 +144,27 @@
     ]
   },
   {
+    "file": "v2-persona-coach@3x.png",
+    "sha256": "6703fa967ba401af7f493658fc313ee3bcdd7f97884477e381b12ef003c9ff3f",
+    "size": [
+      153,
+      144
+    ]
+  },
+  {
     "file": "v2-persona-reaction.png",
     "sha256": "7206bde7753a52d397dcb14a5b964ad9d8576522c160b4327ee0619c941e82e9",
     "size": [
       51,
       48
+    ]
+  },
+  {
+    "file": "v2-persona-reaction@3x.png",
+    "sha256": "e2cc6273eef0ca8fa7fde42aef6ff35a6540e15cc0e8e507c52f707d16487e4e",
+    "size": [
+      153,
+      144
     ]
   },
   {
@@ -104,6 +176,14 @@
     ]
   },
   {
+    "file": "v2-persona-supporter@3x.png",
+    "sha256": "022bf43e8f0d8132f78ef25819bfb329b923142227bdb5d2583acc9341f9803c",
+    "size": [
+      153,
+      144
+    ]
+  },
+  {
     "file": "v2-persona-witty.png",
     "sha256": "8614519e3f59d4d1c2cd487b473116b58aef91442a28d4909008b0e7f259edc4",
     "size": [
@@ -112,11 +192,27 @@
     ]
   },
   {
+    "file": "v2-persona-witty@3x.png",
+    "sha256": "a54d4915ad87204b6c6c808f3a6954275cd3ea4a57a880d18bbe02693ffbac4e",
+    "size": [
+      153,
+      144
+    ]
+  },
+  {
     "file": "v2-settings.png",
     "sha256": "b11fb7e5cf36a9c0194603d0bdc0c49316c240ed98557f493695eb3818a1ff6c",
     "size": [
       15,
       14
+    ]
+  },
+  {
+    "file": "v2-settings@3x.png",
+    "sha256": "ca00e9962ff189b0af62fd60bdcd10a9b6f64adc31dadb17826ef43546c159fd",
+    "size": [
+      45,
+      42
     ]
   },
   {
@@ -176,6 +272,14 @@
     ]
   },
   {
+    "file": "v2-welcome-face@3x.png",
+    "sha256": "1b3af47b1d41b9dd1c2c2489173c5c277982b8f967849f40031598352ee46e37",
+    "size": [
+      297,
+      285
+    ]
+  },
+  {
     "file": "v2-welcome-logo.png",
     "sha256": "540d3146dceed958a1773cf96bb7f6c8154b6c3068cac042ac1d0c796335766e",
     "size": [
@@ -184,11 +288,27 @@
     ]
   },
   {
+    "file": "v2-welcome-logo@3x.png",
+    "sha256": "6087921da872bd4c77eb998c8fb8e84d030da3f0b30c15d94b5428e53f78752d",
+    "size": [
+      297,
+      354
+    ]
+  },
+  {
     "file": "v2-wordmark.png",
     "sha256": "961e3c9dcdeada4261464505a34acdb4ed77f8198580f843c1ff250a76ceec42",
     "size": [
       42,
       18
+    ]
+  },
+  {
+    "file": "v2-wordmark@3x.png",
+    "sha256": "18f858cc2fdc5faba005ab5219e2b6f7db5d24408722997ee6323331339dcd0b",
+    "size": [
+      126,
+      54
     ]
   }
 ]

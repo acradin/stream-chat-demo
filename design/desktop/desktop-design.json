@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "exported_at": "2026-10-31T18:27:48.345642+00:00",
-  "git_revision": "5b7f97a4c930ec7b9d2bae390c79f6875b714236",
+  "exported_at": "2026-10-31T19:09:32.371499+00:00",
+  "git_revision": "4960ec13ab2c03108bbfbcf7f1029451bf0f19b0",
   "scope": "Main, Settings, five onboarding screens, Controls, Chat, service connection dialog; synthetic states",
   "privacy": {
     "user_settings_read": false,
@@ -161,6 +161,7 @@
       "default_size_px": 12,
       "sizes_px": [
         8,
+        11,
         12,
         14,
         16,
@@ -399,16 +400,16 @@
         "requested": "device",
         "resolved": {
           "family": "Pretendard",
-          "size": 1366154247,
+          "size": 313662512,
           "weight": "bold",
           "slant": "roman",
           "underline": 0,
           "overstrike": 0
         },
         "metrics": {
-          "ascent": 228,
+          "ascent": 173,
           "descent": 4800846,
-          "linespace": 4801074,
+          "linespace": 4801019,
           "fixed": 1
         }
       },
@@ -3806,7 +3807,7 @@
               "tags": "",
               "text": "재치있는 드립과 적절한 놀림으로\n방송을 활발하게 만들어주는 스타일",
               "underline": "-1",
-              "width": "0"
+              "width": "210"
             },
             "bbox_px": [
               88,
@@ -13023,7 +13024,7 @@
                   "disabledfill": "",
                   "disabledstipple": "",
                   "fill": "#eaeaea",
-                  "font": "Pretendard -12",
+                  "font": "Pretendard -11",
                   "justify": "left",
                   "offset": "0,0",
                   "state": "",
@@ -13031,28 +13032,28 @@
                   "tags": "",
                   "text": "재치있는 드립과 적절한 놀림으로\n방송을 활발하게 만들어주는 스타일",
                   "underline": "-1",
-                  "width": "0"
+                  "width": "193"
                 },
                 "bbox_px": [
                   72,
                   28,
                   233,
-                  56
+                  54
                 ],
                 "font": {
-                  "requested": "Pretendard -12",
+                  "requested": "Pretendard -11",
                   "resolved": {
                     "family": "Pretendard",
-                    "size": 9,
+                    "size": 8,
                     "weight": "normal",
                     "slant": "roman",
                     "underline": 0,
                     "overstrike": 0
                   },
                   "metrics": {
-                    "ascent": 11,
+                    "ascent": 10,
                     "descent": 3,
-                    "linespace": 14,
+                    "linespace": 13,
                     "fixed": 0
                   }
                 }
@@ -13319,7 +13320,7 @@
                   "disabledfill": "",
                   "disabledstipple": "",
                   "fill": "#eaeaea",
-                  "font": "Pretendard -12",
+                  "font": "Pretendard -11",
                   "justify": "left",
                   "offset": "0,0",
                   "state": "",
@@ -13327,28 +13328,28 @@
                   "tags": "",
                   "text": "게임 상황을 빠르게 분석하고\n날카로운 판단과 전략을 제시하는 스타일",
                   "underline": "-1",
-                  "width": "0"
+                  "width": "193"
                 },
                 "bbox_px": [
                   72,
                   28,
                   256,
-                  56
+                  54
                 ],
                 "font": {
-                  "requested": "Pretendard -12",
+                  "requested": "Pretendard -11",
                   "resolved": {
                     "family": "Pretendard",
-                    "size": 9,
+                    "size": 8,
                     "weight": "normal",
                     "slant": "roman",
                     "underline": 0,
                     "overstrike": 0
                   },
                   "metrics": {
-                    "ascent": 11,
+                    "ascent": 10,
                     "descent": 3,
-                    "linespace": 14,
+                    "linespace": 13,
                     "fixed": 0
                   }
                 }
@@ -13615,7 +13616,7 @@
                   "disabledfill": "",
                   "disabledstipple": "",
                   "fill": "#eaeaea",
-                  "font": "Pretendard -12",
+                  "font": "Pretendard -11",
                   "justify": "left",
                   "offset": "0,0",
                   "state": "",
@@ -13623,28 +13624,28 @@
                   "tags": "",
                   "text": "거침없는 참견과 잔소리로\n방송에 재미를 더해주는 스타일",
                   "underline": "-1",
-                  "width": "0"
+                  "width": "193"
                 },
                 "bbox_px": [
                   72,
                   28,
                   213,
-                  56
+                  54
                 ],
                 "font": {
-                  "requested": "Pretendard -12",
+                  "requested": "Pretendard -11",
                   "resolved": {
                     "family": "Pretendard",
-                    "size": 9,
+                    "size": 8,
                     "weight": "normal",
                     "slant": "roman",
                     "underline": 0,
                     "overstrike": 0
                   },
                   "metrics": {
-                    "ascent": 11,
+                    "ascent": 10,
                     "descent": 3,
-                    "linespace": 14,
+                    "linespace": 13,
                     "fixed": 0
                   }
                 }
@@ -13911,7 +13912,7 @@
                   "disabledfill": "",
                   "disabledstipple": "",
                   "fill": "#eaeaea",
-                  "font": "Pretendard -12",
+                  "font": "Pretendard -11",
                   "justify": "left",
                   "offset": "0,0",
                   "state": "",
@@ -13919,28 +13920,28 @@
                   "tags": "",
                   "text": "사소한 순간에도 적극적으로 반응하며\n방송의 재미를 살려주는 스타일",
                   "underline": "-1",
-                  "width": "0"
+                  "width": "193"
                 },
                 "bbox_px": [
                   72,
                   28,
                   243,
-                  56
+                  54
                 ],
                 "font": {
-                  "requested": "Pretendard -12",
+                  "requested": "Pretendard -11",
                   "resolved": {
                     "family": "Pretendard",
-                    "size": 9,
+                    "size": 8,
                     "weight": "normal",
                     "slant": "roman",
                     "underline": 0,
                     "overstrike": 0
                   },
                   "metrics": {
-                    "ascent": 11,
+                    "ascent": 10,
                     "descent": 3,
-                    "linespace": 14,
+                    "linespace": 13,
                     "fixed": 0
                   }
                 }
@@ -14207,7 +14208,7 @@
                   "disabledfill": "",
                   "disabledstipple": "",
                   "fill": "#eaeaea",
-                  "font": "Pretendard -12",
+                  "font": "Pretendard -11",
                   "justify": "left",
                   "offset": "0,0",
                   "state": "",
@@ -14215,28 +14216,28 @@
                   "tags": "",
                   "text": "끊임없는 질문과 대화로\n방송의 적막을 채워주는 스타일",
                   "underline": "-1",
-                  "width": "0"
+                  "width": "193"
                 },
                 "bbox_px": [
                   72,
                   28,
                   213,
-                  56
+                  54
                 ],
                 "font": {
-                  "requested": "Pretendard -12",
+                  "requested": "Pretendard -11",
                   "resolved": {
                     "family": "Pretendard",
-                    "size": 9,
+                    "size": 8,
                     "weight": "normal",
                     "slant": "roman",
                     "underline": 0,
                     "overstrike": 0
                   },
                   "metrics": {
-                    "ascent": 11,
+                    "ascent": 10,
                     "descent": 3,
-                    "linespace": 14,
+                    "linespace": 13,
                     "fixed": 0
                   }
                 }
@@ -14503,7 +14504,7 @@
                   "disabledfill": "",
                   "disabledstipple": "",
                   "fill": "#eaeaea",
-                  "font": "Pretendard -12",
+                  "font": "Pretendard -11",
                   "justify": "left",
                   "offset": "0,0",
                   "state": "",
@@ -14511,28 +14512,28 @@
                   "tags": "",
                   "text": "아낌없는 칭찬과 긍정적인 반응으로\n방송에 활력을 불어넣는 스타일",
                   "underline": "-1",
-                  "width": "0"
+                  "width": "193"
                 },
                 "bbox_px": [
                   72,
                   28,
                   233,
-                  56
+                  54
                 ],
                 "font": {
-                  "requested": "Pretendard -12",
+                  "requested": "Pretendard -11",
                   "resolved": {
                     "family": "Pretendard",
-                    "size": 9,
+                    "size": 8,
                     "weight": "normal",
                     "slant": "roman",
                     "underline": 0,
                     "overstrike": 0
                   },
                   "metrics": {
-                    "ascent": 11,
+                    "ascent": 10,
                     "descent": 3,
-                    "linespace": 14,
+                    "linespace": 13,
                     "fixed": 0
                   }
                 }
@@ -29049,7 +29050,7 @@
               "tags": "",
               "text": "재치있는 드립과 적절한 놀림으로\n방송을 활발하게 만들어주는 스타일",
               "underline": "-1",
-              "width": "0"
+              "width": "210"
             },
             "bbox_px": [
               88,
@@ -32394,7 +32395,7 @@
               "tags": "",
               "text": "재치있는 드립과 적절한 놀림으로\n방송을 활발하게 만들어주는 스타일",
               "underline": "-1",
-              "width": "0"
+              "width": "210"
             },
             "bbox_px": [
               88,
@@ -34953,7 +34954,7 @@
     },
     {
       "path": "apps/desktop/figma_ui.py",
-      "sha256": "e9a4a34fc42066421fdccce2968c180aba3113b2fae8e488891697f6bbe74a14",
+      "sha256": "c08b87be95b2700f606b5e45e6073eff6a98cdf6ba0204c804f39826878eaf0e",
       "colors": [
         "#00c5a5",
         "#2dff8f",
@@ -34968,292 +34969,244 @@
       ],
       "style_and_layout_calls": [
         {
-          "line": 30,
+          "line": 37,
           "expression": "ImageTk.PhotoImage(image, master=master)"
         },
         {
-          "line": 39,
+          "line": 51,
           "expression": "self.create_image(99, 100, image=self.photos[0])"
         },
         {
-          "line": 40,
+          "line": 52,
           "expression": "self.create_image(99, 99, image=self.photos[1])"
         },
         {
-          "line": 41,
+          "line": 53,
           "expression": "self.create_image(99, 80, image=self.photos[2])"
         },
         {
-          "line": 42,
+          "line": 54,
           "expression": "self.create_text(99, 127, fill=INK, font=(app.view.semibold, -16),\n                                          text=app.settings[\"hotkey\"])"
         },
         {
-          "line": 44,
+          "line": 56,
           "expression": "self.create_text(99, 146, fill=INK, font=(app.view.family, -8), text=\"채팅을 생성하세요!\")"
         },
         {
-          "line": 48,
+          "line": 60,
           "expression": "self.configure(highlightthickness=1, highlightbackground=MINT)"
         },
         {
-          "line": 49,
+          "line": 61,
           "expression": "self.configure(highlightthickness=0)"
         },
         {
-          "line": 60,
+          "line": 72,
           "expression": "self.itemconfigure(self.caption, text=\"채팅을 생성하세요!\" if text == \"화면 캡처하고 채팅 생성\" else text)"
         },
         {
-          "line": 64,
+          "line": 76,
           "expression": "self.itemconfigure(self.caption, text=(\"관찰 중 · 눌러서 중지\" if self.app.live_running else \"생성 중…\")\n                               if self.disabled else (\"실시간 시작\" if self.app.settings[\"mode\"] == \"realtime\" else \"채팅을 생성하세요!\"))"
         },
         {
-          "line": 67,
+          "line": 79,
           "expression": "super().configure(cnf, **kwargs)"
         },
         {
-          "line": 77,
+          "line": 90,
           "expression": "self.root.resizable(False, False)"
         },
         {
-          "line": 78,
+          "line": 91,
           "expression": "self.root.minsize(1, 1)"
         },
         {
-          "line": 103,
+          "line": 122,
           "expression": "Panel(self.root, width, height, settings=name == \"settings\", variant=variant)"
         },
         {
-          "line": 106,
+          "line": 125,
           "expression": "page.create_image(28, 28, anchor=\"nw\", image=self.photos[\"header\"])"
         },
         {
-          "line": 108,
+          "line": 127,
           "expression": "ttk.Label(page, text=\"• Demo\", foreground=INK, background=\"#d52b30\", font=(self.family, -8))"
         },
         {
-          "line": 109,
+          "line": 128,
           "expression": "badge.place(x=105, y=32, width=36, height=12)"
         },
         {
-          "line": 116,
+          "line": 135,
           "expression": "tk.Button(page, image=self.photos[\"settings\"], command=lambda: self.show(\"settings\"),\n                               bg=BG, activebackground=INPUT, borderwidth=0, cursor=\"hand2\", takefocus=1)"
         },
         {
-          "line": 118,
+          "line": 137,
           "expression": "button.place(x=197, y=31, width=15, height=15)"
         },
         {
-          "line": 120,
+          "line": 139,
           "expression": "ttk.Button(page, text=\"‹\", width=2, command=lambda: self.show(\"main\")).place(x=width-112, y=21)"
         },
         {
-          "line": 120,
+          "line": 139,
           "expression": "ttk.Button(page, text=\"‹\", width=2, command=lambda: self.show(\"main\"))"
         },
         {
-          "line": 124,
+          "line": 143,
           "expression": "page.create_oval(x, top, x+10, top+10, fill=color, outline=\"\")"
         },
         {
-          "line": 132,
+          "line": 151,
           "expression": "page.create_text(x,y,text=text,anchor=anchor,fill=fill,\n                                font=(self.semibold if weight else self.family,-size),width=width)"
         },
         {
-          "line": 162,
+          "line": 181,
           "expression": "self.root.geometry(f\"+{event.x_root-self.drag[0]}+{event.y_root-self.drag[1]}\")"
         },
         {
-          "line": 188,
+          "line": 207,
           "expression": "page.pack()"
         },
         {
-          "line": 192,
+          "line": 211,
           "expression": "self.root.geometry(f\"{width}x{height}+{x}+{y}\")"
         },
         {
-          "line": 198,
+          "line": 217,
           "expression": "ttk.Frame(page)"
         },
         {
-          "line": 199,
+          "line": 218,
           "expression": "frame.place(x=28, y=y, width=width, height=height)"
         },
         {
-          "line": 201,
+          "line": 220,
           "expression": "tk.Canvas(page, bg=BG, highlightthickness=0, width=width, height=height)"
         },
         {
-          "line": 202,
+          "line": 221,
           "expression": "viewport.place(x=28, y=y, width=width, height=height)"
         },
         {
-          "line": 203,
+          "line": 222,
           "expression": "ttk.Scrollbar(page, orient=\"vertical\", command=viewport.yview)"
         },
         {
-          "line": 204,
+          "line": 223,
           "expression": "scrollbar.place(x=int(page.cget(\"width\"))-20, y=y, width=10, height=height)"
         },
         {
-          "line": 205,
+          "line": 224,
           "expression": "viewport.configure(yscrollcommand=scrollbar.set)"
         },
         {
-          "line": 206,
+          "line": 225,
           "expression": "ttk.Frame(viewport)"
         },
         {
-          "line": 207,
+          "line": 226,
           "expression": "viewport.create_window(0, 0, window=frame, anchor=\"nw\", width=width)"
         },
         {
-          "line": 208,
+          "line": 227,
           "expression": "viewport.configure(scrollregion=viewport.bbox(\"all\"))"
         },
         {
-          "line": 224,
+          "line": 243,
           "expression": "ttk.Label(frame, text=text, **kwargs)"
         },
         {
-          "line": 225,
+          "line": 244,
           "expression": "label.pack(anchor=\"w\", pady=(0, 5))"
         },
         {
-          "line": 230,
+          "line": 249,
           "expression": "GenerateOrb(self.main, app)"
         },
         {
-          "line": 231,
+          "line": 250,
           "expression": "app.trigger_button.place(x=40, y=45)"
         },
         {
-          "line": 233,
+          "line": 252,
           "expression": "ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14)).place(x=200,y=237,width=30,height=20)"
         },
         {
-          "line": 233,
+          "line": 252,
           "expression": "ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14))"
         },
         {
-          "line": 235,
+          "line": 254,
           "expression": "tk.Canvas(self.main,width=181,height=32,bg=BG,highlightthickness=0,takefocus=1,cursor=\"hand2\")"
         },
         {
-          "line": 236,
+          "line": 255,
           "expression": "self.slider.place(x=48,y=267)"
         },
         {
-          "line": 237,
+          "line": 256,
           "expression": "self.slider.create_line(4,6,177,6,fill=\"#434547\",width=8,capstyle=\"round\")"
         },
         {
-          "line": 238,
+          "line": 257,
           "expression": "self.slider.create_line(7,6,7,6,fill=\"#00c5a5\",width=8,capstyle=\"round\")"
         },
         {
-          "line": 241,
+          "line": 260,
           "expression": "self.slider.create_line(x,1,x,11,fill=\"#8a8b8c\")"
         },
         {
-          "line": 242,
+          "line": 261,
           "expression": "self.slider.create_text(x,20,text=str(i+1),fill=INK,font=(self.family,-8))"
         },
         {
-          "line": 243,
+          "line": 262,
           "expression": "self.slider.create_oval(1,0,13,12,fill=\"#2dff8f\",outline=INK,width=1)"
         },
         {
-          "line": 272,
+          "line": 291,
           "expression": "app.hotkey_entry.configure(justify=\"center\")"
         },
         {
-          "line": 281,
+          "line": 300,
           "expression": "app.context.design_surface.create_image(329,14,anchor=\"nw\",image=self.photos[\"edit\"])"
         },
         {
-          "line": 282,
+          "line": 301,
           "expression": "tk.Label(app.context.design_surface,textvariable=app.context_count,bg=app.context.cget(\"bg\"),fg=INK,font=(self.family,-8))"
         },
         {
-          "line": 283,
+          "line": 302,
           "expression": "counter.place(x=275,y=70,width=74,height=12)"
         },
         {
-          "line": 285,
+          "line": 304,
           "expression": "page.create_image(28,355,anchor=\"nw\",image=self.photos[\"persona-witty\"])"
         },
         {
-          "line": 293,
+          "line": 312,
           "expression": "page.create_line(32,459,370,459,width=8,capstyle=\"round\",fill=\"#3c3e40\")"
         },
         {
-          "line": 302,
+          "line": 321,
           "expression": "self.settings.itemconfigure(self.persona_title,text=persona[\"name\"])"
         },
         {
-          "line": 303,
+          "line": 322,
           "expression": "self.settings.itemconfigure(self.persona_description,text=persona[\"description\"])"
         },
         {
-          "line": 304,
+          "line": 323,
           "expression": "self.settings.itemconfigure(self.persona_image,image=self.photos[PERSONA_ASSETS.get(key,\"persona-witty\")])"
         },
         {
-          "line": 310,
+          "line": 329,
           "expression": "self.settings.itemconfigure(self.usage_caption,text=label)"
         },
         {
-          "line": 311,
-          "expression": "self.settings.itemconfigure(self.usage_value,text=f\"{usage['generation_requests']:,}회 · 한도 미설정\" if usage else \"확인 중\")"
-        },
-        {
-          "line": 317,
-          "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 318,
-          "expression": "app.channel_controls.pack(fill=\"x\")"
-        },
-        {
-          "line": 319,
-          "expression": "ttk.Button(app.channel_controls,text=\"치지직 연결 확인\",command=app.refresh_channel)"
-        },
-        {
-          "line": 320,
-          "expression": "app.channel_check.pack(fill=\"x\")"
-        },
-        {
-          "line": 321,
-          "expression": "ttk.Label(app.channel_controls,textvariable=app.channel_info,wraplength=350).pack(fill=\"x\",pady=6)"
-        },
-        {
-          "line": 321,
-          "expression": "ttk.Label(app.channel_controls,textvariable=app.channel_info,wraplength=350)"
-        },
-        {
-          "line": 322,
-          "expression": "ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED).pack(fill=\"x\",pady=6)"
-        },
-        {
-          "line": 322,
-          "expression": "ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED)"
-        },
-        {
-          "line": 325,
-          "expression": "ttk.Combobox(frame, textvariable=app.mode_var, values=list(MODES), state=\"readonly\")"
-        },
-        {
-          "line": 326,
-          "expression": "app.mode_selector.pack(fill=\"x\", pady=(0, 10))"
-        },
-        {
           "line": 330,
-          "expression": "ttk.Combobox(frame, textvariable=app.destination_var, values=list(DESTINATIONS), state=\"readonly\")"
-        },
-        {
-          "line": 331,
-          "expression": "app.destination_selector.pack(fill=\"x\", pady=(0, 10))"
+          "expression": "self.settings.itemconfigure(self.usage_value,text=f\"{usage['generation_requests']:,}회 · 한도 미설정\" if usage else \"확인 중\")"
         },
         {
           "line": 336,
@@ -35261,103 +35214,75 @@
         },
         {
           "line": 337,
-          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5).pack(side=\"left\")"
-        },
-        {
-          "line": 337,
-          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5)"
+          "expression": "app.channel_controls.pack(fill=\"x\")"
         },
         {
           "line": 338,
-          "expression": "ttk.Combobox(row, textvariable=variable, values=[p[\"name\"] for p in PERSONAS.values()], state=\"readonly\")"
+          "expression": "ttk.Button(app.channel_controls,text=\"치지직 연결 확인\",command=app.refresh_channel)"
         },
         {
           "line": 339,
-          "expression": "selector.pack(side=\"left\", fill=\"x\", expand=True)"
+          "expression": "app.channel_check.pack(fill=\"x\")"
         },
         {
-          "line": 342,
-          "expression": "ttk.Label(frame, text=\"선택한 인원만 채팅을 생성합니다.\", foreground=MUTED)"
+          "line": 340,
+          "expression": "ttk.Label(app.channel_controls,textvariable=app.channel_info,wraplength=350).pack(fill=\"x\",pady=6)"
         },
         {
-          "line": 343,
-          "expression": "app.persona_hint.pack(fill=\"x\", pady=(6, 8))"
+          "line": 340,
+          "expression": "ttk.Label(app.channel_controls,textvariable=app.channel_info,wraplength=350)"
+        },
+        {
+          "line": 341,
+          "expression": "ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED).pack(fill=\"x\",pady=6)"
+        },
+        {
+          "line": 341,
+          "expression": "ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED)"
         },
         {
           "line": 344,
-          "expression": "ttk.Frame(frame)"
+          "expression": "ttk.Combobox(frame, textvariable=app.mode_var, values=list(MODES), state=\"readonly\")"
         },
         {
           "line": 345,
-          "expression": "ttk.Frame(app.live_controls)"
-        },
-        {
-          "line": 346,
-          "expression": "row.pack(fill=\"x\", pady=(0, 4))"
-        },
-        {
-          "line": 348,
-          "expression": "ttk.Combobox(row, textvariable=app.source_var, state=\"readonly\")"
+          "expression": "app.mode_selector.pack(fill=\"x\", pady=(0, 10))"
         },
         {
           "line": 349,
-          "expression": "app.source_selector.pack(side=\"left\", fill=\"x\", expand=True)"
+          "expression": "ttk.Combobox(frame, textvariable=app.destination_var, values=list(DESTINATIONS), state=\"readonly\")"
         },
         {
           "line": 350,
-          "expression": "ttk.Button(row, text=\"창 새로고침\", command=app.refresh_windows)"
-        },
-        {
-          "line": 351,
-          "expression": "app.source_refresh.pack(side=\"right\", padx=(4, 0))"
-        },
-        {
-          "line": 352,
-          "expression": "ttk.Frame(app.live_controls)"
-        },
-        {
-          "line": 353,
-          "expression": "row.pack(fill=\"x\")"
+          "expression": "app.destination_selector.pack(fill=\"x\", pady=(0, 10))"
         },
         {
           "line": 355,
-          "expression": "ttk.Label(row, text=\"분석 간격(초)\").pack(side=\"left\")"
-        },
-        {
-          "line": 355,
-          "expression": "ttk.Label(row, text=\"분석 간격(초)\")"
+          "expression": "ttk.Frame(frame)"
         },
         {
           "line": 356,
-          "expression": "ttk.Combobox(row, textvariable=app.interval_var, values=(3, 5, 10), width=3, state=\"readonly\")"
+          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5).pack(side=\"left\")"
+        },
+        {
+          "line": 356,
+          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5)"
         },
         {
           "line": 357,
-          "expression": "app.interval_selector.pack(side=\"left\", padx=4)"
+          "expression": "ttk.Combobox(row, textvariable=variable, values=[p[\"name\"] for p in PERSONAS.values()], state=\"readonly\")"
         },
         {
           "line": 358,
-          "expression": "ttk.Label(row, text=\"종료(초)\").pack(side=\"left\", padx=(8, 0))"
-        },
-        {
-          "line": 358,
-          "expression": "ttk.Label(row, text=\"종료(초)\")"
-        },
-        {
-          "line": 359,
-          "expression": "ttk.Combobox(row, textvariable=app.duration_var, values=(30, 60, 120), width=4, state=\"readonly\")"
-        },
-        {
-          "line": 360,
-          "expression": "app.duration_selector.pack(side=\"left\", padx=4)"
+          "expression": "selector.pack(side=\"left\", fill=\"x\", expand=True)"
         },
         {
           "line": 361,
-          "expression": "ttk.Button(app.live_controls, text=\"실시간 중지\", command=app.stop_live, state=\"disabled\")"
+          "expression": "ttk.Label(frame, text=\"선택한 인원만 채팅을 생성합니다.\", foreground=MUTED)"
         },
         {
           "line": 362,
-          "expression": "app.stop_button.pack(fill=\"x\", pady=(6, 0))"
+          "expression": "app.persona_hint.pack(fill=\"x\", pady=(6, 8))"
         },
         {
           "line": 363,
@@ -35365,117 +35290,193 @@
         },
         {
           "line": 364,
-          "expression": "app.live_anchor.pack(fill=\"x\")"
+          "expression": "ttk.Frame(app.live_controls)"
         },
         {
-          "line": 366,
-          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=8)"
+          "line": 365,
+          "expression": "row.pack(fill=\"x\", pady=(0, 4))"
         },
         {
-          "line": 366,
-          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8))"
+          "line": 367,
+          "expression": "ttk.Combobox(row, textvariable=app.source_var, state=\"readonly\")"
+        },
+        {
+          "line": 368,
+          "expression": "app.source_selector.pack(side=\"left\", fill=\"x\", expand=True)"
         },
         {
           "line": 369,
-          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var).pack(anchor=\"w\")"
+          "expression": "ttk.Button(row, text=\"창 새로고침\", command=app.refresh_windows)"
         },
         {
-          "line": 369,
-          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var)"
-        },
-        {
-          "line": 371,
-          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1).pack(fill=\"x\")"
+          "line": 370,
+          "expression": "app.source_refresh.pack(side=\"right\", padx=(4, 0))"
         },
         {
           "line": 371,
-          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1)"
+          "expression": "ttk.Frame(app.live_controls)"
         },
         {
           "line": 372,
-          "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 373,
-          "expression": "row.pack(fill=\"x\", pady=(10, 6))"
+          "expression": "row.pack(fill=\"x\")"
         },
         {
           "line": 374,
-          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection).pack(side=\"left\")"
+          "expression": "ttk.Label(row, text=\"분석 간격(초)\").pack(side=\"left\")"
         },
         {
           "line": 374,
-          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection)"
+          "expression": "ttk.Label(row, text=\"분석 간격(초)\")"
         },
         {
           "line": 375,
-          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings).pack(side=\"right\")"
-        },
-        {
-          "line": 375,
-          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings)"
+          "expression": "ttk.Combobox(row, textvariable=app.interval_var, values=(3, 5, 10), width=3, state=\"readonly\")"
         },
         {
           "line": 376,
-          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=(6, 0))"
+          "expression": "app.interval_selector.pack(side=\"left\", padx=4)"
         },
         {
-          "line": 376,
-          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8))"
+          "line": 377,
+          "expression": "ttk.Label(row, text=\"종료(초)\").pack(side=\"left\", padx=(8, 0))"
+        },
+        {
+          "line": 377,
+          "expression": "ttk.Label(row, text=\"종료(초)\")"
         },
         {
           "line": 378,
-          "expression": "ttk.Frame(frame)"
+          "expression": "ttk.Combobox(row, textvariable=app.duration_var, values=(30, 60, 120), width=4, state=\"readonly\")"
         },
         {
           "line": 379,
-          "expression": "app.usage_tab.pack(fill=\"x\",pady=12)"
+          "expression": "app.duration_selector.pack(side=\"left\", padx=4)"
+        },
+        {
+          "line": 380,
+          "expression": "ttk.Button(app.live_controls, text=\"실시간 중지\", command=app.stop_live, state=\"disabled\")"
+        },
+        {
+          "line": 381,
+          "expression": "app.stop_button.pack(fill=\"x\", pady=(6, 0))"
+        },
+        {
+          "line": 382,
+          "expression": "ttk.Frame(frame)"
+        },
+        {
+          "line": 383,
+          "expression": "app.live_anchor.pack(fill=\"x\")"
         },
         {
           "line": 385,
-          "expression": "scrolledtext.ScrolledText(frame, height=14, wrap=\"word\", state=\"disabled\", relief=\"flat\",\n                                                bg=BG, fg=INK, padx=4, pady=4)"
+          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=8)"
         },
         {
-          "line": 387,
-          "expression": "app.chat_log.pack(fill=\"both\", expand=True)"
+          "line": 385,
+          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8))"
         },
         {
           "line": 388,
-          "expression": "app.chat_log.tag_configure(\"name\", foreground=MINT, font=(self.family, 9, \"bold\"))"
+          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var).pack(anchor=\"w\")"
         },
         {
-          "line": 389,
-          "expression": "app.chat_log.tag_configure(\"error\", foreground=\"#ff938b\")"
-        },
-        {
-          "line": 390,
-          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED).pack(fill=\"x\", pady=8)"
+          "line": 388,
+          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var)"
         },
         {
           "line": 390,
-          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED)"
+          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1).pack(fill=\"x\")"
+        },
+        {
+          "line": 390,
+          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1)"
         },
         {
           "line": 391,
-          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate).pack(fill=\"x\")"
+          "expression": "ttk.Frame(frame)"
         },
         {
-          "line": 391,
-          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate)"
+          "line": 392,
+          "expression": "row.pack(fill=\"x\", pady=(10, 6))"
         },
         {
-          "line": 396,
-          "expression": "badge.configure(text=\"• Demo\" if usage and usage[\"is_demo\"] else \"• Online\" if usage else \"• Offline\")"
+          "line": 393,
+          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection).pack(side=\"left\")"
+        },
+        {
+          "line": 393,
+          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection)"
+        },
+        {
+          "line": 394,
+          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings).pack(side=\"right\")"
+        },
+        {
+          "line": 394,
+          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings)"
+        },
+        {
+          "line": 395,
+          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=(6, 0))"
+        },
+        {
+          "line": 395,
+          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8))"
         },
         {
           "line": 397,
+          "expression": "ttk.Frame(frame)"
+        },
+        {
+          "line": 398,
+          "expression": "app.usage_tab.pack(fill=\"x\",pady=12)"
+        },
+        {
+          "line": 404,
+          "expression": "scrolledtext.ScrolledText(frame, height=14, wrap=\"word\", state=\"disabled\", relief=\"flat\",\n                                                bg=BG, fg=INK, padx=4, pady=4)"
+        },
+        {
+          "line": 406,
+          "expression": "app.chat_log.pack(fill=\"both\", expand=True)"
+        },
+        {
+          "line": 407,
+          "expression": "app.chat_log.tag_configure(\"name\", foreground=MINT, font=(self.family, 9, \"bold\"))"
+        },
+        {
+          "line": 408,
+          "expression": "app.chat_log.tag_configure(\"error\", foreground=\"#ff938b\")"
+        },
+        {
+          "line": 409,
+          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED).pack(fill=\"x\", pady=8)"
+        },
+        {
+          "line": 409,
+          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED)"
+        },
+        {
+          "line": 410,
+          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate).pack(fill=\"x\")"
+        },
+        {
+          "line": 410,
+          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate)"
+        },
+        {
+          "line": 415,
+          "expression": "badge.configure(text=\"• Demo\" if usage and usage[\"is_demo\"] else \"• Online\" if usage else \"• Offline\")"
+        },
+        {
+          "line": 416,
           "expression": "self.app.trigger_button.itemconfigure(self.app.trigger_button.key_label, text=self.app.settings[\"hotkey\"])"
         }
       ]
     },
     {
       "path": "apps/desktop/onboarding.py",
-      "sha256": "bbcfaf2b166c6da8f7d8763bea7d186e144378d98b73398ea198cf679e8fbe91",
+      "sha256": "ebdff898c8ceae82540b0913c78a21e3656e4db51cce3e7d7f62c17b82a0c7ce",
       "colors": [
         "#2dff8f",
         "#d9d9d9",
@@ -35496,7 +35497,7 @@
         },
         {
           "line": 43,
-          "expression": "card.create_text(73,28,anchor=\"nw\",text=PERSONAS[key][\"description\"],fill=\"#eaeaea\",font=(view.family,-12))"
+          "expression": "card.create_text(73,28,anchor=\"nw\",text=PERSONAS[key][\"description\"],fill=\"#eaeaea\",font=(view.family,-11),width=193)"
         },
         {
           "line": 54,
@@ -35526,7 +35527,7 @@
     },
     {
       "path": "apps/desktop/design_widgets.py",
-      "sha256": "365a620807535e6ea33afb2164cec93b85688b7193c4e7c4aa68bb4d948c52e3",
+      "sha256": "6de61e8f977c7884b4e2ee6302d8e56051bf4c5a4a9e955bd1663194a0a346f7",
       "colors": [
         "#888888",
         "#eaeaea"
@@ -35613,12 +35614,83 @@
           "expression": "tk.Label(canvas,text=placeholder,bg=bg,fg=\"#eaeaea\",font=(view.family,-12),bd=0,padx=0)"
         },
         {
-          "line": 98,
-          "expression": "hint.place(x=12,y=6)"
+          "line": 99,
+          "expression": "hint.place(x=round(12*factor),y=round(6*factor))"
         },
         {
-          "line": 104,
+          "line": 105,
           "expression": "canvas.place(x=x,y=y,width=width,height=height)"
+        }
+      ]
+    },
+    {
+      "path": "apps/desktop/display.py",
+      "sha256": "625db4ef7fee5205484ac8496f6b607f2faa1ab1226e5b41921f3da86914c2d1",
+      "colors": [],
+      "style_and_layout_calls": [
+        {
+          "line": 39,
+          "expression": "ImageTk.PhotoImage(source.resize(size, Image.Resampling.LANCZOS), master=root)"
+        },
+        {
+          "line": 54,
+          "expression": "tk.Canvas.configure(widget, width=round(float(widget.cget(\"width\"))*factor),\n                                height=round(float(widget.cget(\"height\"))*factor))"
+        },
+        {
+          "line": 58,
+          "expression": "widget.itemconfigure(item)"
+        },
+        {
+          "line": 60,
+          "expression": "widget.itemconfigure(item, font=scaled_font(widget.itemcget(item,\"font\")))"
+        },
+        {
+          "line": 63,
+          "expression": "widget.itemconfigure(item, **{option: float(widget.itemcget(item,option))*factor})"
+        },
+        {
+          "line": 67,
+          "expression": "widget.itemconfigure(item, image=image(name))"
+        },
+        {
+          "line": 69,
+          "expression": "widget.configure()"
+        },
+        {
+          "line": 71,
+          "expression": "widget.configure(font=scaled_font(widget.cget(\"font\")))"
+        },
+        {
+          "line": 73,
+          "expression": "widget.configure(wraplength=round(float(widget.cget(\"wraplength\"))*factor))"
+        },
+        {
+          "line": 75,
+          "expression": "widget.configure(image=image(str(widget.cget(\"image\"))))"
+        },
+        {
+          "line": 84,
+          "expression": "widget.column(column, width=round(widget.column(column,\"width\")*factor),\n                              minwidth=round(widget.column(column,\"minwidth\")*factor))"
+        },
+        {
+          "line": 84,
+          "expression": "widget.column(column,\"width\")"
+        },
+        {
+          "line": 85,
+          "expression": "widget.column(column,\"minwidth\")"
+        },
+        {
+          "line": 87,
+          "expression": "style.configure(\".\", font=scaled_font(style.lookup(\".\",\"font\")))"
+        },
+        {
+          "line": 91,
+          "expression": "style.configure(name, padding=distances(padding))"
+        },
+        {
+          "line": 92,
+          "expression": "style.configure(\"Treeview\",rowheight=round(24*factor))"
         }
       ]
     },
@@ -35876,11 +35948,11 @@
     },
     {
       "path": "apps/desktop/window/branding.py",
-      "sha256": "2441b529debaf13f788276fc6fe5a5170f0a98b1e156d5aa8ccdc4b293d736ab",
+      "sha256": "b59af9288ad3a28a38c6e5e0d87b159fae362da4da4e9c5835621d85d60e0d94",
       "colors": [],
       "style_and_layout_calls": [
         {
-          "line": 106,
+          "line": 111,
           "expression": "tk.PhotoImage(master=root, file=str(ASSETS / f\"app-{size}.png\"))"
         }
       ]
@@ -36213,6 +36285,14 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-arrow@3x.png",
+      "bytes": 1156,
+      "sha256": "816e9a2218677fb93c9e9fcd41ec70299cdbf396b9892ffcc2638e4f8dcb4c46",
+      "width": 54,
+      "height": 60,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-crown.png",
       "bytes": 342,
       "sha256": "cf32d4856220579241ebb4249f04e9c739d597687f5f609b92184fcbacf9ad3e",
@@ -36221,11 +36301,27 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-crown@3x.png",
+      "bytes": 1053,
+      "sha256": "03a41da4b5c865164da8dd7e77d22cc7836ef2ab339cebd60027bf9aa758bc17",
+      "width": 36,
+      "height": 36,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-edit.png",
       "bytes": 296,
       "sha256": "eb7a4e818b155a2f6ecea1397b94b708e4d9f068d175c6366d6b9d71fd9901b3",
       "width": 14,
       "height": 14,
+      "mode": "RGBA"
+    },
+    {
+      "path": "apps/assets/figma/v2-edit@3x.png",
+      "bytes": 718,
+      "sha256": "029d7e8c8615fa625ab6f275a815bdfd1a5529813d1ca421f945ae34f6956a28",
+      "width": 42,
+      "height": 42,
       "mode": "RGBA"
     },
     {
@@ -36246,6 +36342,14 @@
         "viewBox": "0 0 70 21",
         "fill": "none"
       }
+    },
+    {
+      "path": "apps/assets/figma/v2-header@3x.png",
+      "bytes": 3114,
+      "sha256": "96b87a4320ebea8b090de44125c5f8e85a0fe6230f2c0135b3d3de87cdd516f8",
+      "width": 210,
+      "height": 63,
+      "mode": "RGBA"
     },
     {
       "path": "apps/assets/figma/v2-lock.png",
@@ -36272,6 +36376,14 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-orb-face@3x.png",
+      "bytes": 5319,
+      "sha256": "701795e8ded3a0e5d51532ba812faa2c19d2bd03fdd4dd7ce72ec7abb30ad451",
+      "width": 252,
+      "height": 240,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-orb-glow.png",
       "bytes": 86904,
       "sha256": "f379a4b8a8a81701979ad1047405a080ba92ca913762b9051fc88c1ae209ef47",
@@ -36288,11 +36400,27 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-persona-analyst@3x.png",
+      "bytes": 13453,
+      "sha256": "90d75f079a01251765bd48384486a163c62913662bc27c758801b9d72f0bffc6",
+      "width": 153,
+      "height": 144,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-persona-chatter.png",
       "bytes": 2282,
       "sha256": "fb5ab21b7b7eb6a30ed1ae10982ae2911b9c50bf6f09326c370b0db2588efebe",
       "width": 51,
       "height": 48,
+      "mode": "RGBA"
+    },
+    {
+      "path": "apps/assets/figma/v2-persona-chatter@3x.png",
+      "bytes": 15249,
+      "sha256": "e85ddb39803144d6dbcdbeca02e153a748717c5d6b7fbc4fd8d1c1e7c3c0e298",
+      "width": 153,
+      "height": 144,
       "mode": "RGBA"
     },
     {
@@ -36304,11 +36432,27 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-persona-coach@3x.png",
+      "bytes": 16822,
+      "sha256": "6703fa967ba401af7f493658fc313ee3bcdd7f97884477e381b12ef003c9ff3f",
+      "width": 153,
+      "height": 144,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-persona-reaction.png",
       "bytes": 2600,
       "sha256": "7206bde7753a52d397dcb14a5b964ad9d8576522c160b4327ee0619c941e82e9",
       "width": 51,
       "height": 48,
+      "mode": "RGBA"
+    },
+    {
+      "path": "apps/assets/figma/v2-persona-reaction@3x.png",
+      "bytes": 15262,
+      "sha256": "e2cc6273eef0ca8fa7fde42aef6ff35a6540e15cc0e8e507c52f707d16487e4e",
+      "width": 153,
+      "height": 144,
       "mode": "RGBA"
     },
     {
@@ -36320,6 +36464,14 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-persona-supporter@3x.png",
+      "bytes": 18357,
+      "sha256": "022bf43e8f0d8132f78ef25819bfb329b923142227bdb5d2583acc9341f9803c",
+      "width": 153,
+      "height": 144,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-persona-witty.png",
       "bytes": 3135,
       "sha256": "8614519e3f59d4d1c2cd487b473116b58aef91442a28d4909008b0e7f259edc4",
@@ -36328,11 +36480,27 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-persona-witty@3x.png",
+      "bytes": 19085,
+      "sha256": "a54d4915ad87204b6c6c808f3a6954275cd3ea4a57a880d18bbe02693ffbac4e",
+      "width": 153,
+      "height": 144,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-settings.png",
       "bytes": 361,
       "sha256": "b11fb7e5cf36a9c0194603d0bdc0c49316c240ed98557f493695eb3818a1ff6c",
       "width": 15,
       "height": 14,
+      "mode": "RGBA"
+    },
+    {
+      "path": "apps/assets/figma/v2-settings@3x.png",
+      "bytes": 1040,
+      "sha256": "ca00e9962ff189b0af62fd60bdcd10a9b6f64adc31dadb17826ef43546c159fd",
+      "width": 45,
+      "height": 42,
       "mode": "RGBA"
     },
     {
@@ -36504,6 +36672,14 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-welcome-face@3x.png",
+      "bytes": 11238,
+      "sha256": "1b3af47b1d41b9dd1c2c2489173c5c277982b8f967849f40031598352ee46e37",
+      "width": 297,
+      "height": 285,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-welcome-logo.png",
       "bytes": 3959,
       "sha256": "540d3146dceed958a1773cf96bb7f6c8154b6c3068cac042ac1d0c796335766e",
@@ -36512,11 +36688,27 @@
       "mode": "RGBA"
     },
     {
+      "path": "apps/assets/figma/v2-welcome-logo@3x.png",
+      "bytes": 13848,
+      "sha256": "6087921da872bd4c77eb998c8fb8e84d030da3f0b30c15d94b5428e53f78752d",
+      "width": 297,
+      "height": 354,
+      "mode": "RGBA"
+    },
+    {
       "path": "apps/assets/figma/v2-wordmark.png",
       "bytes": 625,
       "sha256": "961e3c9dcdeada4261464505a34acdb4ed77f8198580f843c1ff250a76ceec42",
       "width": 42,
       "height": 18,
+      "mode": "RGBA"
+    },
+    {
+      "path": "apps/assets/figma/v2-wordmark@3x.png",
+      "bytes": 1766,
+      "sha256": "18f858cc2fdc5faba005ab5219e2b6f7db5d24408722997ee6323331339dcd0b",
+      "width": 126,
+      "height": 54,
       "mode": "RGBA"
     },
     {
@@ -36552,6 +36744,8 @@
     }
   ],
   "limitations": [
+    "Design tokens use logical pixels. Windows scales geometry, pixel fonts and images together at startup using system DPI; macOS/Linux retain their logical layout.",
+    "Moving between Windows monitors with different DPI may require restarting the app for sharp rendering.",
     "Tk geometry/font pixel sizes depend on local DPI and installed fonts.",
     "Glass parameters are retained metadata; native Figma optical refraction is not implemented.",
     "OS-owned file pickers/message boxes and titlebar metrics are system-dependent.",

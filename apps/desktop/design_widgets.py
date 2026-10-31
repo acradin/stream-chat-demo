@@ -95,7 +95,8 @@ def field(parent, view, x, y, width, height, *, variable=None, multiline=False,
                 if variable.get() or widget.focus_get() is widget:
                     hint.place_forget()
                 else:
-                    hint.place(x=12,y=6)
+                    factor = getattr(canvas.winfo_toplevel(),"_tiki_display_scale",1)
+                    hint.place(x=round(12*factor),y=round(6*factor))
             hint.bind("<Button-1>",lambda _: widget.focus_set())
             variable.trace_add("write",refresh)
             widget.bind("<FocusIn>",refresh,add="+")

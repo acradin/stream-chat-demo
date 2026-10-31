@@ -28,7 +28,7 @@ from apps.desktop.overlay import Overlay
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "design" / "desktop"
 SOURCES = tuple("apps/desktop/" + name for name in
-                ("panel.py", "figma_ui.py", "onboarding.py", "design_widgets.py", "overlay.py", "connection.py", "branding.py", "fonts.py",
+                ("panel.py", "figma_ui.py", "onboarding.py", "design_widgets.py", "display.py", "overlay.py", "connection.py", "branding.py", "fonts.py",
                  "shell.py", "window/branding.py", "window/shell.py", "window/fonts.py",
                  "mac/branding.py", "mac/shell.py", "mac/fonts.py", "linux/branding.py", "linux/shell.py", "linux/fonts.py"))
 IGNORE_OPTIONS = {"command", "validatecommand", "invalidcommand", "postcommand", "xscrollcommand",
@@ -286,7 +286,7 @@ def export():
         page_sizes_px=dict(main=[277,347], settings=[420,491], controls=[420,690], chat=[420,530],
                            start=[277,347], start1=[339,430], start2=[339,775], start3=[339,286], start_end=[277,347]),
         fonts=dict(default_family_preference=["Pretendard", "맑은 고딕"], default_size_px=12,
-                   sizes_px=[8,12,14,16,24], title_and_usage_family="Pretendard SemiBold",
+                   sizes_px=[8,11,12,14,16,24], title_and_usage_family="Pretendard SemiBold",
                    bundled_weights=[400, 600, 700], bundled_version="1.3.9", registration="process-private",
                    orb_shortcut_weight="bold", chat_name_weight="bold"),
         button_surface=dict(raster_size_px=[64,32], radius_px=8, border_px=1, stretch_border_px=8,
@@ -302,7 +302,9 @@ def export():
                   scope="Main, Settings, five onboarding screens, Controls, Chat, service connection dialog; synthetic states",
                   privacy=dict(user_settings_read=False, secrets_included=False, network_calls=0, screenshots=0),
                   tokens=tokens, runtime=runtime, source_inventory=source_inventory(), assets=asset_inventory(),
-                  limitations=["Tk geometry/font pixel sizes depend on local DPI and installed fonts.",
+                  limitations=["Design tokens use logical pixels. Windows scales geometry, pixel fonts and images together at startup using system DPI; macOS/Linux retain their logical layout.",
+                               "Moving between Windows monitors with different DPI may require restarting the app for sharp rendering.",
+                               "Tk geometry/font pixel sizes depend on local DPI and installed fonts.",
                                "Glass parameters are retained metadata; native Figma optical refraction is not implemented.",
                                "OS-owned file pickers/message boxes and titlebar metrics are system-dependent.",
                                "Source call inventory also includes constructor values overridden later; runtime is authoritative."])

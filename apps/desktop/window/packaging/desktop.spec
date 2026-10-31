@@ -37,6 +37,7 @@ analysis = Analysis([str(root / "apps/desktop/packaging/entry.py")], pathex=[str
 archive = PYZ(analysis.pure)
 exe = EXE(archive, analysis.scripts, [], exclude_binaries=True, name="StreamChat",
           debug=False, strip=False, upx=False, console=False,
+          manifest=str(root / "apps/desktop/window/packaging/app.manifest"),
           version=str(root / "apps/desktop/window/packaging/version.txt"),
           icon=str(root / "apps/assets/app.ico"))
 bundle = COLLECT(exe, analysis.binaries, analysis.datas, strip=False, upx=False, name="StreamChat")

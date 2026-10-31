@@ -73,8 +73,10 @@ class RemoteAuthorization:
             return browser_response("승인 링크가 올바르지 않습니다.", 400)
         key = hashlib.sha256(state[0].encode()).digest()
         entry = self.pending.pop(key, None)  # Consume before any network await or token exchange.
-        if entry is None or entry[2] <= self.clock():
-            return browser_response("승인 링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해주세요.", 400)
+        if entry is None:
+            return browser_response("일치하는 승인 요청을 찾을 수 없습니다. 링크가 변경되었거나 이미 처리됐을 수 있습니다. 가장 최근에 받은 링크를 원문 그대로 열어주세요.", 400)
+        if entry[2] <= self.clock():
+            return browser_response("승인 링크의 유효 시간(10분)이 지났습니다. 새 링크를 요청해주세요.", 400)
         if request.query.get("error") or len(codes) != 1 or not codes[0] or len(codes[0]) > 8192:
             return browser_response("치지직 승인이 취소되었습니다. 연결하려면 새 링크를 요청해주세요.", 400)
         account, client, _ = entry

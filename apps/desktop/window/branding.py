@@ -93,6 +93,11 @@ def _apply_taskbar_identity(root):
 
 def set_app_identity():
     if sys.platform == "win32":
+        # Must precede the first Tk HWND. The packaged EXE also declares this in its manifest.
+        set_dpi = ctypes.WinDLL("user32", use_last_error=True).SetProcessDpiAwarenessContext
+        set_dpi.argtypes, set_dpi.restype = [ctypes.c_void_p], ctypes.c_int
+        if not set_dpi(ctypes.c_void_p(-2)) and ctypes.get_last_error() != 5:
+            raise OSError("Could not configure native display scaling")
         set_id = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
         set_id.argtypes = [ctypes.c_wchar_p]
         set_id.restype = ctypes.c_long

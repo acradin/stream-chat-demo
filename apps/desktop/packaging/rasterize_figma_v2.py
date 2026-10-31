@@ -46,20 +46,22 @@ def main():
         boxes[name] = (x,y,x+width,y+height)
     page = output / 'assets.html'
     page.write_text('\n'.join(html),encoding='utf-8')
-    with tempfile.TemporaryDirectory(prefix='edge-assets-',dir=output) as profile:
-        subprocess.run([str(browser),'--headless','--disable-gpu','--no-first-run','--no-default-browser-check',
-                        '--force-device-scale-factor=1','--default-background-color=00000000',
-                        '--user-data-dir='+profile,'--window-size=1100,400','--hide-scrollbars','--virtual-time-budget=1000',
-                        '--screenshot='+str(output/'assets.png'),page.as_uri()],check=True,capture_output=True,timeout=40)
-    with Image.open(output/'assets.png') as image:
-        for name,box in boxes.items():
-            image.crop(box).save(ASSETS / ('v2-'+name+'.png'))
-    # Frame 55 uses the same original Paytone wordmark below the exported face.
-    with Image.open(ASSETS/'v2-welcome-face.png') as face, Image.open(ASSETS/'v2-wordmark.png') as wordmark:
-        logo = Image.new('RGBA',(99,118))
-        logo.alpha_composite(face,(0,0))
-        logo.alpha_composite(wordmark,((99-wordmark.width)//2,83))
-        logo.save(ASSETS/'v2-welcome-logo.png')
+    for scale in (1,3):
+        suffix = '' if scale == 1 else '@3x'
+        with tempfile.TemporaryDirectory(prefix='edge-assets-',dir=output) as profile:
+            subprocess.run([str(browser),'--headless','--disable-gpu','--no-first-run','--no-default-browser-check',
+                            '--force-device-scale-factor='+str(scale),'--default-background-color=00000000',
+                            '--user-data-dir='+profile,'--window-size=1100,400','--hide-scrollbars','--virtual-time-budget=1000',
+                            '--screenshot='+str(output/'assets.png'),page.as_uri()],check=True,capture_output=True,timeout=40)
+        with Image.open(output/'assets.png') as image:
+            for name,box in boxes.items():
+                image.crop(tuple(round(value*scale) for value in box)).save(ASSETS / ('v2-'+name+suffix+'.png'))
+        # Frame 55 uses the same original Paytone wordmark below the exported face.
+        with Image.open(ASSETS/('v2-welcome-face'+suffix+'.png')) as face, Image.open(ASSETS/('v2-wordmark'+suffix+'.png')) as wordmark:
+            logo = Image.new('RGBA',(99*scale,118*scale))
+            logo.alpha_composite(face,(0,0))
+            logo.alpha_composite(wordmark,((99*scale-wordmark.width)//2,83*scale))
+            logo.save(ASSETS/('v2-welcome-logo'+suffix+'.png'))
     import hashlib
     manifest = [{'file':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'size':list(Image.open(p).size)}
                 for p in sorted(ASSETS.glob('v2-*.png'))]

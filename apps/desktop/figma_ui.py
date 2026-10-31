@@ -15,6 +15,7 @@ from apps.desktop.shell import configure_window, mapped
 from apps.desktop.panel import Panel, BG, INPUT, INK, MUTED, MINT, configure_theme
 from backend.personas import PERSONAS
 from apps.desktop.design_widgets import DesignButton, field, surface
+from apps.desktop.display import display_scale, scale_layout
 
 PERSONA_ASSETS = {"witty_friend": "persona-witty", "analyst": "persona-analyst",
                   "coach": "persona-coach", "hype_commentator": "persona-reaction",
@@ -24,10 +25,21 @@ PERSONA_ASSETS = {"witty_friend": "persona-witty", "analyst": "persona-analyst",
 def asset(master, name):
     source = "v2-" + name
     with Image.open(ASSETS / "figma" / (source + ".png")) as image:
+        original = image.convert("RGBA")
+        high_resolution = ASSETS / "figma" / (source + "@3x.png")
+        if high_resolution.is_file():
+            with Image.open(high_resolution) as high:
+                original = high.convert("RGBA")
         if name in ("orb-base", "orb-glow"):
             image = image.resize((image.width//2, image.height//2), Image.Resampling.LANCZOS)
             image.putalpha(image.getchannel("A").point(lambda alpha: round(alpha * .72)))
-        return ImageTk.PhotoImage(image, master=master)
+            original.putalpha(original.getchannel("A").point(lambda alpha: round(alpha * .72)))
+        photo = ImageTk.PhotoImage(image, master=master)
+        root = master.winfo_toplevel()
+        if not hasattr(root,"_design_image_sources"):
+            root._design_image_sources = {}
+        root._design_image_sources[str(photo)] = original
+        return photo
 
 
 class GenerateOrb(tk.Canvas):
@@ -70,6 +82,7 @@ class GenerateOrb(tk.Canvas):
 class FigmaView:
     def __init__(self, app):
         self.app, self.root = app, app.root
+        self.scale = 1.0
         app.view = self
         self.family = configure_theme(self.root)
         self.semibold = "Pretendard SemiBold" if "Pretendard SemiBold" in font.families(self.root) else self.family
@@ -96,6 +109,12 @@ class FigmaView:
         self._menu()
         from apps.desktop.onboarding import Onboarding
         self.onboarding = Onboarding(self)
+        factor = display_scale(self.root)
+        scale_layout(self.root, factor, self.photos.values())
+        self.scale = factor
+        self.root._tiki_display_scale = factor
+        scaled = getattr(self.root,"_scaled_design_images",{})
+        self.photos = {name:scaled.get(str(photo),photo) for name,photo in self.photos.items()}
         self.show("main" if app.settings["onboarding_complete"] else "start")
         apply_window_icon(self.root)
 
@@ -155,7 +174,7 @@ class FigmaView:
             self.show("main")
 
     def _drag_start(self, event):
-        self.drag = (event.x_root-self.root.winfo_x(), event.y_root-self.root.winfo_y()) if event.y < 62 else None
+        self.drag = (event.x_root-self.root.winfo_x(), event.y_root-self.root.winfo_y()) if event.y < 62*self.scale else None
 
     def _drag(self, event):
         if getattr(self, "drag", None):
@@ -242,7 +261,7 @@ class FigmaView:
             self.slider.create_text(x,20,text=str(i+1),fill=INK,font=(self.family,-8))
         self.slider_knob = self.slider.create_oval(1,0,13,12,fill="#2dff8f",outline=INK,width=1)
         for event in ("<Button-1>","<B1-Motion>"):
-            self.slider.bind(event,lambda e:self._count_changed(max(1,min(5,round((e.x-7)/42)+1))))
+            self.slider.bind(event,lambda e:self._count_changed(max(1,min(5,round((e.x/self.scale-7)/42)+1))))
         self.slider.bind("<Left>",lambda _:self._count_changed(max(1,self.count.get()-1)))
         self.slider.bind("<Right>",lambda _:self._count_changed(min(5,self.count.get()+1)))
         self.count.trace_add("write",lambda *_:self._draw_count())
@@ -255,8 +274,8 @@ class FigmaView:
 
     def _draw_count(self):
         x = 7 + (self.count.get()-1)*42
-        self.slider.coords(self.slider_active, 7, 6, x, 6)
-        self.slider.coords(self.slider_knob, x-6, 0, x+6, 12)
+        self.slider.coords(self.slider_active, *(v*self.scale for v in (7,6,x,6)))
+        self.slider.coords(self.slider_knob, *(v*self.scale for v in (x-6,0,x+6,12)))
 
     def _settings(self):
         app, page = self.app, self.settings
@@ -284,7 +303,7 @@ class FigmaView:
         self.text(page,30,331,"페르소나")
         self.persona_image = page.create_image(28,355,anchor="nw",image=self.photos["persona-witty"])
         self.persona_title = self.text(page,89,355,"")
-        self.persona_description = self.text(page,89,375,"",12,fill="#eaeaea")
+        self.persona_description = self.text(page,89,375,"",12,fill="#eaeaea",width=210)
         app.persona_preview = tk.StringVar()
         DesignButton(page,self,"수정",lambda:self.onboarding.select_personas(),313,365,height=29)
         self.text(page,30,415,"사용량")

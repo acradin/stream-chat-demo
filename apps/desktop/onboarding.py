@@ -40,7 +40,7 @@ class Onboarding:
             card.design_node = "Shortcut/ChangeButton"
             card.create_image(12,8,anchor="nw",image=view.photos[PERSONA_ASSETS[key]])
             card.create_text(73,8,anchor="nw",text=PERSONAS[key]["name"],fill="white",font=(view.family,-14))
-            card.create_text(73,28,anchor="nw",text=PERSONAS[key]["description"],fill="#eaeaea",font=(view.family,-12))
+            card.create_text(73,28,anchor="nw",text=PERSONAS[key]["description"],fill="#eaeaea",font=(view.family,-11),width=193)
             self.cards.append(card)
         self.back, self.next = self._navigation(self.persona_page,38,663,self.persona_back,self.to_link)
         self._heading(self.link_page,43,3,"이제 마지막 단계에요","방송 링크를 첨부해주세요.")

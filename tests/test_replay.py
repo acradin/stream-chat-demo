@@ -14,9 +14,9 @@ import wave
 import numpy as np
 from PIL import Image
 
-from artifacts import MOCK_LABEL, _visible_comments, write_report
-from media import ClipMedia, Frame
-from replay import ReplayConfig, ReplayEngine, score_matches
+from experiments.artifacts import MOCK_LABEL, _visible_comments, write_report
+from experiments.media import ClipMedia, Frame
+from experiments.replay import ReplayConfig, ReplayEngine, score_matches
 
 
 class _SlowProvider:

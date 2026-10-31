@@ -14,7 +14,7 @@ import wave
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from artifacts import _font_file
+from experiments.artifacts import _font_file
 
 
 def make_fixture(output: str, duration: float = 18.0) -> str:
@@ -115,7 +115,7 @@ def make_fixture(output: str, duration: float = 18.0) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", default="samples/fixture.mp4")
+    parser.add_argument("--output", default="experiments/samples/fixture.mp4")
     parser.add_argument("--duration", type=float, default=18.0)
     args = parser.parse_args()
     print(make_fixture(args.output, args.duration))

@@ -16,8 +16,8 @@ import time
 
 import numpy as np
 
-from media import ClipMedia, prepare_clip
-from providers import GeminiProvider, MockProvider, InvalidResponseError, ProviderError
+from experiments.media import ClipMedia, prepare_clip
+from backend.providers import GeminiProvider, MockProvider, InvalidResponseError, ProviderError
 
 
 @dataclass
@@ -413,7 +413,7 @@ async def run_cli(args) -> None:
         result = await ReplayEngine(config, output).run(media, provider)
     finally:
         await provider.close()
-    from artifacts import render_replay, write_report
+    from experiments.artifacts import render_replay, write_report
     if not args.no_render:
         print("Rendering comments at their actual display times...", flush=True)
         render_replay(str(Path(args.video).resolve()), str(output), font_path=args.font)

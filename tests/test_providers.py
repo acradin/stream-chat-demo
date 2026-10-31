@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from providers import (GeminiProvider, InvalidResponseError, MockProvider,
+from backend.providers import (GeminiProvider, InvalidResponseError, MockProvider,
                        ProviderError, _parse_response)
 
 

@@ -1,13 +1,23 @@
 # 개발 인수인계: 웹사이트와 데스크톱 앱
 
+## 최신 변경: 폴더 분리와 스크린샷 오버레이
+
+- 데스크톱은 `apps/desktop/`입니다. `python -m apps.desktop` 또는 `start_desktop.cmd`로 실행합니다. 버튼·전역 단축키로 주 모니터를 촬영하고 **OpenAI `gpt-6-astra`**로 생성합니다.
+- 웹은 `apps/web/`입니다. 기존 텍스트 Gemini/Mock 서버는 `python -m apps.web`, 정적 UI는 `apps/web/demo/`입니다. 웹에 스크린샷 업로드 API를 새로 노출하지 않았습니다.
+- 공통 생성·검증 코드는 `backend/`입니다. `server.py`는 인증·계정별 API, `chat_service.py`는 생성·서버 집계, `screenshot_provider.py`는 OpenAI 이미지 요청을 담당합니다. `OPENAI_API_KEY`와 `OPENAI_MODEL`은 `backend/.env` 또는 서버 환경변수에만 설정합니다. 앱은 별도의 `apps/desktop/.env`에서 서비스 연결 정보만 읽습니다. 사용자 화면에는 AI 키·모델·공급자 토큰 수를 표시하지 않습니다.
+- 데스크톱의 `service_client.py`는 우리 서버만 호출합니다. 사용량은 월별 생성 요청·생성된 채팅·누적 채팅 수이며 서버 기록을 조회합니다. 현재 개발 인증은 계정별 서비스 토큰이고 로그인·요금제는 미구현입니다. [BACKEND.md](BACKEND.md)에 연결 방법과 API 계약이 있습니다.
+- 자동 영상 실험은 `experiments/`로 분리했습니다. `python -m experiments.replay`로 실행하며 합성 샘플도 해당 폴더 안에 있습니다.
+- 디자이너는 `apps/desktop/overlay.py`, 웹 담당자는 `apps/web/`, AI 생성 담당자는 `backend/`를 우선 작업합니다. 공유 페르소나·입력 계약 변경은 함께 검토합니다.
+- 상세 실행·키 설정·저장 경계는 [DESKTOP.md](DESKTOP.md)를 확인하세요. 아래 내용은 기존 **웹 텍스트 데모 계약과 당시 인수인계 기록**입니다. 데스크톱 미구현이라는 아래의 과거 설명은 새 오버레이에 적용되지 않습니다.
+
 현재 제품 흐름은 **페르소나 선택 → 방송 정보 입력(선택) → 원하는 순간에 버튼 클릭 → 한국어 채팅 한 줄 표시**입니다. 방송자가 매번 반응 종류를 지정하지 않습니다. 팀원은 웹사이트를, 제품 개발자는 데스크톱 앱을 이어서 개발하는 방향입니다. 이 저장소는 그 출발점인 데모와 생성 코드를 담고 있습니다.
 
 ## 1. 먼저 확인할 것
 
 - [README](README.md): 실행 방법과 사용법.
 - [검증 기록](VALIDATION.md): 실제로 확인한 범위와 미검증 항목. 실제 Gemini API 지연이나 드립 품질이 검증됐다고 간주하지 마세요.
-- `demo/index.html`: API 없이 화면 흐름을 확인하는 정적 데모.
-- `manual.py` + `manual_panel.html`: 로컬 HTTP 서버에 연결되는 패널. Mock 또는 Gemini를 선택해 실행합니다.
+- `apps/web/demo/index.html`: API 없이 화면 흐름을 확인하는 정적 데모.
+- `apps/web/server.py` + `apps/web/manual_panel.html`: 로컬 HTTP 서버에 연결되는 패널. Mock 또는 Gemini를 선택해 실행합니다.
 
 GitHub 저장소는 비공개이며, 협업자 초대나 웹사이트 외부 배포는 완료하지 않았습니다. 현재 제공되는 것은 저장소 소스와 로컬 실행 경로입니다.
 
@@ -15,13 +25,13 @@ GitHub 저장소는 비공개이며, 협업자 초대나 웹사이트 외부 배
 
 | 파일 | 역할 | 이어서 작업할 때 |
 |---|---|---|
-| `demo/index.html`, `demo/sample.mp4` | 브라우저 안에서만 동작하는 체험 화면과 합성 영상 | 웹 UI 참고용. 예시 문장·650ms 대기를 실제 생성 로직으로 오해하지 않기 |
-| `manual_panel.html` | 실제 로컬 API를 호출하는 웹 패널 | 페르소나·방송 정보 입력, 생성 버튼, 결과 표시와 표시 확인 요청을 참고 |
-| `manual_provider.py` | 페르소나 정의, 텍스트 입력·출력 검증, Gemini/Mock 생성 | 웹 서비스와 데스크톱에서 공유할 생성 기능의 시작점 |
-| `manual.py` | `aiohttp` 로컬 어댑터, 단일 세션, 동시 입력 제어, 표시 확인, 로그 | 로컬 API 계약과 요청 생명주기 참고. 운영용 다중 사용자 서버는 아님 |
-| `providers.py` | Gemini REST 전송 및 기존 영상 실험의 provider | 수동 provider도 이 파일의 전송 코드를 재사용하므로 함께 확인 |
+| `apps/web/demo/index.html`, `apps/web/demo/sample.mp4` | 브라우저 안에서만 동작하는 체험 화면과 합성 영상 | 웹 UI 참고용. 예시 문장·650ms 대기를 실제 생성 로직으로 오해하지 않기 |
+| `apps/web/manual_panel.html` | 실제 로컬 API를 호출하는 웹 패널 | 페르소나·방송 정보 입력, 생성 버튼, 결과 표시와 표시 확인 요청을 참고 |
+| `backend/manual_provider.py` | 페르소나 정의, 텍스트 입력·출력 검증, Gemini/Mock 생성 | 웹 서비스와 데스크톱에서 공유할 생성 기능의 시작점 |
+| `apps/web/server.py` | `aiohttp` 로컬 어댑터, 단일 세션, 동시 입력 제어, 표시 확인, 로그 | 로컬 API 계약과 요청 생명주기 참고. 운영용 다중 사용자 서버는 아님 |
+| `backend/providers.py` | Gemini REST 전송 및 기존 영상 실험의 provider | 수동 provider도 이 파일의 전송 코드를 재사용하므로 함께 확인 |
 | `tests/test_manual*.py` | 수동 생성·HTTP 흐름 검사 | 공통 계약을 바꿀 때 함께 수정 |
-| `replay.py`, `media.py`, `artifacts.py`, `make_fixture.py`, `samples/` | 이전 자동 영상 분석·합성 샘플 실험 | 현재 버튼 제품의 필수 실행 경로가 아님 |
+| `experiments/replay.py`, `experiments/media.py`, `experiments/artifacts.py`, `experiments/make_fixture.py`, `experiments/samples/` | 이전 자동 영상 분석·합성 샘플 실험 | 현재 버튼 제품의 필수 실행 경로가 아님 |
 
 아직 공통 코드를 별도 패키지로 추출하지 않았습니다. 데스크톱은 Python 생성 모듈을 직접 재사용하거나 로컬 HTTP 어댑터를 호출할 수 있지만, 프레임워크·패키징 방식은 선택하지 않았습니다. 우선 아래의 입력 계약을 웹과 데스크톱에서 함께 유지하면 됩니다.
 
@@ -32,7 +42,7 @@ GitHub 저장소는 비공개이며, 협업자 초대나 웹사이트 외부 배
 **화면만 확인:**
 
 ```bash
-python -m http.server 8000 --directory demo
+python -m http.server 8000 --directory apps/web/demo
 ```
 
 같은 컴퓨터에서 `http://127.0.0.1:8000`을 엽니다. 페르소나별 준비된 문장을 표시합니다. 입력한 방송 정보는 체험 기록에 보관하지만 의미를 해석하지 않습니다.
@@ -41,10 +51,10 @@ python -m http.server 8000 --directory demo
 
 ```bash
 python -m pip install -r requirements.txt
-python manual.py --provider mock
+python -m apps.web --provider mock
 ```
 
-같은 컴퓨터에서 `http://127.0.0.1:8765`를 엽니다. Mock의 기본 0.2초 대기도 인위적인 값입니다. 실제 생성은 서버 환경변수에 `GEMINI_API_KEY` 또는 `GOOGLE_API_KEY`를 설정한 뒤 `python manual.py --provider gemini`로 실행합니다. 키 설정 방법은 README에 있습니다. 브라우저 입력창에 API 키를 넣지 않습니다.
+같은 컴퓨터에서 `http://127.0.0.1:8765`를 엽니다. Mock의 기본 0.2초 대기도 인위적인 값입니다. 실제 생성은 서버 환경변수에 `GEMINI_API_KEY` 또는 `GOOGLE_API_KEY`를 설정한 뒤 `python -m apps.web --provider gemini`로 실행합니다. 키 설정 방법은 README에 있습니다. 브라우저 입력창에 API 키를 넣지 않습니다.
 
 ```bash
 python -m unittest discover -s tests -v
@@ -61,7 +71,7 @@ python -m unittest discover -s tests -v
 | `hype_commentator` | 과몰입 해설러 |
 | `dry_comic` | 덤덤한 드립러 |
 
-정식 정의는 `manual_provider.py`의 `PERSONAS`입니다. `channel_context`는 최대 1,000자의 텍스트이며 빈 문자열도 허용합니다. 방송 주제·별명·배경·목표 등을 적어두고 여러 번의 버튼 입력에 재사용합니다. 버튼을 누른 순간의 선택값과 텍스트를 한 요청으로 고정합니다.
+정식 정의는 `backend/manual_provider.py`의 `PERSONAS`입니다. `channel_context`는 최대 1,000자의 텍스트이며 빈 문자열도 허용합니다. 방송 주제·별명·배경·목표 등을 적어두고 여러 번의 버튼 입력에 재사용합니다. 버튼을 누른 순간의 선택값과 텍스트를 한 요청으로 고정합니다.
 
 생성 모듈이 받는 키는 정확히 `request_id`, `persona`, `channel_context`, `recent_comments`입니다. `recent_comments`는 최대 8개의 이미 표시된 채팅이고, 각 문장은 100자 이하입니다. HTTP 어댑터가 이를 조립하므로 브라우저는 최근 채팅을 직접 보낼 필요가 없습니다. 영상·오디오·재생 시점은 모델에 전달하지 않습니다.
 
@@ -71,7 +81,7 @@ python -m unittest discover -s tests -v
 
 | 메서드·경로 | 응답·동작 |
 |---|---|
-| `GET /` | `manual_panel.html` 제공 |
+| `GET /` | `apps/web/manual_panel.html` 제공 |
 | `GET /api/config` | `provider`, `model`, `is_mock`, `session_token`, `cooldown_s`, `max_age_s`, `default_persona`, `personas` 반환. `personas` 항목은 `{id, name, description}` |
 | `POST /api/trigger` | 아래 입력을 받아 생성 결과 또는 거절 상태 반환 |
 | `POST /api/display` | 클라이언트의 표시·폐기 결과를 기록 |

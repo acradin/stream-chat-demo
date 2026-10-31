@@ -1,26 +1,41 @@
 # 버튼으로 만드는 AI 라이브 채팅 데모
 
+## 현재 개발: GPT-6 스크린샷 데스크톱 오버레이
+
+**버튼 / 전역 단축키 → 주 모니터 스크린샷 → 서비스 서버 → `gpt-6-astra` → 한국어 AI 채팅**을 구현했습니다. 인원 1~5명, AI별 페르소나, 상황 설명, 창 설정과 서비스 사용량을 작은 창에서 조작합니다. 실행은 **`start_desktop.cmd`** 또는 `python -m apps.desktop`입니다. **AI API 키는 운영자의 `backend/.env`에 넣으면 자동으로 읽습니다.** [데스크톱 안내](DESKTOP.md)와 [운영자 서버·키 설정](BACKEND.md)을 확인하세요.
+
+| 폴더 | 담당 영역 |
+|---|---|
+| `apps/desktop/` | 데스크톱 UI, 화면 캡처, 전역 단축키 |
+| `apps/web/` | 기존 로컬 웹 서버·패널, `demo/` 정적 체험 화면 |
+| `backend/` | 서비스 HTTP API, 계정별 사용량, 공통 페르소나, AI provider |
+| `experiments/` | 기존 자동 영상 분석·리플레이·합성 샘플 |
+| `tests/` | 공통·데스크톱·웹·기존 실험 회귀 테스트 |
+| `runs/` | 로컬 설정·사용량·실험 결과 (Git 제외) |
+
+아래는 **기존 웹 텍스트 데모**의 실행 안내입니다. 웹 데모는 기존 Gemini/Mock 계약을 유지하며, 새 OpenAI 스크린샷 흐름은 데스크톱에서 사용합니다.
+
 저장소: [acradin/stream-chat-demo](https://github.com/acradin/stream-chat-demo)
 
 **개발을 이어받는 팀원은 [개발 인수인계 문서](HANDOFF.md)부터 확인하세요.** 웹사이트와 데스크톱 앱의 작업 범위, 재사용할 생성 코드, 로컬 API 계약, 다음 개발 순서를 정리했습니다.
 
-**페르소나를 고르고 방송 정보를 적어두면, 버튼을 누를 때마다 그 캐릭터의 짧은 한국어 채팅을 만듭니다.** 현재 주 실행 파일은 `manual.py`입니다. 방송자가 타이밍을 정하고, 텍스트 모델은 선택한 페르소나와 방송 정보를 바탕으로 한 줄을 작성합니다. 매번 반응 종류나 상황 태그를 고를 필요가 없습니다.
+**페르소나를 고르고 방송 정보를 적어두면, 버튼을 누를 때마다 그 캐릭터의 짧은 한국어 채팅을 만듭니다.** 웹 서버는 `python -m apps.web`으로 실행합니다. 방송자가 타이밍을 정하고, 텍스트 모델은 선택한 페르소나와 방송 정보를 바탕으로 한 줄을 작성합니다. 매번 반응 종류나 상황 태그를 고를 필요가 없습니다.
 
 이 모드에는 영상·소리 인식이나 자동 `WAIT` / `REACT` 판단이 없습니다. 화면은 본인 컴퓨터에서 실행하는 실험용 패널이며, 생성한 채팅도 이 패널에 표시됩니다. 방송 플랫폼에 실제로 전송하는 기능은 다음 단계입니다.
 
 ## 화면만 먼저 체험하기 — 정적 mock 데모
 
-`demo/`에는 API 키와 Python 패키지 설치 없이 버튼 흐름을 체험할 수 있는 정적 데모가 있습니다. 프로젝트 폴더에서 Python의 기본 HTTP 서버를 실행합니다.
+`apps/web/demo/`에는 API 키와 Python 패키지 설치 없이 버튼 흐름을 체험할 수 있는 정적 데모가 있습니다. 프로젝트 폴더에서 Python의 기본 HTTP 서버를 실행합니다.
 
 ```bash
-python -m http.server 8000 --directory demo
+python -m http.server 8000 --directory apps/web/demo
 ```
 
 같은 컴퓨터에서 [http://127.0.0.1:8000](http://127.0.0.1:8000)을 열고 **페르소나**를 고르세요. **방송 정보** 입력란은 선택 사항입니다. 설정한 뒤에는 **드립 만들기** 버튼만 누르면 됩니다. 함께 제공한 합성 테스트 영상이나 본인의 로컬 영상을 보며 누를 수 있습니다. 로컬 영상은 브라우저에서만 재생되며 업로드되지 않습니다.
 
 이 정적 화면은 **실제 AI가 연결되지 않은 체험 데모**입니다. 페르소나별로 준비한 예시 문장을 선택하고 650ms를 인위적으로 기다립니다. 방송 정보는 버튼을 누른 시점의 페르소나와 함께 체험 기록에 담지만, 문장을 고를 때 그 내용을 해석하지는 않습니다. 화면에 표시되는 시간은 설정한 대기와 브라우저 처리 시간이며 AI 성능 수치가 아닙니다. 방송 플랫폼 전송 기능도 포함하지 않습니다.
 
-실제 텍스트 모델을 연결하거나 서버의 요청·표시 로그를 측정하려면 아래의 `manual.py` 모드를 실행하세요.
+실제 텍스트 모델을 연결하거나 서버의 요청·표시 로그를 측정하려면 아래의 `apps/web/server.py` 모드를 실행하세요.
 
 ## 가장 먼저 실행하기
 
@@ -37,7 +52,7 @@ Python 3.10 이상이 설치된 환경에서 다음 명령을 실행하세요.
 
 ```bash
 python -m pip install -r requirements.txt
-python manual.py --provider mock --output runs/manual_mock
+python -m apps.web --provider mock --output runs/manual_mock
 ```
 
 서버를 실행한 **같은 컴퓨터의 브라우저**에서 [http://127.0.0.1:8765](http://127.0.0.1:8765)를 엽니다. 터미널은 실행한 상태로 두세요. 종료하려면 터미널에서 `Ctrl+C`를 누릅니다. 다시 실행할 때는 `runs/manual_mock_2`처럼 새로운 결과 폴더를 지정합니다.
@@ -72,10 +87,10 @@ python manual.py --provider mock --output runs/manual_mock
 read -r -s -p "Gemini API key: " GEMINI_API_KEY
 export GEMINI_API_KEY
 
-python manual.py --provider gemini --model gemini-3.5-flash-lite --output runs/manual_real
+python -m apps.web --provider gemini --model gemini-3.5-flash-lite --output runs/manual_real
 ```
 
-Windows에서는 사용하는 셸의 환경변수 설정 방식을 사용한 뒤 같은 `python manual.py ...` 명령을 실행합니다. 인증이 없으면 서버 시작 단계에서 오류가 나며, 실제 호출에는 모델 API 사용 요금이 발생할 수 있습니다.
+Windows에서는 사용하는 셸의 환경변수 설정 방식을 사용한 뒤 같은 `python -m apps.web ...` 명령을 실행합니다. 인증이 없으면 서버 시작 단계에서 오류가 나며, 실제 호출에는 모델 API 사용 요금이 발생할 수 있습니다.
 
 Gemini 요청에는 선택한 페르소나·방송 정보·최근 채팅이 텍스트로 들어갑니다. 실제 모델은 방송 정보를 채팅의 맥락으로 사용하며, 입력된 정보만으로 알 수 없는 구체적인 사건을 만들어내지 않도록 지시합니다. 프레임, 영상 파일, 오디오와 영상 재생 시점은 모델에 전달하지 않습니다. 출력은 비어 있지 않은 100자 이하 한 줄로 검증합니다.
 
@@ -104,7 +119,7 @@ Gemini 요청에는 선택한 페르소나·방송 정보·최근 채팅이 텍�
 
 실행 중 [http://127.0.0.1:8765/api/export](http://127.0.0.1:8765/api/export)에서도 JSONL 기록을 내려받을 수 있습니다. 수동 모드는 패널에서 영상과 채팅을 함께 보여주며 결과 MP4를 별도로 렌더링하지 않습니다.
 
-주요 선택 옵션은 `--port`, `--cooldown`, `--max-age`, `--timeout`, `--mock-delay`입니다. 전체 옵션은 `python manual.py --help`로 확인합니다. 검사 실행은 다음과 같습니다.
+주요 선택 옵션은 `--port`, `--cooldown`, `--max-age`, `--timeout`, `--mock-delay`입니다. 전체 옵션은 `python -m apps.web --help`로 확인합니다. 검사 실행은 다음과 같습니다.
 
 ```bash
 python -m unittest discover -s tests -v
@@ -114,7 +129,7 @@ python -m unittest discover -s tests -v
 
 # 기존 자동 영상 분석 실험 (보관)
 
-아래는 이전 `replay.py` 기반 자동 분석 실험의 설명입니다. **현재 버튼 모드를 실행할 때 아래의 영상 추출·자동 판단 단계는 사용하지 않습니다.** 비교와 재현을 위해 기존 코드와 사용법을 보관합니다.
+아래는 이전 `experiments/replay.py` 기반 자동 분석 실험의 설명입니다. **현재 버튼 모드를 실행할 때 아래의 영상 추출·자동 판단 단계는 사용하지 않습니다.** 비교와 재현을 위해 기존 코드와 사용법을 보관합니다.
 
 ## 영상 하나로 검증하는 AI 라이브 채팅 실험
 
@@ -143,9 +158,9 @@ Windows에서는 가상환경 활성화 명령을 사용하는 셸에 맞게 바
 ## 2. API 키 없이 흐름부터 확인
 
 ```bash
-python make_fixture.py --output samples/fixture.mp4 --duration 18
+python -m experiments.make_fixture --output experiments/samples/fixture.mp4 --duration 18
 
-python replay.py run samples/fixture.mp4 \
+python -m experiments.replay run experiments/samples/fixture.mp4 \
   --provider mock \
   --mock-delay 0.2 \
   --cooldown 4 \
@@ -171,7 +186,7 @@ export GEMINI_API_KEY
 그다음 본인의 데모 영상을 지정합니다.
 
 ```bash
-python replay.py run /path/to/demo.mp4 \
+python -m experiments.replay run /path/to/demo.mp4 \
   --provider gemini \
   --model gemini-3.5-flash-lite \
   --mode joint \
@@ -186,13 +201,13 @@ python replay.py run /path/to/demo.mp4 \
 한글 글꼴을 직접 지정하는 예시입니다.
 
 ```bash
-python replay.py run /path/to/demo.mp4 \
+python -m experiments.replay run /path/to/demo.mp4 \
   --duration 60 \
   --output runs/gemini_with_font \
   --font /path/to/NotoSansCJK-Regular.ttc
 ```
 
-`--no-render`를 추가하면 MP4 렌더링을 건너뜁니다. 영상 전처리와 추론, 로그·보고서 생성은 수행합니다. 모든 CLI 옵션은 `python replay.py run --help`에서 확인할 수 있습니다.
+`--no-render`를 추가하면 MP4 렌더링을 건너뜁니다. 영상 전처리와 추론, 로그·보고서 생성은 수행합니다. 모든 CLI 옵션은 `python -m experiments.replay run --help`에서 확인할 수 있습니다.
 
 ## 4. 판단과 드립을 한 번에 만들까, 나눠 만들까?
 
@@ -204,7 +219,7 @@ python replay.py run /path/to/demo.mp4 \
 같은 영상에서 분리 모드를 비교합니다.
 
 ```bash
-python replay.py run /path/to/demo.mp4 \
+python -m experiments.replay run /path/to/demo.mp4 \
   --provider gemini \
   --model gemini-3.5-flash-lite \
   --mode split \
@@ -321,7 +336,7 @@ python replay.py run /path/to/demo.mp4 \
 `onset_s`는 사건 시작입니다. 선택 항목인 `observable_s`에는 결과나 말의 뜻을 알 수 있게 된 시점을, `valid_until_s`에는 반응이 여전히 자연스럽다고 보는 마지막 시점을 적습니다. 말을 끝까지 들어야 이해하는 농담처럼 사건 시작과 이해 가능한 시점이 다를 때 구분해서 평가할 수 있습니다.
 
 ```bash
-python replay.py score runs/gemini_joint \
+python -m experiments.replay score runs/gemini_joint \
   --annotations annotations.json \
   --matches matches.json
 ```

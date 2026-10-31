@@ -5,8 +5,8 @@ import json
 import unittest
 from unittest.mock import patch
 
-from manual_provider import PERSONAS, GeminiManualProvider, MockManualProvider, validate_context
-from providers import InvalidResponseError
+from backend.manual_provider import PERSONAS, GeminiManualProvider, MockManualProvider, validate_context
+from backend.providers import InvalidResponseError
 
 
 def context(**updates):

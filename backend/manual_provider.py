@@ -13,7 +13,7 @@ import json
 import time
 from typing import Any
 
-from providers import GeminiProvider, InvalidResponseError, _finite_nonnegative
+from backend.providers import GeminiProvider, InvalidResponseError, _finite_nonnegative
 
 
 PERSONAS = {

@@ -1,6 +1,6 @@
 """Local button-triggered chat experiment. No video/audio enters the model.
 
-Run: python manual.py --provider mock
+Run: python -m apps.web --provider mock
 Open the printed localhost URL, optionally choose a local clip, then press the
 button. A browser acknowledgement supplies button-to-DOM latency; the server
 cannot infer that metric from its own clock or from a media timestamp.
@@ -23,8 +23,8 @@ from urllib.parse import urlsplit
 
 from aiohttp import web
 
-from manual_provider import DEFAULT_PERSONA, PERSONAS, GeminiManualProvider, MockManualProvider
-from providers import ProviderError, InvalidResponseError
+from backend.manual_provider import DEFAULT_PERSONA, PERSONAS, GeminiManualProvider, MockManualProvider
+from backend.providers import ProviderError, InvalidResponseError
 
 
 def _number(value, name: str, *, optional: bool = False):
@@ -251,7 +251,7 @@ class ManualSession:
         for name, body in content.items():
             target = self.directory / name
             temp = target.with_suffix(target.suffix + ".tmp")
-            temp.write_text(body, encoding="utf-8")
+            temp.write_text(body, encoding="utf-8", newline="")
             temp.replace(target)
 
 

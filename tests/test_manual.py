@@ -17,7 +17,7 @@ import uuid
 
 from aiohttp.test_utils import TestClient, TestServer
 
-from manual import create_app
+from apps.web.server import create_app
 
 
 class ControlledProvider:

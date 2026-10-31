@@ -21,6 +21,7 @@ __pycache__/
 htmlcov/
 
 # Generated runs, logs and transfer bundles
+.omx/
 runs/
 media_cache/
 *.log

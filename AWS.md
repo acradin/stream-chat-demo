@@ -11,7 +11,7 @@
 - 백엔드 설치와 내부 `/healthz`, 공개 HTTPS `/healthz`, 인증된 `/api/usage` 검사 통과. `check` 결과: `HTTPS and authenticated service verified`.
 - DuckDNS A 레코드는 `52.200.103.213`으로 반영됐습니다. 이 도메인을 쓰는 데 추가 도메인 구매나 Route 53 등록은 필요하지 않습니다.
 - Caddy 인증서 발급 완료. 치지직 콜백은 `https://tiki-chat.duckdns.org/oauth/chzzk/callback`이며 사용자가 개발자 센터 redirect URL 수정 완료를 확인했습니다. 원격 승인 왕복 검증은 아직 남아 있습니다.
-- 이 주소는 데스크톱 앱용 백엔드입니다. `apps/web` 프론트엔드를 배포한 것은 아니므로 루트 `/`에 웹 메인 화면은 없습니다. 브라우저 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
+- 이 주소는 데스크톱 앱용 백엔드입니다. 루트 `/`는 인증 없이 볼 수 있는 서비스 안내 화면이며, `apps/web` 프론트엔드와는 별개입니다. 채팅·사용량 API는 계속 서비스 인증이 필요합니다. 브라우저 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
 
 초기 Ubuntu 설치에서 APT의 `awscli` 패키지를 찾지 못한 문제는 공식 AWS CLI v2 설치 파일로 수정했습니다. 같은 서버에서 초기 설정을 복구하고 백엔드를 설치했습니다. 이전 cloud-init 실패 기록이 있어도 완료 표시 파일이 있는 경우에만 배포를 계속합니다.
 

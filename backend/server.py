@@ -23,6 +23,7 @@ from backend.realtime_service import RealtimeSession, validate_start
 from backend.chat_delivery import ChatDelivery
 from backend.chzzk_target import parse_channel_id
 from backend.chzzk_remote import CALLBACK_PATH, RemoteAuthorization
+from backend.public_page import SERVICE_PAGE
 
 
 def validate_accounts(accounts):
@@ -58,6 +59,8 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
 
     @web.middleware
     async def authenticate(request, handler):
+        if request.method in ("GET", "HEAD") and request.path == "/":
+            return await handler(request)
         if request.method in ("GET", "HEAD") and request.path == "/healthz":
             return web.json_response({"status": "ok"}, headers={"Cache-Control": "no-store"})
         if remote_auth and request.method == "GET" and request.path == CALLBACK_PATH:
@@ -94,6 +97,14 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
 
     async def health(request):
         return web.json_response({"status": "ok"})
+
+    async def home(request):
+        return web.Response(text=SERVICE_PAGE, content_type="text/html", headers={
+            "Cache-Control": "no-store",
+            "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "no-referrer",
+        })
 
     async def generate(request):
         data = await request.json()
@@ -159,6 +170,7 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
         await asyncio.gather(*(socket.close(code=1001, message=b"Service shutdown") for socket in list(active)))
 
     app = web.Application(middlewares=[authenticate], client_max_size=7_000_000)
+    app.router.add_get("/", home)
     app.router.add_get("/healthz", health)
     if remote_auth:
         app.router.add_get(CALLBACK_PATH, remote_auth.callback, allow_head=False)

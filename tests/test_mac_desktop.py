@@ -78,6 +78,13 @@ class MacCaptureTests(unittest.TestCase):
 
 
 class MacShortcutTests(unittest.TestCase):
+    def test_pre_tk_identity_does_not_create_a_cocoa_application(self):
+        from apps.desktop.mac import branding
+        application = Mock()
+        with patch.dict(sys.modules, {"AppKit": NS(NSApplication=application)}):
+            branding.set_app_identity()
+        application.sharedApplication.assert_not_called()
+
     def test_cmd_option_and_physical_key_mapping(self):
         self.assertEqual(hotkey.parse_hotkey("command+shift+g"), ("Shift+Cmd+G", (1 << 17) | (1 << 20), 5))
         self.assertEqual(hotkey.parse_hotkey("option+Space"), ("Alt+Space", 1 << 19, 49))

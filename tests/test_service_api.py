@@ -45,6 +45,26 @@ class ServiceApiTests(unittest.IsolatedAsyncioTestCase):
         return {"personas": ["witty_friend", "warm_supporter"], "context": "방송 상황",
                 "screenshot": base64.b64encode(jpeg()).decode()}
 
+    async def test_public_home_does_not_open_authenticated_service_routes(self):
+        async with ClientSession() as session:
+            async with session.get(self.client.base_url + "/?token=do-not-reflect") as response:
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.content_type, "text/html")
+                body = await response.text()
+                self.assertIn("데스크톱 앱에서 만나요.", body)
+                for private in (TOKEN_A, TOKEN_B, "do-not-reflect"):
+                    self.assertNotIn(private, body)
+                self.assertEqual(response.headers["Cache-Control"], "no-store")
+            async with session.head(self.client.base_url + "/") as response:
+                self.assertEqual(response.status, 200)
+                self.assertEqual(await response.read(), b"")
+            for method, path in (("GET", "/api/usage"), ("GET", "/api/chzzk/status"),
+                                 ("GET", "/api/chat/realtime"), ("POST", "/api/chat/generate"),
+                                 ("POST", "/")):
+                async with session.request(method, self.client.base_url + path) as response:
+                    self.assertEqual(response.status, 401, (method, path))
+        self.assertEqual(self.providers, [])
+
     async def test_desktop_uses_service_and_usage_is_account_scoped(self):
         with patch.dict("os.environ", {"OPENAI_API_KEY": "must-not-be-sent-by-desktop"}):
             lines = []

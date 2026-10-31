@@ -157,3 +157,10 @@
 - 웹 팀원 브랜치 병합 `6b90e8e`: `npm run lint`, `npm run build`, `npm test` **5개 통과**. 실제 로컬 Python Mock API, Origin/인증, 결과 표시 확인, 오래된 컨텍스트 폐기, preview 프록시 포함.
 - AWS: `package` 성공, 기본 리전 `us-east-1`. AWS 리소스 생성·서버 부팅·DNS/TLS·실제 원격 승인은 미검증입니다. 계정 로그인과 도메인이 필요합니다.
 - 남은 디자인 차이: Tk에는 Figma의 실시간 배경 굴절/GLASS 광학 효과와 외부 그림자가 없습니다. 다중 Fill과 별도 Glass 레이어는 유지하되 중립 어두운 배경 위의 합성·가장자리 빛으로 근사합니다. 폰트는 Pretendard가 없으면 맑은 고딕을 사용하며 일부 입력 컨트롤은 네이티브 위젯입니다.
+# 2026-11-01 public service entry and Mac startup follow-up
+
+- Public `GET /` and `HEAD /` now show a static Tiki service guide without credentials. API routes remain authenticated.
+- Service API tests: 8 passed; AWS deployment tests: 7 passed. Deployed to the existing AWS instance. Public `/` returned HTTP 200 HTML; unauthenticated `/api/usage` returned 401; authenticated usage and HTTPS health checks passed. No AI generation or broadcast chat was sent.
+- Mac CI baseline run `41222180932`: Intel bundle built, but startup aborted because branding created `NSApplication` before Tk initialized its subclass. Dock branding now runs after the Tk root exists; a regression test covers the ordering contract (11 Mac tests passed locally).
+- The ARM job was cancelled by the scheduled macOS 14 runner brownout. Updated it to `macos-15`; native builds must pass before release claims.
+

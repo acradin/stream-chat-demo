@@ -2,7 +2,17 @@
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
-apt-get install -y --no-install-recommends python3-venv python3-pip awscli curl ca-certificates gnupg debian-keyring debian-archive-keyring
+apt-get install -y --no-install-recommends python3-venv python3-pip unzip curl ca-certificates gnupg debian-keyring debian-archive-keyring
+# Ubuntu 24.04 repositories do not consistently provide an awscli candidate.
+# Use AWS's versioned v2 installer; the instance role supplies credentials.
+if ! command -v aws >/dev/null 2>&1; then
+    aws_install=$(mktemp -d /var/tmp/stream-chat-awscli.XXXXXX)
+    trap 'rm -rf -- "$aws_install"' EXIT
+    curl --fail --silent --show-error --location --retry 3 \
+        https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.39.3.zip -o "$aws_install/awscliv2.zip"
+    unzip -q "$aws_install/awscliv2.zip" -d "$aws_install"
+    "$aws_install/aws/install" --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli
+fi
 curl -fsSL https://dl.cloudsmith.io/public/caddy/stable/gpg.key -o /tmp/caddy-key.asc
 gpg --batch --yes --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg /tmp/caddy-key.asc
 curl -fsSL https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt -o /etc/apt/sources.list.d/caddy-stable.list

@@ -1,1 +1,1 @@
-"""Windows desktop UI, capture and shortcut integration."""
+"""Shared desktop UI and service client; native adapters live in window/ and mac/."""

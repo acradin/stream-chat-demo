@@ -7,6 +7,7 @@ import asyncio
 import json
 from pathlib import Path
 import queue
+import sys
 import threading
 import time
 import tkinter as tk
@@ -97,6 +98,8 @@ class Overlay:
         self.root.option_add("*Font", ("맑은 고딕", 9))
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.bind("<Control-Return>", lambda event: self.generate())
+        if sys.platform == "darwin":
+            self.root.bind("<Command-Return>", lambda event: self.generate())
         self.status = tk.StringVar(value="화면 캡처 버튼이나 단축키로 채팅을 생성하세요.")
         self.mode_text = tk.StringVar()
         self.count_text = tk.StringVar()
@@ -119,7 +122,7 @@ class Overlay:
         FigmaView(self)
 
     def _build_usage(self):
-        ttk.Label(self.usage_tab, text="서비스 사용량", font=("맑은 고딕", 11, "bold")).pack(anchor="w", pady=(0, 8))
+        ttk.Label(self.usage_tab, text="서비스 사용량", font=(self.view.family, 11, "bold")).pack(anchor="w", pady=(0, 8))
         self.usage_period = tk.StringVar(value="사용량을 불러오는 중…")
         ttk.Label(self.usage_tab, textvariable=self.usage_period, wraplength=370).pack(anchor="w", pady=(0, 12))
         self.usage_table = ttk.Treeview(self.usage_tab, columns=("metric", "value"), show="headings", height=3)
@@ -368,7 +371,7 @@ class Overlay:
             self._finish_hotkey_recording()
             return "break"
         try:
-            name = pressed_hotkey(event.keycode)
+            name = pressed_hotkey(event.keycode, event=event)
             if name:
                 self.hotkey_var.set(name)
                 self._finish_hotkey_recording()
@@ -458,7 +461,7 @@ class Overlay:
         self.status.set("오버레이를 숨기고 주 모니터를 촬영합니다…")
         self.restore_state = self.root.state()
         self.root.withdraw()
-        # Let Windows finish removing this window before capturing the screen.
+        # Let the window manager finish hiding the overlay before capture.
         self.root.after(180, lambda: self._start_worker(snapshot))
 
     def _start_worker(self, snapshot):

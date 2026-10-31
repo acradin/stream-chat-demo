@@ -1,4 +1,4 @@
-"""Absolute-import entry point for the frozen Windows executable."""
+"""Absolute-import entry point shared by the Windows and Mac bundles."""
 
 from apps.desktop.overlay import main
 

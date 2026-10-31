@@ -10,6 +10,8 @@ import tkinter as tk
 from tkinter import ttk, font
 
 from PIL import Image, ImageDraw, ImageFilter, ImageTk
+from apps.desktop.fonts import load_bundled_fonts
+from apps.desktop.shell import transparent_color
 
 RADIUS = 26
 FILLS = ((.15, .15, .15, 1., "COLOR_DODGE"), (0., 0., 0., .2, "NORMAL"))
@@ -49,7 +51,10 @@ INK, MUTED, INPUT, MINT = "#ffffff", "#c5c5c5", "#303234", "#03ffd5"
 
 
 def configure_theme(root):
+    load_bundled_fonts()
     family = "Pretendard" if "Pretendard" in font.families(root) else "맑은 고딕"
+    for name in font.names(root):
+        font.nametofont(name, root=root).configure(family=family)
     root.option_add("*Font", (family, 9))
     style = ttk.Style(root)
     style.theme_use("clam")
@@ -79,7 +84,7 @@ def configure_theme(root):
     style.map("TCheckbutton", background=[("active", BG)])
     style.configure("Treeview", background=BG, fieldbackground=BG, foreground=INK,
                     rowheight=24, borderwidth=0)
-    style.configure("Treeview.Heading", background=INPUT, foreground=INK, relief="flat")
+    style.configure("Treeview.Heading", background=INPUT, foreground=INK, relief="flat", font=(family, 9, "bold"))
     style.configure("Horizontal.TScale", background=BG, troughcolor=INPUT)
     root.option_add("*TCombobox*Listbox.background", INPUT)
     root.option_add("*TCombobox*Listbox.foreground", INK)
@@ -120,7 +125,7 @@ def paint_layers(width, height):
 
 class Panel(tk.Canvas):
     def __init__(self, parent, width, height, *, settings=False):
-        super().__init__(parent, width=width, height=height, bg="#010203",
+        super().__init__(parent, width=width, height=height, bg=transparent_color(),
                          highlightthickness=0, borderwidth=0)
         self.design_node = "Screen/Settings" if settings else "Screen/Main"
         self.background_owner = "Fill + Shadow" if settings else "Screen/Main"

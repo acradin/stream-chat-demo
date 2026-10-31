@@ -3,11 +3,13 @@ from pathlib import Path
 import importlib.metadata
 import sys
 
-root = Path(SPECPATH).resolve().parents[2]
+root = Path(SPECPATH).resolve().parents[3]
 data = [(str(root / "apps/assets" / name), "apps/assets")
         for name in ("logo.svg", "app.svg", "app.ico", "app-16.png", "app-32.png", "app-48.png", "app-256.png")]
 data += [(str(path), "apps/assets/figma") for path in (root / "apps/assets/figma").iterdir()
          if path.suffix in (".png", ".svg")]
+data += [(str(root / "apps/assets/fonts/pretendard" / name), "apps/assets/fonts/pretendard")
+         for name in ("Pretendard-Regular.ttf", "Pretendard-Bold.ttf", "LICENSE.txt")]
 # Retain runtime dependency notices in the distributable.
 for package in ("aiohttp", "aiohappyeyeballs", "aiosignal", "attrs", "frozenlist",
                 "multidict", "propcache", "yarl", "idna", "Pillow"):
@@ -35,6 +37,6 @@ analysis = Analysis([str(root / "apps/desktop/packaging/entry.py")], pathex=[str
 archive = PYZ(analysis.pure)
 exe = EXE(archive, analysis.scripts, [], exclude_binaries=True, name="StreamChat",
           debug=False, strip=False, upx=False, console=False,
-          version=str(root / "apps/desktop/packaging/version.txt"),
+          version=str(root / "apps/desktop/window/packaging/version.txt"),
           icon=str(root / "apps/assets/app.ico"))
 bundle = COLLECT(exe, analysis.binaries, analysis.datas, strip=False, upx=False, name="StreamChat")

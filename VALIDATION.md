@@ -1,5 +1,15 @@
 # 검증 기록
 
+## 2026-11-01 · OS 분리, Pretendard, 디자인 추출, AWS 배포
+
+- Windows 코드를 `apps/desktop/window`, macOS 코드를 `apps/desktop/mac`으로 분리하고 UI·서비스 통신은 공통으로 유지했습니다. 전체 Python 테스트 **123개 통과**. 이후 AWS 배포·설치 경로·Mac 계약 검사 **23개 재검증 통과**.
+- Mac 캡처 권한, 창 식별, 콜백 오류·시간 초과, 이미지 크기, 주 모니터 선택, 단축키와 저장 경로는 모의 네이티브 API로 검사했습니다. 실제 Mac 실행·권한 대화상자·DMG 빌드·서명은 아직 검증하지 않았습니다. 관련 코드 push 및 수동 실행용 GitHub Actions 워크플로로 Apple Silicon/Intel 빌드를 구성했습니다. 실행 결과는 해당 커밋의 Actions 기록으로 확인합니다.
+- 공식 Pretendard 1.3.9 Regular/Bold TTF와 OFL 라이선스를 자산에 포함했습니다. Windows 소스와 설치본에서 프로세스 전용 글꼴 로딩 및 실제 Tk 글꼴 패밀리·굵기를 확인했습니다. `runs/platform_font_self_test.json` 통과.
+- Windows 설치본 `dist/StreamChat-Setup-0.4.0-x64.exe` 재빌드 및 비밀/백엔드 제외 검사 통과. `runs/installer_smoke_20261101-013025-348/report.json`: 격리 설치, frozen 실행, 업그레이드 설정 유지, 제거와 설정 보존 모두 통과. 실제 AI 호출·방송 채팅 전송·화면 캡처는 하지 않았습니다.
+- `design/desktop/`에 디자인 설명, JSON 전체 값, 참조 CSS를 생성했습니다. 12개 화면 상태와 26개 자산을 포함한 `dist/tiki-desktop-design.zip`의 ZIP 무결성 및 허용 파일 목록을 확인했습니다. Tk의 실제 굴절·외부 그림자 미지원 차이는 문서에 명시했습니다.
+- AWS `stream-chat-demo` 스택 생성 완료, EC2 `i-0639cfc3ff95be510`, 고정 IP `52.200.103.213`. 초기 APT의 AWS CLI 패키지 부재를 공식 설치 파일로 수정한 뒤 SSM 초기 설정과 백엔드 설치·내부 상태 검사가 통과했습니다. 관련 Bash 스크립트 구문 검사도 통과했습니다.
+- 사용자의 DuckDNS 수정 후 A 레코드 `52.200.103.213`과 공개 `/healthz` HTTP 200을 확인했습니다. 배포 도구 `check`의 신뢰 가능한 HTTPS 및 인증된 `/api/usage` 검사도 통과했습니다. 사용자 확인상 치지직 redirect URL 수정은 완료됐으며, 배포 서버의 실제 AI 생성·치지직 승인/전송은 미검증입니다. 현재 상태는 `AWS.md`에 기록했습니다.
+
 ## 타이틀바 로고 0.3.2 — 2026-10-31
 
 - Tkinter의 `iconbitmap(bitmap, default=...)` 호출은 `default`가 있으면 현재 창에 대한 `bitmap` 인수를 사용하지 않았습니다. 현재 창의 ICO와 자식 창 기본 ICO를 별도 호출로 지정했습니다.

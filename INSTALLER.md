@@ -1,5 +1,10 @@
 # Windows 데스크톱 앱 설치
 
+Windows 설치 구현은 `apps/desktop/window/packaging/`에 있습니다.
+이전 `apps/desktop/packaging/build.ps1`·`smoke.ps1` 명령도 호환 래퍼로 유지합니다.
+Mac용 `.app`/`.dmg`는 [Mac 안내](apps/desktop/mac/README.md)에 따라 Mac에서 빌드합니다.
+Pretendard 1.3.9 Regular/Bold와 OFL 라이선스를 설치본에 포함합니다.
+
 ## 사용자 설치
 
 `dist/StreamChat-Setup-0.4.0-x64.exe`를 실행합니다. Windows 10/11의 64비트 앱이며 Python을 따로 설치하지 않아도 됩니다. 한국어 설치 마법사에서 설치 위치와 바탕화면 바로가기를 선택할 수 있습니다. 설치 완료 화면의 실행을 선택하거나 시작 메뉴의 **Stream Chat**을 열면 네이티브 오버레이가 바로 뜹니다.

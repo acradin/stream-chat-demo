@@ -11,6 +11,8 @@ def installed() -> bool:
 
 def state_directory() -> Path:
     if installed():
+        if sys.platform == "darwin":
+            return Path.home() / "Library" / "Application Support" / "tiki" / "desktop"
         base = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local")
         return base / "StreamChat" / "desktop"
     return Path(__file__).resolve().parents[2] / "runs" / "desktop"

@@ -1,6 +1,19 @@
 # AWS 데모 서버 배포
 
-새 AWS 계정을 만든 뒤 이 저장소에서 배포합니다. **현재는 준비 파일만 있으며 실제 AWS 리소스는 생성하지 않았습니다.**
+이 저장소의 배포 도구로 AWS 서버를 생성하고 백엔드를 설치했습니다. **서버 내부 상태, 공개 HTTPS 인증서, 인증된 사용량 API 검사를 모두 통과했습니다.**
+
+## 현재 배포 상태 — 2026-11-01
+
+- 계정: `377200859257`, CLI 프로필: `stream-chat`, 리전: `us-east-1`.
+- CloudFormation `stream-chat-demo`: `CREATE_COMPLETE`.
+- EC2: `i-0639cfc3ff95be510`, 고정 공인 IPv4: `52.200.103.213`.
+- 서비스 주소: `https://tiki-chat.duckdns.org`.
+- 백엔드 설치와 내부 `/healthz`, 공개 HTTPS `/healthz`, 인증된 `/api/usage` 검사 통과. `check` 결과: `HTTPS and authenticated service verified`.
+- DuckDNS A 레코드는 `52.200.103.213`으로 반영됐습니다. 이 도메인을 쓰는 데 추가 도메인 구매나 Route 53 등록은 필요하지 않습니다.
+- Caddy 인증서 발급 완료. 치지직 콜백은 `https://tiki-chat.duckdns.org/oauth/chzzk/callback`이며 사용자가 개발자 센터 redirect URL 수정 완료를 확인했습니다. 원격 승인 왕복 검증은 아직 남아 있습니다.
+- 이 주소는 데스크톱 앱용 백엔드입니다. `apps/web` 프론트엔드를 배포한 것은 아니므로 루트 `/`에 웹 메인 화면은 없습니다. 브라우저 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
+
+초기 Ubuntu 설치에서 APT의 `awscli` 패키지를 찾지 못한 문제는 공식 AWS CLI v2 설치 파일로 수정했습니다. 같은 서버에서 초기 설정을 복구하고 백엔드를 설치했습니다. 이전 cloud-init 실패 기록이 있어도 완료 표시 파일이 있는 경우에만 배포를 계속합니다.
 
 ## 준비된 구성
 
@@ -88,6 +101,6 @@ aws sts get-caller-identity --profile stream-chat
 - 설치 또는 내부 상태 검사 실패 시 직전 코드·서버 설정으로 복구를 시도합니다. 실제 EC2에서의 복구 검증은 최초 배포 때 진행해야 합니다. 공개 DNS/인증서 문제는 코드 복구 대신 `check`로 재확인합니다.
 - SSM → Run Command에서 출력된 명령 ID로 설치 결과를 확인합니다. Session Manager에서 `sudo systemctl status stream-chat caddy`, `sudo journalctl -u stream-chat -n 50`으로 서버를 확인할 수 있습니다. 키 파일 내용을 출력하거나 공유하지 않습니다.
 - EBS 데이터 볼륨 역할을 하는 루트 디스크는 인스턴스 종료 후에도 보존하도록 설정했습니다. 스택 삭제 시 소스 S3 버킷도 보존됩니다. 이들과 별도로 만든 SSM 설정 파라미터는 자동 삭제되지 않으므로, 완전 종료할 때는 필요한 데이터를 백업한 뒤 AWS 콘솔에서 잔여 리소스를 확인합니다. EC2를 정지해도 디스크·공인 IP 요금은 발생할 수 있습니다.
-- 현재 작업은 로컬 자동 테스트·패키지/문법·Linux 의존성 검증까지입니다. 새 계정의 IAM, CloudFormation 생성, 실제 Linux 부팅, DNS/TLS, 상대방의 실제 치지직 승인은 아직 검증하지 않았습니다.
+- AWS 계정 인증, CloudFormation 생성, 실제 Linux 부팅, SSM 관리 연결, 백엔드 설치와 내부 상태, 공개 DNS/TLS 및 인증된 사용량 API를 확인했습니다. 배포 서버를 통한 실제 AI 생성과 상대방의 치지직 승인은 아직 검증하지 않았습니다.
 
 구성 근거: [Ubuntu AMI](https://ubuntu.com/aws/docs/aws-how-to/instances/build-cloudformation-templates/), [SSM Ubuntu 지원](https://docs.aws.amazon.com/systems-manager/latest/userguide/agent-install-ubuntu.html), [Parameter Store Standard](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html), [Caddy HTTPS](https://caddyserver.com/docs/automatic-https).

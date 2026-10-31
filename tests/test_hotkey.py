@@ -2,7 +2,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from apps.desktop.hotkey import GlobalHotkey, parse_hotkey, pressed_hotkey
+from apps.desktop.window.hotkey import GlobalHotkey, parse_hotkey, pressed_hotkey
 from apps.desktop.overlay import clean_settings
 
 
@@ -29,7 +29,7 @@ class HotkeyTests(unittest.TestCase):
 
     @unittest.skipUnless(sys.platform == "win32", "Windows key state")
     def test_recording_uses_physical_keys_even_with_a_non_latin_keyboard(self):
-        with patch("apps.desktop.hotkey.ctypes.WinDLL") as dll:
+        with patch("apps.desktop.window.hotkey.ctypes.WinDLL") as dll:
             dll.return_value.GetKeyState.side_effect = lambda code: -32768 if code in (0x11, 0x10) else 0
             self.assertEqual(pressed_hotkey(0x47), "Ctrl+Shift+G")
             self.assertIsNone(pressed_hotkey(0x11))

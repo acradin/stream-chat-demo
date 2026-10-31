@@ -11,6 +11,7 @@ from tkinter import ttk, scrolledtext
 from PIL import Image, ImageTk
 
 from apps.desktop.branding import ASSETS, apply_window_icon
+from apps.desktop.shell import configure_window, mapped
 from apps.desktop.panel import Panel, BG, INPUT, INK, MUTED, MINT, configure_theme
 from backend.personas import PERSONAS
 
@@ -69,9 +70,7 @@ class FigmaView:
         self.root.title("tiki")
         self.root.resizable(False, False)
         self.root.minsize(1, 1)
-        self.root.configure(bg="#010203")
-        if sys.platform == "win32":
-            self.root.attributes("-transparentcolor", "#010203")
+        configure_window(self.root)
         self.root.overrideredirect(True)
         self.root.bind("<Map>", self._mapped, add="+")
         self.root.bind("<Alt-F4>", lambda _: app.close())
@@ -129,14 +128,7 @@ class FigmaView:
         if event.widget is self.root and self.root.state() == "normal":
             self.root.overrideredirect(True)
             # Keep a frameless native window available in taskbar and Alt+Tab.
-            if sys.platform == "win32":
-                import ctypes
-                user32 = ctypes.WinDLL("user32", use_last_error=True)
-                hwnd = int(self.root.wm_frame(), 0)
-                user32.GetWindowLongW.argtypes = [ctypes.c_void_p, ctypes.c_int]
-                user32.SetWindowLongW.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_long]
-                extended = user32.GetWindowLongW(hwnd, -20)
-                user32.SetWindowLongW(hwnd, -20, (extended | 0x40000) & ~0x80)
+            mapped(self.root)
             apply_window_icon(self.root)
 
     def minimize(self):
@@ -177,7 +169,8 @@ class FigmaView:
             parent = target
             while parent is not None:
                 if parent is viewport:
-                    viewport.yview_scroll(-int(event.delta/120), "units")
+                    delta = event.delta if sys.platform == "darwin" else event.delta/120
+                    viewport.yview_scroll(-int(delta), "units")
                     return "break"
                 parent = getattr(parent, "master", None)
         self.root.bind("<MouseWheel>", scroll, add="+")

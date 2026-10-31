@@ -28,7 +28,8 @@ class DesktopInstallTests(unittest.TestCase):
                 verify(bundle, analysis)
 
     def test_frozen_paths_use_user_data_not_installation_directory(self):
-        with patch.object(sys, "frozen", True, create=True), patch.dict(os.environ, {"LOCALAPPDATA": "C:/Users/Example/AppData/Local"}):
+        with patch.object(sys, "frozen", True, create=True), patch.object(sys, "platform", "win32"), \
+                patch.dict(os.environ, {"LOCALAPPDATA": "C:/Users/Example/AppData/Local"}):
             expected = Path("C:/Users/Example/AppData/Local/StreamChat/desktop")
             self.assertEqual(state_directory(), expected)
             self.assertEqual(connection_file(), expected / ".env")

@@ -6,7 +6,7 @@ import sys
 
 
 def verify(bundle: Path, analysis: Path):
-    if not (bundle / "StreamChat.exe").is_file():
+    if not any((bundle / name).is_file() for name in ("StreamChat.exe", "Contents/MacOS/tiki")):
         raise ValueError("Desktop executable is missing")
     forbidden_names = {".env", "tokens.json", "settings.json", "usage.json"}
     for path in bundle.rglob("*"):

@@ -18,7 +18,7 @@ def check_taskbar_identity(root):
     if sys.platform != "win32":
         return
     import ctypes
-    from apps.desktop.branding import APP_ID, ASSETS, _PropertyKey, _PropVariant, _window_property_store
+    from apps.desktop.window.branding import APP_ID, ASSETS, _PropertyKey, _PropVariant, _window_property_store
     hwnd = int(root.wm_frame(), 0)
     send = ctypes.WinDLL("user32").SendMessageW
     send.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_size_t, ctypes.c_ssize_t]
@@ -108,6 +108,16 @@ def run(report_path: Path) -> int:
                           capture=lambda: b"synthetic", window_list=lambda: [source],
                           window_capture=lambda selected: b"synthetic" if selected == source else None)
             app._restore_window = lambda: None  # Remain hidden through both flows.
+            from apps.desktop.fonts import load_bundled_fonts
+            from tkinter import font
+            if len(load_bundled_fonts()) != 2 or app.view.family != "Pretendard":
+                raise ValueError("Bundled Pretendard fonts did not load")
+            for weight in ("normal", "bold"):
+                resolved = font.Font(root=root, family=app.view.family, size=9, weight=weight).actual()
+                if resolved["family"] != "Pretendard" or resolved["weight"] != weight:
+                    raise ValueError("Pretendard resolved to a fallback font")
+            if "SIL OPEN FONT LICENSE" not in (ASSETS / "fonts/pretendard/LICENSE.txt").read_text(encoding="utf-8"):
+                raise ValueError("Bundled font license is missing")
             if tuple(image.width() for image in root._brand_icons) != (16, 32, 48, 256):
                 raise ValueError("Desktop branding images did not load")
             with Image.open(ASSETS / "app.ico") as icon:
@@ -217,9 +227,10 @@ def run(report_path: Path) -> int:
         atomic_json(report_path, {"status": "ok", "frozen": bool(getattr(sys, "frozen", False)),
                                   "python": sys.version.split()[0], "tk": tk.TkVersion,
                                   "state_directory": str(state_directory()),
-                                  "checks": ["tls", "jpeg", "app_icons", "titlebar_icon", "taskbar_identity", "bundled_original_svg", "figma_panels", "page_navigation", "member_slider", "content_opacity", "hidden_overlay", "topmost", "manual_generation",
+                                  "checks": ["tls", "jpeg", "bundled_pretendard_regular_bold", "font_license", "app_icons", "bundled_original_svg", "figma_panels", "page_navigation", "member_slider", "content_opacity", "hidden_overlay", "topmost", "manual_generation",
                                              "realtime_start_stop_restart", "mode_switch", "output_switch",
-                                             "channel_link_extraction", "broadcast_link_always_visible", "custom_hotkey", "settings_save"],
+                                             "channel_link_extraction", "broadcast_link_always_visible", "custom_hotkey", "settings_save"]
+                                            + (["titlebar_icon", "taskbar_identity"] if sys.platform == "win32" else []),
                                   "network_calls": 0, "screenshots": 0})
         return 0
     except Exception as exc:

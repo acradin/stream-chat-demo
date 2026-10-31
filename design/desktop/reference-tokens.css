@@ -1,0 +1,29 @@
+/* Reference variables only. The Tk desktop app does not load this CSS. */
+:root {
+  --tiki-panel: #151619;
+  --tiki-backdrop: #16181a;
+  --tiki-text: #ffffff;
+  --tiki-muted: #c5c5c5;
+  --tiki-input: #303234;
+  --tiki-accent: #03ffd5;
+  --tiki-button-hover: #454749;
+  --tiki-disabled-text: #888888;
+  --tiki-border: #666666;
+  --tiki-description-border: #777777;
+  --tiki-slider-track: #434547;
+  --tiki-slider-active: #00c5a5;
+  --tiki-slider-tick: #8a8b8c;
+  --tiki-slider-thumb: #2dff8f;
+  --tiki-error: #ff938b;
+  --tiki-badge: #d52b30;
+  --tiki-close: #ff736a;
+  --tiki-minimize: #febc2e;
+  --tiki-transparency-key: #010203;
+  --tiki-panel-radius: 26px;
+  --tiki-button-radius: 8px;
+  --tiki-fill-2-opacity: 0.2;
+  --tiki-glass-fill-opacity: 0.2;
+  --tiki-orb-layer-opacity: 0.72;
+  --tiki-font-family: "Pretendard", "Malgun Gothic", sans-serif;
+  --tiki-font-size: 9pt;
+}

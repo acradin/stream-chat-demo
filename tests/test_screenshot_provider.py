@@ -15,8 +15,8 @@ import backend.screenshot_provider as module
 from backend.providers import InvalidResponseError, ProviderError
 from backend.screenshot_provider import OpenAIScreenshotProvider, parse_response
 from backend.personas import PERSONAS
-from apps.desktop.capture import capture_primary_screen
-import apps.desktop.capture as capture_module
+from apps.desktop.window.capture import capture_primary_screen
+import apps.desktop.window.capture as capture_module
 
 
 def jpeg():

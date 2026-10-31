@@ -177,7 +177,8 @@ def remote_commands(outputs, key, checksum, version, release_id, region):
     release = "/opt/stream-chat/releases/" + release_id
     uri = "s3://" + outputs["ArtifactBucket"] + "/" + key
     parameter = outputs["RuntimeParameter"] + ":" + str(version)
-    return ["set -eu", "umask 077", "cloud-init status --wait >/dev/null",
+    return ["set -eu", "umask 077",
+        "cloud-init status --wait >/dev/null || test -f /var/lib/stream-chat-bootstrap.ready",
         "test -f /var/lib/stream-chat-bootstrap.ready", "test ! -e " + quote(release),
         "install -d -m 755 " + quote(release),
         "runtime=$(mktemp /var/tmp/stream-chat-runtime.XXXXXX)", "trap 'rm -f -- \"$runtime\"' EXIT",

@@ -1,5 +1,11 @@
 # 데스크톱 오버레이
 
+Windows 전용 코드는 `apps/desktop/window`, Mac 전용 코드는 `apps/desktop/mac`에 있습니다.
+채팅·설정·Figma UI·백엔드 연결은 공통으로 사용합니다. [폴더 구조](apps/desktop/README.md),
+[macOS 실행·빌드·검증 안내](apps/desktop/mac/README.md)를 참고하세요.
+Pretendard Regular/Bold는 앱에 동봉하여 별도 글꼴 설치 없이 사용합니다.
+[전체 디자인 값 추출](design/desktop/README.md)도 제공됩니다.
+
 ## Figma 디자인 확인 (0.4.0)
 
 기존 앱을 닫고 저장소의 `start_desktop.cmd`를 더블클릭합니다. 브라우저에 접속할 필요 없이 작은 tiki 오버레이가 열립니다. 설치 실행 파일은 `dist/StreamChat-Setup-0.4.0-x64.exe`입니다.

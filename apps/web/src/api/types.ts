@@ -1,5 +1,5 @@
 // apps.web.server API 계약의 TypeScript 표현.
-// 백엔드를 수정하지 않으므로 이 타입은 서버 구현에 정확히 맞춰야 한다.
+// 로컬 및 공개 웹 API와 같은 계약을 사용한다.
 
 export interface PersonaConfig {
   id: string;
@@ -12,6 +12,7 @@ export interface ServerConfig {
   provider: string;
   model: string;
   is_mock: boolean;
+  supports_frames?: boolean;
   session_token: string;
   cooldown_s: number;
   max_age_s: number;
@@ -21,13 +22,15 @@ export interface ServerConfig {
   personas: PersonaConfig[];
 }
 
-/** POST /api/trigger 요청 본문 — 정확히 이 5개 키만 보낸다. */
+/** 영상 체험 시 버튼을 누른 장면의 JPEG 한 장을 추가한다. */
 export interface TriggerRequest {
   client_request_id: string;
   persona: string;
   channel_context: string;
   clicked_video_s: number | null;
   video_session_id: string | null;
+  frame_jpeg?: string;
+  demo_video_id?: string;
 }
 
 /**

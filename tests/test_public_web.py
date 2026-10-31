@@ -1,11 +1,14 @@
 """Public demo sessions stay isolated from private desktop APIs and one another."""
 import json
+import base64
+import io
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import AsyncMock, patch
 from aiohttp import ClientSession
 from aiohttp.test_utils import TestServer
+from PIL import Image
 from backend.server import create_app
 
 ORIGIN = "https://tiki.example.org"
@@ -20,6 +23,7 @@ class PublicWebTests(unittest.IsolatedAsyncioTestCase):
         static.mkdir()
         (static / "index.html").write_text('<html><div id="root">tiki</div></html>')
         (static / "main.js").write_text("console.log('tiki')")
+        (static / "clip.mp4").write_bytes(b"0123456789")
         (static / ".env").write_text("NEVER-PUBLIC")
         self.server = TestServer(create_app(self.directory / "private", accounts={"demo": "s"*40},
                                             provider="mock", public_url=ORIGIN, web_dir=static))
@@ -99,6 +103,24 @@ class PublicWebTests(unittest.IsolatedAsyncioTestCase):
         now[0] += 31
         self.assertEqual((await demo.dispatch(make_mocked_request("GET", "/api/config"))).status, 200)
         self.assertEqual(len(demo.sessions), 1)
+
+    async def test_video_range_and_frame_request_keep_authentication(self):
+        response = await self.request("GET", "/clip.mp4", headers={"Range": "bytes=2-5"})
+        self.assertEqual(response.status, 206)
+        self.assertEqual(await response.read(), b"2345")
+        output = io.BytesIO()
+        Image.new("RGB", (32, 24), "red").save(output, format="JPEG")
+        payload = {**self.payload(), "video_session_id": "clip", "clicked_video_s": 2,
+                   "frame_jpeg": base64.b64encode(output.getvalue()).decode()}
+        headers = await self.visitor()
+        response = await self.request("POST", "/api/trigger", json=payload, headers={**headers, "X-Demo-Token": "wrong"})
+        self.assertEqual(response.status, 403)
+        response = await self.request("POST", "/api/trigger", json=payload, headers=headers)
+        self.assertEqual(response.status, 200)
+        self.assertEqual((await response.json())["status"], "ready")
+        exported = await (await self.request("GET", "/api/export", headers=headers)).text()
+        self.assertNotIn(payload["frame_jpeg"], exported)
+        self.assertNotIn("frame_jpeg", exported)
 
     async def test_live_web_uses_server_provider_and_keeps_desktop_private(self):
         from backend.manual_provider import MockManualProvider

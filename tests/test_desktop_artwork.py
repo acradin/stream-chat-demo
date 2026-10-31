@@ -8,7 +8,7 @@ from apps.desktop.vector import source
 
 class DesktopArtworkTests(unittest.TestCase):
     def test_shipped_fallbacks_preserve_svg_resolution_and_transparency(self):
-        for name in ("header", "settings", "orb-face", "welcome-face", "wordmark", "arrow", "edit", "crown", *(f"count-slider-{i}" for i in range(1,6))):
+        for name in ("header", "settings", "back", "orb-face", "welcome-face", "wordmark", "arrow", "edit", "crown", *(f"count-slider-{i}" for i in range(1,6))):
             with self.subTest(name=name):
                 svg = ET.parse(source(name)).getroot()
                 with Image.open(ASSETS / "figma" / f"v2-{name}@4x.png") as image:

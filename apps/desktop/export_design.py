@@ -187,6 +187,8 @@ def export():
             # The measured transparency is tooling-only, not an application token.
             root.attributes("-alpha", 0)
             root.deiconify()
+            page_sizes = {name: [page.logical_width, page.logical_height] for name,page in app.view.pages.items()}
+            persona_top = app.view.persona_rows_top
             aliases = {str(value): name for owner in (app, app.view) for name, value in vars(owner).items()
                        if isinstance(value, tk.Widget)}
             runtime["environment"] = dict(tk_version=str(root.tk.call("info", "patchlevel")),
@@ -198,6 +200,10 @@ def export():
                                             application_default_window_alpha=app.settings["opacity"])
             states = {}
             def snapshot(name, page):
+                # Synthetic busy states must not trigger the interactive save
+                # confirmation when switching away from the settings window.
+                if page not in ("settings", "chat"):
+                    app.view.settings_window.withdraw()
                 app.view.show(page)
                 root.update_idletasks()
                 states[name] = widget_tree(app.view.pages[page], aliases, app.view.pages[page])
@@ -283,8 +289,9 @@ def export():
                                                            side_fade="abs(1 - 2*y/max(1,height-1))"))),
         window=dict(default_opacity=1, allowed_opacity=[.6, 1], default_topmost=True,
                     frameless=True, resizable=False, drag_header_height_px=62),
-        page_sizes_px=dict(main=[277,347], settings=[420,540], controls=[420,690], chat=[420,530], chzzk=[420,620],
-                           start=[277,347], start1=[339,430], start2=[339,775], start3=[339,286], start_end=[277,347]),
+        page_sizes_px=page_sizes,
+        settings_personas=dict(row_height_px=48, gap_px=8, additional_height_per_member_px=56),
+        persona_edit_height_px=674,
         fonts=dict(default_family_preference=["Pretendard", "맑은 고딕"], default_size_px=12,
                    sizes_px=[8,11,12,14,16,24], title_and_usage_family="Pretendard SemiBold",
                    bundled_weights=[400, 600, 700], bundled_version="1.3.9", registration="process-private",
@@ -296,7 +303,8 @@ def export():
                     orb_face=dict(file="v2-source-orb-face.svg", display_px=[84,80], position=[57,40]),
                     header=dict(file="v2-header.svg", display_px=[70,21], position=[28,28]),
                     settings=dict(file="v2-source-settings.svg", display_px=[15,14.4776], slot=[194,28,21,21]),
-                    persona=dict(file="v2-persona-*.png", display_px=[51,48], position=[28,355])))
+                    back=dict(file="v2-source-back.svg", display_px=[19,21], slot=[337,28,21,21]),
+                    persona=dict(file="v2-persona-*.png", display_px=[51,48], position=[28,persona_top])))
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     result = dict(schema_version=1, exported_at=datetime.now(timezone.utc).isoformat(), git_revision=revision,
                   scope="Main, Settings, five onboarding screens, Controls, Chat, service connection dialog; synthetic states",

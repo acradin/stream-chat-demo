@@ -35,6 +35,15 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(root, "src"),
       },
     },
+    build: {
+      rollupOptions: {
+        input: {
+          landing: path.resolve(root, "index.html"),
+          demo: path.resolve(root, "demo/index.html"),
+          legacyDemo: path.resolve(root, "legacy-demo/index.html"),
+        },
+      },
+    },
     server: {
       host: "127.0.0.1",
       port: 5173,

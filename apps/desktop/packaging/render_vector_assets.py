@@ -10,7 +10,7 @@ import copy
 import resvg_py
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets" / "figma"
-NAMES = ("header", "settings", "orb-face", "welcome-face", "wordmark", "arrow", "edit", "crown")
+NAMES = ("header", "settings", "back", "orb-face", "welcome-face", "wordmark", "arrow", "edit", "crown")
 
 
 def slider_variants():

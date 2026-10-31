@@ -12,6 +12,12 @@ for vector artwork. The newer 3x persona exports remain available for DPI scalin
 Its five generated states preserve the original paths, number outlines and gradients;
 only the active rail width, thumb position and demo lock visibility vary.
 
+The chat window back icon comes from [node 2088:1511](https://www.figma.com/design/jfQdgEwHlOaAqwSfHh8MO8?node-id=2088-1511).
+`chat-back.svg` preserves the complete MCP export. `v2-source-back.svg` extracts its
+transparent 19×21 icon group and definitions, retaining the instance's left-facing
+transform and shadow; `v2-back@4x.png` is its transparent 4x browser render.
+Both the chat back button and Main settings button use a 21×21 slot.
+
 | File | Source node / slot | Display geometry |
 |---|---|---|
 | header.png | Common/AppHeader `2011:70` | 70 × 21 |

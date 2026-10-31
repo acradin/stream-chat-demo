@@ -125,11 +125,8 @@ class FigmaView:
             self.chat_window.bind("<Command-Return>", lambda _: app.generate())
         self.chat_window.bind("<Map>", self._auxiliary_mapped, add="+")
         self.photos = {name: asset(self.root, name) for name in PERSONA_ASSETS.values()}
-        for key, name in PERSONA_ASSETS.items():
-            self.photos["member-"+key] = ImageTk.PhotoImage(
-                ImageTk.getimage(self.photos[name]).resize((38,36), Image.Resampling.LANCZOS), master=self.root)
-        self.main = self._page("main", 277, 347)
-        self.settings = self._page("settings", 420, 540)
+        self.main = self._page("main", 277, 374)
+        self.settings = self._page("settings", 420, 557)
         self.controls = self._page("controls", 420, 690)
         self.chat = self._page("chat", 420, 530)
         self.chzzk = self._page("chzzk", 420, 620)
@@ -147,6 +144,10 @@ class FigmaView:
         self.root._tiki_display_scale = factor
         self.settings_window._tiki_display_scale = factor
         self.chat_window._tiki_display_scale = factor
+        # Native font metrics round independently from placed widgets at fractional DPI.
+        description_y = float(app.context.design_surface.place_info()["y"])
+        heading_bottom = self.settings.bbox(self.context_heading)[3]
+        self.settings.move(self.context_heading, 0, description_y-round(8*factor)-heading_bottom)
         scaled = getattr(self.root,"_scaled_design_images",{})
         self.photos = {name:scaled.get(str(photo),photo) for name,photo in self.photos.items()}
         self.show("main" if app.settings["onboarding_complete"] else "start")
@@ -182,6 +183,15 @@ class FigmaView:
             button.bind("<space>", lambda _: self.show("settings"))
             button.place(x=194, y=28, width=21, height=21)
             self.settings_button = button
+        elif name == "chat":
+            button = tk.Canvas(page, bg=BG, highlightthickness=0, bd=0,
+                               cursor="hand2", takefocus=1)
+            draw_vector(button, "back", 1, 0)
+            button.bind("<Button-1>", lambda _: self.close_chat())
+            button.bind("<Return>", lambda _: self.close_chat())
+            button.bind("<space>", lambda _: self.close_chat())
+            button.place(x=width-83, y=28, width=21, height=21)
+            self.chat_back_button = button
         elif header and name != "settings":
             ttk.Button(page, text="‹", width=2, command=self.close_chat if name == "chat" else lambda: self.show("main")).place(x=width-112, y=21)
         for x, color, command, symbol in ((width-53, "#ff736a", self.close_settings if name == "settings" else self.close_chat if name == "chat" else self.app.close, "×"),
@@ -374,17 +384,18 @@ class FigmaView:
     def _main(self):
         app = self.app
         app.trigger_button = GenerateOrb(self.main, app)
-        app.trigger_button.place(x=40, y=45)
-        self.text(self.main,50,239,"채팅 멤버")
-        ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14)).place(x=200,y=237,width=30,height=20)
+        # Header ends at y=49. The orb's opaque Canvas must begin below it.
+        app.trigger_button.place(x=40, y=57)
+        self.text(self.main,50,251,"채팅 멤버")
+        ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14)).place(x=200,y=249,width=30,height=20)
         self.count = tk.IntVar(value=app.settings["count"])
         self.slider = CountSlider(self.main,self._count_changed)
-        self.slider.place(x=48,y=267)
+        self.slider.place(x=48,y=279)
         self.slider_active, self.slider_knob = self.slider.active, self.slider.knob
         self.count.trace_add("write",lambda *_:self._draw_count())
         self._draw_count()
-        self.chat_button = DesignButton(self.main,self,"채팅 보기",lambda:self.show("chat"),28,305,107,29)
-        self.chzzk_button = DesignButton(self.main,self,"치지직 전송",lambda:self.show("chzzk"),142,305,107,29)
+        self.chat_button = DesignButton(self.main,self,"채팅 보기",lambda:self.show("chat"),28,317,107,29)
+        self.chzzk_button = DesignButton(self.main,self,"치지직 전송",lambda:self.show("chzzk"),142,317,107,29)
 
     def _count_changed(self, value):
         self.count.set(value)
@@ -404,40 +415,49 @@ class FigmaView:
         self.text(page,30,136,"단축키 설정")
         app.hotkey_var = tk.StringVar(value=app.settings["hotkey"])
         app.hotkey_entry = field(page,self,31,160,180,31,variable=app.hotkey_var,opacity=.3,component="Shortcut/KeyDisplay")
-        app.hotkey_entry.configure(justify="center")
+        app.hotkey_entry.configure(justify="center",state="readonly",readonlybackground=app.hotkey_entry.cget("bg"))
         app.hotkey_entry.bind("<KeyPress>",app._capture_hotkey)
         app.hotkey_entry.bind("<FocusOut>",app._hotkey_focus_lost)
         app.hotkey_record = DesignButton(page,self,"변경",app.record_hotkey,311,161,height=29)
-        app.hotkey_hint = tk.StringVar(value="키 조합을 입력하고 메인으로 돌아가면 저장됩니다.")
+        app.hotkey_hint = tk.StringVar(value="변경을 누른 다음 원하는 키 조합을 누르세요.")
         tk.Label(page,textvariable=app.hotkey_hint,bg=BG,fg=MUTED,font=(self.family,-8),anchor="w").place(x=31,y=193,width=358,height=11)
-        self.text(page,30,210,"방송 설명")
-        app.context = field(page,self,28,227,364,92,multiline=True,component="Settings/Description")
+        self.context_heading = self.text(page,30,210,"방송 설명")
+        self.context_top = page.bbox(self.context_heading)[3] + 8
+        offset = self.context_top - 227
+        app.context = field(page,self,28,self.context_top,364,92,multiline=True,component="Settings/Description")
         app.context.insert("1.0",app.settings["context"])
         app.context.bind("<<Modified>>",app._context_changed)
-        draw_vector(app.context.design_surface,"edit",329,14)
-        counter = tk.Label(app.context.design_surface,textvariable=app.context_count,bg=app.context.cget("bg"),fg=INK,font=(self.family,-8))
-        counter.place(x=275,y=70,width=74,height=12)
-        self.persona_heading = self.text(page,30,331,"페르소나")
-        self.persona_image = page.create_image(28,355,anchor="nw",image=self.photos["persona-witty"])
-        self.persona_title = self.text(page,89,355,"")
-        self.persona_description = self.text(page,89,375,"",12,fill="#eaeaea",width=210)
-        app.persona_preview = tk.StringVar()
-        DesignButton(page,self,"수정",lambda:self.onboarding.select_personas(),313,329,height=29)
+        self.context_edit_icon = draw_vector(app.context.design_surface,"edit",329,14)
+        self.context_counter = tk.Label(app.context.design_surface,textvariable=app.context_count,
+            bg=app.context.cget("bg"),fg=INK,font=(self.family,-8),anchor="e",padx=0,pady=0,bd=0)
+        self.context_counter.place(x=269,y=70,width=74,height=12)
+        self.persona_heading = self.text(page,30,331+offset,"페르소나")
+        self.persona_rows_top = 355+offset
         self.persona_members = []
         for index in range(5):
-            x = 28+72*index
-            avatar = page.create_image(x,359,anchor="nw",image=self.photos["member-witty_friend"],state="hidden")
-            label = page.create_text(x+19,403,text="",anchor="center",fill=INK,font=(self.family,-8),state="hidden")
-            self.persona_members.append((avatar,label))
-        self.text(page,30,415,"사용량")
-        self.usage_caption = self.text(page,30,439,"이번 달 생성 요청",8)
-        self.usage_value = self.text(page,372,439,"—",8,anchor="ne")
-        self.usage_track = page.create_line(32,459,370,459,width=8,capstyle="round",fill="#3c3e40")
+            y = self.persona_rows_top + 56*index
+            avatar = page.create_image(28,y,anchor="nw",image=self.photos["persona-witty"],state="hidden")
+            title = self.text(page,89,y,"")
+            description = self.text(page,89,y+20,"",12,fill="#eaeaea",width=210)
+            self.persona_members.append((avatar,title,description))
+        self.persona_image,self.persona_title,self.persona_description = self.persona_members[0]
+        app.persona_preview = tk.StringVar()
+        DesignButton(page,self,"수정",lambda:self.onboarding.select_personas(),313,329+offset,height=29)
+        self.usage_heading = self.text(page,30,415+offset,"사용량")
+        self.usage_caption = self.text(page,30,439+offset,"이번 달 생성 요청",8)
+        self.usage_value = self.text(page,372,439+offset,"—",8,anchor="ne")
+        self.usage_track = page.create_line(32,459+offset,370,459+offset,width=8,capstyle="round",fill="#3c3e40")
+        for item in (self.usage_heading,self.usage_caption,self.usage_value,self.usage_track):
+            page.addtag_withtag("settings-footer",item)
         # There is no server quota contract yet; an empty rail must not imply a made-up limit.
         for item in (self.usage_caption,self.usage_value,self.usage_track):
             page.tag_bind(item,"<Button-1>",lambda _:self.show("controls"))
-        tk.Label(page,textvariable=app.status,bg=BG,fg=MUTED,font=(self.family,-9),anchor="w",justify="left",wraplength=260).place(x=28,y=486,width=270,height=38)
-        self.save_button = DesignButton(page,self,"저장",self.save_settings,311,493,height=29)
+        self.settings_status = tk.Label(page,textvariable=app.status,bg=BG,fg=MUTED,font=(self.family,-9),anchor="w",justify="left",wraplength=260)
+        self.settings_status.place(x=28,y=486+offset,width=270,height=38)
+        self.save_button = DesignButton(page,self,"저장",self.save_settings,311,493+offset,height=29)
+        self.settings_base_height = 550+offset
+        self.settings_footer_extra = 0
+        page.resize_height(self.settings_base_height)
 
     def save_settings(self):
         if not self.app.save_settings():
@@ -446,24 +466,26 @@ class FigmaView:
         return True
 
     def refresh_persona(self,index=0):
-        selected = self.app.persona_vars[index].get()
-        key = next(key for key,p in PERSONAS.items() if p["name"] == selected)
-        persona = PERSONAS[key]
-        self.settings.itemconfigure(self.persona_title,text=persona["name"])
-        self.settings.itemconfigure(self.persona_description,text=persona["description"])
-        self.settings.itemconfigure(self.persona_image,image=self.photos[PERSONA_ASSETS.get(key,"persona-witty")])
         count = self.app.settings["count"]
-        multiple = count > 1
         self.settings.itemconfigure(self.persona_heading,text=f"페르소나 · {count}명")
-        for item in (self.persona_image,self.persona_title,self.persona_description):
-            self.settings.itemconfigure(item,state="hidden" if multiple else "normal")
         by_name = {p["name"]:key for key,p in PERSONAS.items()}
-        for slot,(avatar,label) in enumerate(self.persona_members):
-            visible = multiple and slot < count
+        for slot,(avatar,title,description) in enumerate(self.persona_members):
+            state = "normal" if slot < count else "hidden"
             name = self.app.persona_vars[slot].get()
             member = by_name[name]
-            self.settings.itemconfigure(avatar,image=self.photos["member-"+(member if member in PERSONA_ASSETS else "witty_friend")],state="normal" if visible else "hidden")
-            self.settings.itemconfigure(label,text=name,state="normal" if visible else "hidden")
+            self.settings.itemconfigure(avatar,image=self.photos[PERSONA_ASSETS.get(member,"persona-witty")],state=state)
+            self.settings.itemconfigure(title,text=name,state=state)
+            self.settings.itemconfigure(description,text=PERSONAS[member]["description"],state=state)
+        extra = (count-1)*56
+        delta = (extra-self.settings_footer_extra)*self.scale
+        if delta:
+            self.settings.move("settings-footer",0,delta)
+            for widget in (self.settings_status,self.save_button):
+                widget.place_configure(y=float(widget.place_info()["y"])+delta)
+        self.settings_footer_extra = extra
+        self.settings.resize_height(self.settings_base_height+extra)
+        if self.settings_window.state() == "normal":
+            self.settings_window.geometry(f"{int(self.settings.cget('width'))}x{int(self.settings.cget('height'))}")
 
     def refresh_usage(self,usage):
         label = "이번 달 생성 요청" + (" · 데모" if usage and usage["is_demo"] else "")

@@ -43,19 +43,31 @@ class DesktopLayoutTests(unittest.TestCase):
                     root.update_idletasks()
                     self.assertEqual(view.main.winfo_manager(),"pack")
                     self.assertEqual(int(view.settings.cget("width")),round(420*factor))
-                    self.assertEqual(int(view.settings.cget("height")),round(540*factor))
+                    self.assertEqual(int(view.settings.cget("height")),round((view.settings_base_height+224)*factor))
                     self.assertEqual(str(view.settings_window.transient()),str(root))
                     for page in (view.main,view.settings):
                         header = next(item for item in page.find_all() if page.type(item)=="image" and any(tag.startswith("vector-header-") for tag in page.gettags(item)))
                         self.assertEqual(int(root.tk.call("image","width",page.itemcget(header,"image"))),round(70*factor))
-                    self.assertEqual(sum(view.settings.itemcget(avatar,"state") == "normal" for avatar,_ in view.persona_members),5)
+                    self.assertEqual(sum(view.settings.itemcget(avatar,"state") == "normal" for avatar,_,_ in view.persona_members),5)
+                    rows = [view.settings.coords(avatar)[1] for avatar,_,_ in view.persona_members]
+                    for before,after in zip(rows,rows[1:]):
+                        self.assertAlmostEqual(after-before,56*factor)
+                    main_bottom = int(view.main.cget("height"))-view.chat_button.winfo_y()-view.chat_button.winfo_height()
+                    self.assertAlmostEqual(main_bottom,28*factor,delta=1)
+                    settings_bottom = int(view.settings.cget("height"))-view.save_button.winfo_y()-view.save_button.winfo_height()
+                    self.assertAlmostEqual(settings_bottom,28*factor,delta=1)
+                    self.assertEqual(view.settings_button.place_info()["width"],view.chat_back_button.place_info()["width"])
+                    self.assertEqual(view.settings_button.place_info()["height"],view.chat_back_button.place_info()["height"])
+                    header = next(item for item in view.main.find_all() if any(tag.startswith("vector-header-") for tag in view.main.gettags(item)))
+                    self.assertLessEqual(view.main.bbox(header)[3],float(app.trigger_button.place_info()["y"]))
+                    self.assertAlmostEqual(float(app.context.design_surface.place_info()["y"])-view.settings.bbox(view.context_heading)[3],8*factor,delta=1)
                     view._count_changed(1)
                     for key in PERSONAS:
                         app.persona_vars[0].set(PERSONAS[key]["name"])
                         view.refresh_persona()
                         bounds = view.settings.bbox(view.persona_description)
                         self.assertLess(bounds[2],313*factor)
-                        self.assertLess(bounds[3],415*factor)
+                        self.assertLess(bounds[3],view.settings.coords(view.usage_heading)[1])
                     for card in view.onboarding.cards:
                         for item in card.find_all():
                             if card.type(item) == "text":

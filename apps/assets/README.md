@@ -6,7 +6,7 @@
 - `app-*.png`: 앱 창과 설치 마법사 등에 사용하는 크기별 이미지입니다.
 
 외부 폴더를 참조하지 않습니다. 원본 SVG와 런타임 아이콘은 설치본에도 포함됩니다.
-정적 웹 데모를 따로 배포할 때는 `apps/web/demo/favicon.svg`가 함께 배포됩니다.
+정적 웹 데모를 따로 배포할 때는 `apps/web/legacy-demo/favicon.svg`가 함께 배포됩니다.
 
 아이콘을 다시 생성하려면 프로젝트 루트의 Windows PowerShell에서 실행하세요.
 

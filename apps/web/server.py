@@ -1,4 +1,4 @@
-"""Local button-triggered chat experiment. No video/audio enters the model.
+"""Local button-triggered web chat with optional single video-frame input.
 
 Run: python -m apps.web --provider mock
 Open the printed localhost URL, optionally choose a local clip, then press the
@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 import io
 import json
 import math
+import os
 from pathlib import Path
 import secrets
 import sys
@@ -23,8 +24,13 @@ from urllib.parse import urlsplit
 
 from aiohttp import web
 
-from backend.manual_provider import DEFAULT_PERSONA, PERSONAS, GeminiManualProvider, MockManualProvider
+from backend.manual_provider import DEFAULT_PERSONA, PERSONAS, GeminiManualProvider
 from backend.providers import ProviderError, InvalidResponseError
+from backend.realtime_provider import decode_frame, RealtimeError
+from backend.web_provider import DEMO_VIDEO_PROMPTS
+
+
+MAX_WEB_REQUEST = 750_000
 
 
 def _number(value, name: str, *, optional: bool = False):
@@ -82,6 +88,7 @@ class ManualSession:
     def config(self) -> dict:
         return {"provider": self.provider.provider, "model": self.provider.model,
                 "is_mock": self.provider.provider == "mock", "session_token": self.session_token,
+                "supports_frames": bool(getattr(self.provider, "supports_frames", False)),
                 "cooldown_s": self.cooldown_s, "max_age_s": self.max_age_s,
                 "default_persona": DEFAULT_PERSONA,
                 "personas": [{"id": key, "name": value["name"], "description": value["description"]}
@@ -91,8 +98,8 @@ class ManualSession:
     def _validate_trigger(payload: dict) -> dict:
         required = {"client_request_id", "persona", "channel_context",
                     "clicked_video_s", "video_session_id"}
-        if not isinstance(payload, dict) or set(payload) != required:
-            raise ValueError("Trigger accepts only the documented text fields and timing metadata; no media")
+        if not isinstance(payload, dict) or not required <= set(payload) or set(payload) - required - {"frame_jpeg", "demo_video_id"}:
+            raise ValueError("Trigger accepts only documented fields and an optional video frame")
         client_id = _text(payload["client_request_id"], "client_request_id", 128, allow_empty=False)
         persona = payload["persona"]
         if not isinstance(persona, str) or persona not in PERSONAS:
@@ -103,7 +110,17 @@ class ManualSession:
         video_s = _number(payload["clicked_video_s"], "clicked_video_s", optional=True)
         if (video_s is None) != (video_id is None):
             raise ValueError("Video time and video session ID must be provided together")
-        return {"client_request_id": client_id, "persona": persona,
+        frame = {}
+        if "frame_jpeg" in payload:
+            if video_id is None or not isinstance(payload["frame_jpeg"], str) or not 1 <= len(payload["frame_jpeg"]) <= 700000:
+                raise ValueError("영상 시점과 1280픽셀 이하의 JPEG 장면이 필요합니다.")
+            frame["frame_jpeg"] = payload["frame_jpeg"]
+        if "demo_video_id" in payload:
+            demo_id = _text(payload["demo_video_id"], "demo_video_id", 32, allow_empty=False)
+            if "frame_jpeg" not in frame or demo_id not in DEMO_VIDEO_PROMPTS:
+                raise ValueError("등록된 체험 영상과 현재 장면이 필요합니다.")
+            frame["demo_video_id"] = demo_id
+        return {"client_request_id": client_id, "persona": persona, **frame,
                 "channel_context": _text(payload["channel_context"], "channel_context", 1000),
                 "clicked_video_s": video_s, "video_session_id": video_id}
 
@@ -114,6 +131,15 @@ class ManualSession:
 
     async def trigger(self, payload: dict) -> dict:
         data = self._validate_trigger(payload)
+        encoded = data.pop("frame_jpeg", None)
+        screenshot = None
+        if encoded is not None:
+            if not getattr(self.provider, "supports_frames", False):
+                raise ValueError("현재 서버는 영상 장면 분석을 지원하지 않습니다.")
+            try:
+                screenshot = decode_frame({"type": "frame", "sequence": 1, "jpeg": encoded}, 0).jpeg
+            except RealtimeError as exc:
+                raise ValueError(str(exc)) from None
         client_id = data["client_request_id"]
         if client_id in self.client_requests:
             existing = self.records[self.client_requests[client_id]]
@@ -134,12 +160,12 @@ class ManualSession:
             self.last_accepted = time.monotonic()
             request_id = f"m{len(self.records) + 1:06d}"
             recent = [r["comment"] for r in self.records.values() if r["status"] == "displayed"][-8:]
-            # Only these human-supplied text fields enter the model. Video time,
-            # filename, local URL and media bytes are NEVER forwarded.
+            # Media is passed separately and is never persisted in session logs.
             context = {"request_id": request_id, "persona": data["persona"],
                        "channel_context": data["channel_context"],
                        "recent_comments": recent}
             record = {"request_id": request_id, **data, "status": "generating", "comment": "",
+                      "input_kind": "image" if screenshot is not None else "text",
                       "provider": self.provider.provider, "model": self.provider.model,
                       "received_session_s": self.last_accepted - self.started,
                       "response_completed_session_s": None, "api_latency_ms": None,
@@ -152,7 +178,11 @@ class ManualSession:
             self._persist()
             begin = time.monotonic()
             try:
-                result = await asyncio.wait_for(self.provider.generate(context), self.timeout_s)
+                options = {"screenshot": screenshot} if screenshot is not None else {}
+                if "demo_video_id" in data:
+                    options["demo_video_id"] = data["demo_video_id"]
+                call = self.provider.generate(context, **options)
+                result = await asyncio.wait_for(call, self.timeout_s)
                 comment = result.get("comment") if isinstance(result, dict) else None
                 if not isinstance(comment, str) or not comment.strip() or len(comment) > 100 or "\n" in comment or "\r" in comment:
                     raise InvalidResponseError("Chat must be a nonempty single line of at most 100 characters")
@@ -224,9 +254,11 @@ class ManualSession:
             for key, value in record["usage"].items():
                 if key.endswith("TokenCount") and isinstance(value, int) and not isinstance(value, bool):
                     usage[key] = usage.get(key, 0) + value
-        report = {"schema_version": 3, "mode": "manual_text", "created_at": self.created_at,
+        has_frames = any(record["input_kind"] == "image" for record in records)
+        report = {"schema_version": 3, "mode": "manual_image" if has_frames else "manual_text", "created_at": self.created_at,
                   "provider": self.provider.provider, "model": self.provider.model,
-                  "is_mock": self.provider.provider == "mock", "input_media_sent_to_model": False,
+                  "is_mock": self.provider.provider == "mock",
+                  "input_media_sent_to_model": has_frames and self.provider.provider != "mock",
                   "settings": {"cooldown_s": self.cooldown_s, "max_age_s": self.max_age_s, "timeout_s": self.timeout_s},
                   "summary": {"status_counts": counts, "rejections": self.rejections,
                               "api_latency_ms": _stats([r["api_latency_ms"] for r in records if r["api_latency_ms"] is not None]),
@@ -274,6 +306,8 @@ async def local_only(request: web.Request, handler):
         return web.json_response({"error": "Session token required"}, status=403)
     try:
         response = await handler(request)
+    except web.HTTPRequestEntityTooLarge:
+        return web.json_response({"error": "화면 데이터가 너무 큽니다."}, status=413)
     except (ValueError, json.JSONDecodeError):
         return web.json_response({"status": "error", "error": "Invalid input; use the documented fields, limits and timing values"}, status=400)
     response.headers["Cache-Control"] = "no-store"
@@ -285,7 +319,7 @@ async def local_only(request: web.Request, handler):
 def create_app(provider, run_dir: str | Path, *, cooldown_s: float = 1,
                max_age_s: float = 8, timeout_s: float = 20) -> web.Application:
     session = ManualSession(provider, run_dir, cooldown_s=cooldown_s, max_age_s=max_age_s, timeout_s=timeout_s)
-    app = web.Application(middlewares=[local_only], client_max_size=16 * 1024)
+    app = web.Application(middlewares=[local_only], client_max_size=MAX_WEB_REQUEST)
     app[SESSION] = session
 
     async def index(request):
@@ -297,7 +331,11 @@ def create_app(provider, run_dir: str | Path, *, cooldown_s: float = 1,
     async def trigger(request):
         if request.content_type != "application/json":
             raise ValueError("JSON required")
-        return web.json_response(await session.trigger(await request.json()))
+        body = await request.read()
+        payload = json.loads(body)
+        if isinstance(payload, dict) and "frame_jpeg" not in payload and len(body) > 16 * 1024:
+            raise web.HTTPRequestEntityTooLarge(max_size=16 * 1024, actual_size=len(body))
+        return web.json_response(await session.trigger(payload))
     async def display(request):
         if request.content_type != "application/json":
             raise ValueError("JSON required")
@@ -315,22 +353,32 @@ def create_app(provider, run_dir: str | Path, *, cooldown_s: float = 1,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--provider", choices=["gemini", "mock"], default="gemini")
-    parser.add_argument("--model", default="gemini-3.5-flash-lite")
+    parser.add_argument("--provider", choices=["openai", "gemini", "mock"], default="openai")
+    parser.add_argument("--model", default=None)
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--output", default=None)
     parser.add_argument("--cooldown", type=float, default=1)
-    parser.add_argument("--max-age", type=float, default=8)
-    parser.add_argument("--timeout", type=float, default=20)
+    parser.add_argument("--max-age", type=float, default=None)
+    parser.add_argument("--timeout", type=float, default=None)
     parser.add_argument("--mock-delay", type=float, default=.2)
     args = parser.parse_args()
     try:
         if not 1 <= args.port <= 65535:
             raise ValueError("port must be between 1 and 65535")
-        provider = MockManualProvider(args.mock_delay) if args.provider == "mock" else GeminiManualProvider(args.model, timeout_s=args.timeout)
+        from backend.env import BACKEND_ENV, BACKEND_KEYS, load_env_file
+        from backend.web_provider import OpenAIWebProvider, MockWebProvider, DEFAULT_MODEL
+        load_env_file(BACKEND_ENV, BACKEND_KEYS)
+        timeout = args.timeout if args.timeout is not None else (35 if args.provider == "openai" else 20)
+        max_age = args.max_age if args.max_age is not None else (40 if args.provider == "openai" else 8)
+        if args.provider == "openai":
+            provider = OpenAIWebProvider(Path("runs/service/public-web-usage.json"), args.model or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))
+        elif args.provider == "mock":
+            provider = MockWebProvider(args.mock_delay)
+        else:
+            provider = GeminiManualProvider(args.model or "gemini-3.5-flash-lite", timeout_s=timeout)
         output = Path(args.output or ("runs/manual_" + datetime.now().strftime("%Y%m%d_%H%M%S")))
-        app = create_app(provider, output, cooldown_s=args.cooldown, max_age_s=args.max_age, timeout_s=args.timeout)
-        print(f"Manual text-only mode: {provider.provider}/{provider.model}")
+        app = create_app(provider, output, cooldown_s=args.cooldown, max_age_s=max_age, timeout_s=timeout)
+        print(f"Web demo mode: {provider.provider}/{provider.model}")
         print(f"Open http://127.0.0.1:{args.port} in your browser. Press Ctrl+C to stop.")
         print(f"Results: {output.resolve()}")
         if provider.provider == "mock":

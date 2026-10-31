@@ -62,12 +62,14 @@ class AwsDeploymentTests(unittest.TestCase):
             path.write_text("# source")
         (static / "index.html").write_text("<html>tiki</html>")
         (static / "icon.png").write_bytes(b"\x89PNG\r\n\xff")
+        (static / "demo.mp4").write_bytes(b"\x00\x00ftyp\r\n\xff")
         (static / ".env").write_text("private")
         (static / "main.js.map").write_text("private source")
         archive, _, _ = package(root, self.directory / "out")
         with tarfile.open(archive) as bundle:
             self.assertIn("apps/web/dist/index.html", bundle.getnames())
             self.assertEqual(bundle.extractfile("apps/web/dist/icon.png").read(), b"\x89PNG\r\n\xff")
+            self.assertEqual(bundle.extractfile("apps/web/dist/demo.mp4").read(), b"\x00\x00ftyp\r\n\xff")
             self.assertNotIn("apps/web/dist/.env", bundle.getnames())
             self.assertNotIn("apps/web/dist/main.js.map", bundle.getnames())
 

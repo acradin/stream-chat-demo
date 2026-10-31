@@ -29,6 +29,23 @@ class MacSettingsTests(unittest.TestCase):
         root.overrideredirect.assert_called_once_with(False)
         root.tk.call.assert_called_once_with("::tk::unsupported::MacWindowStyle","style",".settings","document",("noTitleBar","noShadow"))
 
+    def test_mapping_removes_native_title_background_without_replacing_focusable_style(self):
+        root, window = Mock(), Mock()
+        root.title.return_value = window.title.return_value = "tiki"
+        window.styleMask.return_value = 1
+        window.collectionBehavior.return_value = 0
+        appkit = SimpleNamespace(NSApplication=Mock(), NSColor=Mock(),
+            NSWindowCollectionBehaviorCanJoinAllSpaces=1, NSWindowCollectionBehaviorFullScreenAuxiliary=2,
+            NSWindowStyleMaskFullSizeContentView=32768, NSWindowTitleHidden=1,
+            NSWindowCloseButton=0, NSWindowMiniaturizeButton=1, NSWindowZoomButton=2)
+        appkit.NSApplication.sharedApplication.return_value.windows.return_value = [window]
+        with patch.dict(sys.modules,{"AppKit":appkit}):
+            mac_shell.mapped(root)
+        window.setStyleMask_.assert_called_once_with(32769)
+        window.setTitlebarAppearsTransparent_.assert_called_once_with(True)
+        window.setTitleVisibility_.assert_called_once_with(1)
+        self.assertEqual(window.standardWindowButton_.call_count,3)
+
 
 @unittest.skipUnless(sys.platform in ("win32","darwin") or os.environ.get("DISPLAY"),"Native Tk display required")
 class DesktopSettingsTests(unittest.TestCase):
@@ -57,9 +74,46 @@ class DesktopSettingsTests(unittest.TestCase):
         snapshot = self.app._snapshot_settings()
         self.assertEqual(snapshot["personas"][:snapshot["count"]],["witty_friend","analyst","coach"])
         self.assertEqual(self.saved()["count"],3)
-        self.assertEqual(sum(self.app.view.settings.itemcget(image,"state")=="normal" for image,_ in self.app.view.persona_members),3)
+        self.assertEqual(sum(self.app.view.settings.itemcget(image,"state")=="normal" for image,_,_ in self.app.view.persona_members),3)
         wizard.select_personas()
         self.assertEqual(wizard.selected,["witty_friend","analyst","coach"])
+
+    def test_persona_edit_has_save_without_onboarding_progress_and_can_restore_wizard(self):
+        wizard = self.app.view.onboarding
+        wizard.select_personas()
+        self.assertEqual(wizard.next.itemcget(wizard.next.label,"text"),"저장")
+        progress = wizard.persona_page.find_withtag("setup-progress")
+        self.assertTrue(progress)
+        self.assertTrue(all(wizard.persona_page.itemcget(item,"state")=="hidden" for item in progress))
+        self.assertEqual(wizard.next.itemcget(wizard.next.arrow,"state"),"hidden")
+        for card,mark in zip(wizard.cards,wizard.selection_marks):
+            self.assertEqual(card.type(mark),"polygon")
+            self.assertTrue(card.itemcget(mark,"smooth"))
+        wizard.persona_back()
+        self.assertEqual(self.app.view.current,"settings")
+        wizard.start()
+        wizard.to_personas()
+        self.assertEqual(wizard.next.itemcget(wizard.next.label,"text"),"다음")
+        self.assertTrue(all(wizard.persona_page.itemcget(item,"state")=="normal" for item in progress))
+        wizard.persona_back()
+        self.assertEqual(self.app.view.current,"start1")
+
+    def test_hotkey_display_rejects_text_and_changes_only_during_recording(self):
+        app = self.app
+        original = app.hotkey_var.get()
+        self.assertEqual(app.hotkey_entry.cget("state"),"readonly")
+        app.hotkey_entry.delete(0,"end")
+        app.hotkey_entry.insert(0,"typed text")
+        app.hotkey_entry.event_generate("<<Paste>>")
+        self.assertEqual(app.hotkey_var.get(),original)
+        with patch.object(app,"apply_hotkey") as apply:
+            self.assertEqual(app._capture_hotkey(SimpleNamespace(keysym="Return")),"break")
+            apply.assert_not_called()
+        app.record_hotkey()
+        with patch("apps.desktop.overlay.pressed_hotkey",return_value="Ctrl+Shift+F8"):
+            app._capture_hotkey(SimpleNamespace(keysym="F8",keycode=119))
+        self.assertEqual(self.saved()["hotkey"],"Ctrl+Shift+F8")
+        self.assertEqual(app.hotkey_entry.cget("state"),"readonly")
 
     def test_recording_applies_hotkey_and_conflict_retains_previous_binding(self):
         binding = Mock(current="Ctrl+Alt+Space")

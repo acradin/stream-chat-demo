@@ -45,6 +45,8 @@ export interface TriggerContext {
   contextVersion: number;
   /** 표시 직전 현재 영상 시점을 다시 읽기 위한 콜백 */
   readVideoTime: () => number | null;
+  frameJpeg?: string;
+  demoVideoId?: string;
 }
 
 interface SessionState {
@@ -185,6 +187,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
           channel_context: s.channelContext,
           clicked_video_s: ctx.clickedVideoS,
           video_session_id: ctx.videoSessionId,
+          ...(ctx.frameJpeg ? { frame_jpeg: ctx.frameJpeg } : {}),
+          ...(ctx.demoVideoId ? { demo_video_id: ctx.demoVideoId } : {}),
         },
         config.session_token,
       );

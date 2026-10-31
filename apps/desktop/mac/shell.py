@@ -19,9 +19,22 @@ def configure_window(root):
 
 
 def mapped(root):
-    from AppKit import NSApplication, NSColor, NSWindowCollectionBehaviorCanJoinAllSpaces, NSWindowCollectionBehaviorFullScreenAuxiliary
+    from AppKit import (NSApplication, NSColor, NSWindowCollectionBehaviorCanJoinAllSpaces,
+                        NSWindowCollectionBehaviorFullScreenAuxiliary, NSWindowStyleMaskFullSizeContentView,
+                        NSWindowTitleHidden, NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton)
     for window in NSApplication.sharedApplication().windows():
         if window.title() == root.title():
+            # Tk can restore native chrome while mapping. Keep its focusable
+            # document window, but extend content through the transparent title bar.
+            mask = window.styleMask() | NSWindowStyleMaskFullSizeContentView
+            if mask != window.styleMask():
+                window.setStyleMask_(mask)
+            window.setTitleVisibility_(NSWindowTitleHidden)
+            window.setTitlebarAppearsTransparent_(True)
+            for kind in (NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton):
+                button = window.standardWindowButton_(kind)
+                if button is not None:
+                    button.setHidden_(True)
             window.setCollectionBehavior_(window.collectionBehavior()
                 | NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorFullScreenAuxiliary)
             window.setOpaque_(False)

@@ -1,9 +1,23 @@
 """Figma component surfaces with native editable controls and pixel typography."""
 import tkinter as tk
+from math import cos, sin, radians
 from PIL import Image, ImageDraw, ImageTk
 
 from apps.desktop.panel import BG, INK, MINT, panel_color
 from apps.desktop.vector import draw as draw_vector
+
+
+def rounded_outline(canvas, component_width, component_height, *, inset=1, radius=8, **options):
+    """Follow the same 8px rounded silhouette as the component surface."""
+    x, y, right, bottom = inset, inset, component_width-inset, component_height-inset
+    r = max(0, radius-inset)
+    points = []
+    for cx,cy,start in ((right-r,y+r,-90), (right-r,bottom-r,0),
+                        (x+r,bottom-r,90), (x+r,y+r,180)):
+        for step in range(9):
+            angle = radians(start + step*90/8)
+            points.extend((cx+r*cos(angle),cy+r*sin(angle)))
+    return canvas.create_polygon(*points,fill="",joinstyle="round",**options)
 
 
 def surface(parent, x, y, width, height, *, opacity=.1, gradient=False, key=False):
@@ -47,9 +61,8 @@ class DesignButton(tk.Canvas):
         self.create_image(0,0,anchor="nw",image=self.photo)
         self.label = self.create_text(width/2-(8 if arrow else 0),height/2,text=text,
                                       font=(view.family,-14),fill=INK)
-        if arrow:
-            draw_vector(self,"arrow",width/2+24,height/2-10)
-        self.focus_outline = self.create_rectangle(2,2,width-3,height-3,outline=MINT,state="hidden")
+        self.arrow = draw_vector(self,"arrow",width/2+24,height/2-10) if arrow else None
+        self.focus_outline = rounded_outline(self,width,height,inset=2,outline=MINT,state="hidden")
         self.bind("<Button-1>", self.invoke)
         self.bind("<Return>", self.invoke)
         self.bind("<space>", self.invoke)

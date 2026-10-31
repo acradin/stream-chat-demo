@@ -141,6 +141,7 @@ class Panel(tk.Canvas):
         layers = paint_layers(width, height, variant)
         self.surface = layers[1]
         self.variant = variant
+        self.logical_width, self.logical_height = width, height
         # Composite before handing the image to Tk. On transparent macOS
         # windows, drawing a mostly transparent PhotoImage over another image
         # can clear the native backing surface instead of preserving the body.
@@ -148,5 +149,21 @@ class Panel(tk.Canvas):
         for layer in layers:
             surface = Image.alpha_composite(surface, layer)
         self.images = [ImageTk.PhotoImage(surface, master=self)]
-        self.create_image(0, 0, image=self.images[0], anchor="nw",
+        self.background = self.create_image(0, 0, image=self.images[0], anchor="nw",
                           tags=("Drop shadow", self.background_owner, "Glass Effect"))
+
+    def resize_height(self, height):
+        """Grow the settings surface without stretching its corners or glass."""
+        if height == self.logical_height:
+            return
+        self.logical_height = height
+        factor = getattr(self, "_tiki_display_scale", 1)
+        layers = paint_layers(self.logical_width, height, self.variant)
+        self.surface = layers[1]
+        surface = Image.new("RGBA", (self.logical_width, height))
+        for layer in layers:
+            surface = Image.alpha_composite(surface, layer)
+        size = round(self.logical_width * factor), round(height * factor)
+        self.images = [ImageTk.PhotoImage(surface.resize(size, Image.Resampling.LANCZOS), master=self)]
+        self.itemconfigure(self.background, image=self.images[0])
+        self.configure(width=size[0], height=size[1])

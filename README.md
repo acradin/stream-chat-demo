@@ -34,10 +34,10 @@ Figma 페르소나 6종과 기존 덤덤한 드립러의 말투·예시는 `back
 
 ## 화면만 먼저 체험하기 — 정적 mock 데모
 
-`apps/web/demo/`에는 API 키와 Python 패키지 설치 없이 버튼 흐름을 체험할 수 있는 정적 데모가 있습니다. 프로젝트 폴더에서 Python의 기본 HTTP 서버를 실행합니다.
+`apps/web/legacy-demo/`에는 API 키와 Python 패키지 설치 없이 버튼 흐름을 체험할 수 있는 정적 데모가 있습니다. 프로젝트 폴더에서 Python의 기본 HTTP 서버를 실행합니다.
 
 ```bash
-python -m http.server 8000 --directory apps/web/demo
+python -m http.server 8000 --directory apps/web/legacy-demo
 ```
 
 같은 컴퓨터에서 [http://127.0.0.1:8000](http://127.0.0.1:8000)을 열고 **페르소나**를 고르세요. **방송 정보** 입력란은 선택 사항입니다. 설정한 뒤에는 **드립 만들기** 버튼만 누르면 됩니다. 함께 제공한 합성 테스트 영상이나 본인의 로컬 영상을 보며 누를 수 있습니다. 로컬 영상은 브라우저에서만 재생되며 업로드되지 않습니다.

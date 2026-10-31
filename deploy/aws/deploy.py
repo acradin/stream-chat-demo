@@ -48,7 +48,7 @@ def package(root=ROOT, output=OUTPUT):
     static = root / "apps/web/dist"
     if (static / "index.html").is_file():
         files += [path.relative_to(root).as_posix() for path in static.rglob("*")
-                  if path.is_file() and path.suffix in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".webp", ".woff2", ".ttf"}
+                  if path.is_file() and path.suffix in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".webp", ".woff2", ".ttf", ".mp4"}
                   and not any(part.startswith(".") for part in path.relative_to(static).parts)]
     archive = output / "stream-chat-backend.tar.gz"
     with tarfile.open(archive, "w:gz") as bundle:

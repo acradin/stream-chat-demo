@@ -1,14 +1,201 @@
 <!doctype html>
-<html lang="ko" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
-    <link rel="icon" type="image/svg+xml" href="/tiki-face.svg" />
-    <title>tiki · 채팅 콘솔</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" type="image/svg+xml" href="/tiki-face.svg"/>
+<title>tiki — 방송의 첫 대화부터</title>
+<style>
+@font-face{font-family:Pretendard;font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/pretendard/Pretendard-Regular.ttf') format('truetype')}
+@font-face{font-family:Pretendard;font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/pretendard/Pretendard-SemiBold.ttf') format('truetype')}
+@font-face{font-family:Pretendard;font-style:normal;font-weight:700;font-display:swap;src:url('/fonts/pretendard/Pretendard-Bold.ttf') format('truetype')}
+:root{--bg:#061612;--panel:#10231f;--mint:#19e5aa;--text:#f5fff9;--muted:#a6b9b0}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,sans-serif;line-height:1.65}
+button,input,select,textarea{font:inherit}
+a{text-decoration:none;color:inherit}
+.container{width:min(1160px,calc(100% - 44px));margin:auto}
+header{position:sticky;top:0;z-index:20;background:rgba(6,22,18,.84);backdrop-filter:blur(16px);border-bottom:1px solid #ffffff14}
+.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:inline-flex;align-items:center}
+.brand img{height:30px;width:auto;display:block}
+.links{display:flex;align-items:center;gap:29px;font-size:14px;color:#c5d6ce}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 23px;border-radius:11px;font-size:15px;font-weight:800;background:var(--mint);color:#05221a;border:1px solid var(--mint);transition:.2s;cursor:pointer}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 35px #19e5aa40}
+.btn.ghost{background:transparent;color:var(--text);border-color:#608077}
+.btn.small{padding:10px 16px;font-size:13px}
+.hero{position:relative;overflow:hidden;padding:100px 0 115px;background:radial-gradient(ellipse at 76% 42%,#0a6b4b76,transparent 45%)}
+.hero-grid{display:grid;grid-template-columns:1.03fr .97fr;align-items:center;gap:55px}
+.eyebrow{color:var(--mint);font-size:13px;font-weight:850;letter-spacing:2px;text-transform:uppercase}
+.hero h1{font-size:clamp(42px,5.2vw,72px);line-height:1.18;letter-spacing:-3px;margin:24px 0}
+.hero h1 span,.accent{color:var(--mint)}
+.hero h1 .hero-title-intro{display:block;font-size:.7em;color:var(--text);letter-spacing:-.04em}
+.hero h1 .hero-title-primary{display:block}
+.lead{font-size:19px;color:#bbcfc5;max-width:560px;word-break:keep-all}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin:33px 0 20px}
+.disclaimer{color:#90aa9d;font-size:12px}
+/* ===== 데모 미리보기 (실제 React 데모와 유사한 연출용 UI) ===== */
+.demo-frame{background:#242a28;border:1px solid #54746b;border-radius:25px;box-shadow:0 32px 100px #000a;max-width:420px;margin:auto;padding:24px}
+.mock-top{display:flex;justify-content:space-between;align-items:center}
+.mock-top .brand img{height:22px}
+.mock-top .right{display:flex;align-items:center;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#ed45561f;color:#ff6b74;border:1px solid #ed455644}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:#ed4556;animation:pulse 1.8s ease-in-out infinite}
+.gear{color:#8fa89d;font-size:16px}
+.orb{position:relative;margin:26px auto 22px;width:200px;aspect-ratio:1;border-radius:50%;display:grid;place-content:center;justify-items:center;text-align:center;background:radial-gradient(circle at 50% 32%,#2DFF8F,#12cf9f 55%,#07b892);box-shadow:inset 0 0 0 1.5px #ffffff59,0 0 48px -4px #2dff8f8c,0 18px 46px -16px #03ffd58c;animation:glow 3.2s ease-in-out infinite}
+.orb img{height:52px;width:auto;filter:drop-shadow(0 2px 4px #0003)}
+.orb strong{display:block;font-size:19px;font-weight:800;color:#fff;margin-top:8px;letter-spacing:-.5px}
+.orb small{display:block;font-size:11px;color:#fff;font-weight:600}
+.chatwrap{min-height:112px}
+.chat{background:#3b4440;border-radius:11px;padding:10px 13px;margin:9px 0;font-size:12px;opacity:0;transform:translateY(6px);animation:rise .5s ease forwards}
+.chat:nth-child(1){animation-delay:.3s}
+.chat:nth-child(2){animation-delay:1.3s}
+.chat:nth-child(3){animation-delay:2.3s}
+.meter{margin-top:20px;display:flex;justify-content:space-between;font-size:13px;font-weight:750}
+.member-slider-preview{display:block;width:100%;height:auto;margin-top:9px}
+.mock-foot{font-size:11px;margin-top:13px;color:#a2c9b7}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{box-shadow:inset 0 0 0 1.5px #ffffff59,0 0 40px -6px #2dff8f80,0 18px 46px -16px #03ffd580}50%{box-shadow:inset 0 0 0 1.5px #ffffff73,0 0 64px 0 #2dff8fb3,0 18px 50px -14px #03ffd5b3}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+/* ===== 섹션 공통 ===== */
+.section{padding:105px 0}
+.section-label{font-weight:850;color:var(--mint);font-size:13px;letter-spacing:2px}
+.section h2{font-size:clamp(30px,3.7vw,48px);line-height:1.32;letter-spacing:-1.7px;margin:14px 0}
+.desc{color:var(--muted);max-width:680px;font-size:17px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.card{background:linear-gradient(145deg,#18352d,#10231e);border:1px solid #ffffff1a;border-radius:20px;padding:30px;min-height:230px;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:#19e5aa55}
+.icon{font-size:30px}
+.card h3{font-size:21px;letter-spacing:-.5px;margin:20px 0 10px}
+.card p{color:#a9bdb4;font-size:15px;margin:0}
+.contrast{background:#0a211a}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+.step{padding:24px;background:#153028;border:1px solid #30604c;border-radius:18px}
+.num{color:var(--mint);font-size:13px;font-weight:900}
+.step h3{font-size:19px;line-height:1.4;margin-bottom:10px}
+.step p{font-size:14px;color:#b0c8bc}
+.showcase{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}
+.preview{background:#111c19;border-radius:20px;padding:24px;border:1px solid #49715f}
+.preview .row{display:flex;gap:12px;margin:12px 0}
+.preview .avatar{border-radius:50%;background:#17d99e;color:#07231a;width:32px;height:32px;display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.preview .msg{padding:10px 15px;background:#244439;border-radius:11px;flex:1;font-size:13px}
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+.plan{padding:30px;background:#122720;border:1px solid #365b4b;border-radius:18px}
+.plan.featured{border:2px solid var(--mint);background:#13392e}
+.plan h3{font-size:22px;margin:0}
+.price{font-size:38px;font-weight:900;margin:14px 0}
+.price small{font-size:14px;color:#91b7a6;font-weight:400}
+.plan ul{padding-left:21px;color:#b3c9bd;min-height:124px;font-size:14px}
+.banner{text-align:center;padding:75px 25px;border-radius:28px;background:radial-gradient(circle at center,#0a7753,#0e3328 80%);border:1px solid #1b9a70}
+.banner h2{font-size:clamp(30px,4vw,48px)}
+footer{padding:35px 0;border-top:1px solid #ffffff1c;color:#809b8d;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+footer .brand img{height:20px;opacity:.85}
+footer .foot-left{display:flex;align-items:center;gap:12px}
+@media(max-width:850px){.hero-grid,.showcase{grid-template-columns:1fr}.hero{padding:70px 0}.hero h1{letter-spacing:-2px}.cards,.pricing{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}.links a:not(.btn){display:none}.demo-frame{margin-top:24px}}
+@media(max-width:520px){.steps{grid-template-columns:1fr}.hero h1{font-size:42px}.section{padding:70px 0}.demo-frame{padding:18px}.orb{width:185px}.price{font-size:34px}footer{flex-direction:column;align-items:flex-start}}
+</style></head>
+<body>
+<header><div class="container nav">
+  <a class="brand" href="#top" aria-label="tiki 홈"><img src="/AppHeader.svg" alt="tiki"/></a>
+  <nav class="links"><a href="#features">주요 기능</a><a href="#how">작동 방식</a><a href="#pricing">요금제</a><a class="btn small" href="/demo/index.html">데모 체험하기 ↗</a></nav>
+</div></header>
+<main id="top">
+<section class="hero"><div class="container hero-grid">
+  <div>
+    <div class="eyebrow">AI STREAMING CHAT COMPANION</div>
+    <h1><span class="hero-title-intro">채팅이 조용한 순간에도,</span><span class="hero-title-primary">방송은 계속 티키타카.</span></h1>
+    <p class="lead">작은 방송에도 활기찬 대화가 이어지도록. tiki는 스트리머의 콘텐츠와 분위기에 어울리는 AI 채팅으로 첫 대화를 시작합니다.</p>
+    <div class="actions"><a class="btn" href="/demo/index.html">⚡ 지금 데모 체험하기 →</a><a class="btn ghost" href="#features">기능 살펴보기 ↓</a></div>
+    <div class="disclaimer">※ 현재 공개된 체험은 MOCK 데모입니다. 실제 방송 연동 및 AI 기능과 차이가 있을 수 있습니다.</div>
+  </div>
+  <div class="demo-frame">
+    <div class="mock-top">
+      <span class="brand"><img src="/AppHeader.svg" alt="tiki"/></span>
+      <span class="right"><span class="pill"><span class="dot"></span>Online · MOCK</span><span class="gear" aria-hidden="true">⚙︎</span></span>
+    </div>
+    <div class="orb"><img src="/tiki-character.svg" alt=""/><strong>Space</strong><small>채팅을 생성하세요!</small></div>
+    <div class="chatwrap">
+      <div class="chat">[MOCK] 드립은 제가 챙길게요. 진행은 부탁드립니다 ㅋㅋ</div>
+      <div class="chat">[MOCK] 채팅창에 웃음 한 스푼 놓고 갑니다 ㅋㅋ</div>
+      <div class="chat">[MOCK] 재미 담당 지원했습니다. 수습 기간은 없나요 ㅋㅋ</div>
+    </div>
+    <div class="meter"><span>채팅 멤버</span><span>1명</span></div>
+    <img class="member-slider-preview" src="/landing/count-slider.svg" width="178" height="32" alt="채팅 멤버 1명 선택 · 1~5명"/>
+    <div class="mock-foot">데모 화면 미리보기 · 실제 체험 화면은 버튼을 눌러주세요</div>
+  </div>
+</div></section>
+
+<section class="section contrast" id="problem"><div class="container">
+  <div class="section-label">WHY TIKI?</div>
+  <h2>시청자가 적어서가 아니라,<br/><span class="accent">대화를 시작하기 어려워서.</span></h2>
+  <p class="desc">처음 들어온 시청자가 말을 걸기 전까지의 긴 침묵. 소규모 스트리머는 방송 진행과 채팅 반응을 동시에 책임져야 합니다. tiki는 그 첫 대화의 부담을 덜어주는 데 집중합니다.</p>
+  <div class="cards">
+    <div class="card"><div class="icon">💬</div><h3>조용한 채팅창</h3><p>적은 채팅량으로 방송 분위기를 유지하기 어려운 순간</p></div>
+    <div class="card"><div class="icon">🎙️</div><h3>혼자 이끄는 진행</h3><p>콘텐츠 진행과 시청자 반응을 모두 신경 써야 하는 부담</p></div>
+    <div class="card"><div class="icon">🌱</div><h3>커뮤니티의 첫 시작</h3><p>새 시청자가 자연스럽게 참여할 수 있는 대화의 계기</p></div>
+  </div>
+</div></section>
+
+<section class="section" id="features"><div class="container">
+  <div class="section-label">FEATURES</div>
+  <h2>채팅을 채우는 게 아니라,<br/><span class="accent">방송의 흐름을 이어갑니다.</span></h2>
+  <p class="desc">스트리머를 위한 AI 채팅 동반자. 데모로 현재 경험을 확인해 보세요.</p>
+  <div class="cards">
+    <div class="card"><div class="icon">✨</div><h3>상황에 어울리는 대화</h3><p>방송 설명과 설정된 분위기를 바탕으로 채팅을 생성하도록 설계한 서비스</p></div>
+    <div class="card"><div class="icon">🎭</div><h3>AI 채팅 멤버</h3><p>채팅 멤버를 설정해 여러 캐릭터가 있는 듯한 대화 경험을 구성</p></div>
+    <div class="card"><div class="icon">⌨️</div><h3>간편한 사용 흐름</h3><p>방송 링크와 설정, 단축키를 활용한 직관적인 채팅 실행 흐름</p></div>
+  </div>
+</div></section>
+
+<section class="section contrast" id="how"><div class="container">
+  <div class="section-label">HOW IT WORKS</div>
+  <h2>복잡한 세팅 대신,<br/><span class="accent">네 단계로 시작하세요.</span></h2>
+  <div class="steps">
+    <div class="step"><div class="num">STEP 01</div><h3>방송 링크 설정</h3><p>체험할 방송 정보를 입력하거나 설정합니다.</p></div>
+    <div class="step"><div class="num">STEP 02</div><h3>방송 상황 입력·분석</h3><p>데모에서는 설정된 예시 상황을 사용합니다.</p></div>
+    <div class="step"><div class="num">STEP 03</div><h3>AI 채팅 생성</h3><p>선택한 채팅 멤버가 자연스러운 반응을 구성합니다.</p></div>
+    <div class="step"><div class="num">STEP 04</div><h3>채팅 경험 확인</h3><p>데모에서 채팅 생성 흐름을 직접 체험합니다.</p></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="container showcase">
+  <div class="preview">
+    <div style="font-weight:900;font-size:20px;margin-bottom:20px">● tiki <span style="float:right;font-size:12px;color:#19e5aa">DEMO PREVIEW</span></div>
+    <div class="row"><div class="avatar">A</div><div class="msg">오늘 게임 처음인데 분위기 너무 좋네요! 👀</div></div>
+    <div class="row"><div class="avatar">B</div><div class="msg">방금 플레이 진짜 아슬아슬했어요 ㅋㅋ</div></div>
+    <div class="row"><div class="avatar">C</div><div class="msg">이 다음 스테이지가 진짜 기대되는데요?</div></div>
+    <div style="text-align:center;color:#789b8a;font-size:11px;margin-top:20px">예시 대화 · 실제 데모 출력과 다를 수 있습니다</div>
+  </div>
+  <div>
+    <div class="section-label">TRY IT YOURSELF</div>
+    <h2>설명보다 빠른 건<br/><span class="accent">직접 써보는 경험.</span></h2>
+    <p class="desc">지금 준비된 tiki 체험 화면에서 채팅 멤버와 생성 인터랙션을 확인해 보세요.</p>
+    <div class="actions"><a class="btn" href="/demo/index.html">데모 체험하기 →</a></div>
+  </div>
+</div></section>
+
+<section class="section contrast" id="pricing"><div class="container">
+  <div class="section-label">PRICING</div>
+  <h2>내 방송 규모에 맞게,<br/><span class="accent">가볍게 시작하세요.</span></h2>
+  <p class="desc">아래는 준비 중인 요금제 구성안이며, 결제 기능 오픈 전에는 과금되지 않습니다.</p>
+  <div class="pricing">
+    <div class="plan"><h3>FREE</h3><div class="price">₩0 <small>/월</small></div><ul><li>tiki 기능 맛보기</li><li>기본 데모 체험</li><li>서비스 경험 탐색</li></ul><a href="/demo/index.html" class="btn ghost" style="width:100%">무료 데모 체험</a></div>
+    <div class="plan featured"><div class="eyebrow">POPULAR</div><h3>PRO</h3><div class="price">₩29,000 <small>/월</small></div><ul><li>AI 채팅 멤버 2명</li><li>단일 플랫폼 선택</li><li>치지직 · SOOP · 유튜브 중 1개</li></ul><a href="/demo/index.html" class="btn" style="width:100%">데모 먼저 체험하기</a></div>
+    <div class="plan"><h3>MEGA</h3><div class="price">₩59,000 <small>/월</small></div><ul><li>AI 채팅 멤버 4명</li><li>복수 플랫폼 설정</li><li>고도화된 기능 및 빠른 처리 목표</li></ul><a href="/demo/index.html" class="btn ghost" style="width:100%">데모 먼저 체험하기</a></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="container">
+  <div class="banner">
+    <div class="section-label">READY TO START?</div>
+    <h2>당신의 방송에 첫 번째<br/><span class="accent">티키타카를 더해보세요.</span></h2>
+    <p class="desc" style="margin:0 auto 28px">tiki의 채팅 경험을 직접 확인할 수 있는 데모를 준비했습니다.</p>
+    <a class="btn" href="/demo/index.html">⚡ 무료 데모 체험하기 →</a>
+  </div>
+</div></section>
+</main>
+<footer class="container">
+  <span class="foot-left"><span class="brand"><img src="/AppHeader.svg" alt="tiki"/></span>© 2026 tiki. AI streaming chat companion.</span>
+  <span>본 사이트는 해커톤 서비스 소개용 프로토타입입니다.</span>
+</footer>
+</body></html>

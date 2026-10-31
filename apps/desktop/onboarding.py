@@ -2,8 +2,8 @@
 import tkinter as tk
 from tkinter import messagebox
 
-from apps.desktop.design_widgets import DesignButton, field
-from apps.desktop.vector import draw as draw_vector
+from apps.desktop.design_widgets import DesignButton, field, rounded_outline
+from apps.desktop.vector import draw as draw_vector, visible as vector_visible
 from backend.personas import PERSONAS
 from backend.chzzk_target import parse_channel_id
 
@@ -15,6 +15,7 @@ class Onboarding:
         self.personas = tuple(PERSONA_ASSETS)
         self.selected = list(dict.fromkeys(self.app.settings["personas"][:self.app.settings["count"]]))
         self.editing = False
+        self.edit_offset = 0
         self.start_page = view._page("start",277,347,variant="welcome",header=False)
         self.description_page = view._page("start1",339,430,variant="setup",header=False)
         self.persona_page = view._page("start2",339,775,variant="setup",header=False)
@@ -43,7 +44,7 @@ class Onboarding:
             card.create_image(12,8,anchor="nw",image=view.photos[PERSONA_ASSETS[key]])
             card.create_text(73,8,anchor="nw",text=PERSONAS[key]["name"],fill="white",font=(view.family,-14))
             card.create_text(73,28,anchor="nw",text=PERSONAS[key]["description"],fill="#eaeaea",font=(view.family,-11),width=193)
-            self.selection_marks.append(card.create_rectangle(1,1,277,64,outline="#2dff8f",width=2,state="hidden"))
+            self.selection_marks.append(rounded_outline(card,278,65,outline="#2dff8f",width=2,state="hidden"))
             self.cards.append(card)
         self.back, self.next = self._navigation(self.persona_page,38,663,self.persona_back,self.to_link)
         self._heading(self.link_page,43,3,"이제 마지막 단계에요","방송 링크를 첨부해주세요.")
@@ -69,14 +70,17 @@ class Onboarding:
 
     def _heading(self,page,y,step,title,copy):
         view = self.view
-        page.create_line(128.5,y+6,210.5,y+6,fill="#d9d9d9",width=2)
+        page.create_line(128.5,y+6,210.5,y+6,fill="#d9d9d9",width=2,tags="setup-progress")
         if step > 1:
-            page.create_line(128.5,y+6,128.5+(step-1)*40,y+6,fill="#2dff8f",width=2)
+            page.create_line(128.5,y+6,128.5+(step-1)*40,y+6,fill="#2dff8f",width=2,tags="setup-progress")
         for i in range(3):
             x = 123.5+i*40
-            page.create_oval(x,y,x+12,y+12,fill="#2dff8f" if i<step else "#d9d9d9",outline="")
-        view.text(page,169.5,y+48,title,16,anchor="center",weight=True)
-        return view.text(page,169.5,y+68,copy,12,anchor="n",fill="#eaeaea")
+            page.create_oval(x,y,x+12,y+12,fill="#2dff8f" if i<step else "#d9d9d9",outline="",tags="setup-progress")
+        heading = view.text(page,169.5,y+48,title,16,anchor="center",weight=True)
+        caption = view.text(page,169.5,y+68,copy,12,anchor="n",fill="#eaeaea")
+        for item in (heading,caption):
+            page.addtag_withtag("setup-heading",item)
+        return caption
 
     def _navigation(self,page,x,y,previous,next_action):
         return (DesignButton(page,self.view,"이전",previous,x,y),
@@ -90,18 +94,32 @@ class Onboarding:
             self.description.edit_modified(False)
 
     def start(self):
-        self.editing = False
+        self._set_editing(False)
         self.description.delete("1.0","end")
         self.description.insert("1.0",self.app.context.get("1.0","end-1c"))
         self.view.show("start")
 
     def select_personas(self):
-        self.editing = True
-        self.next.configure(text="적용")
+        self._set_editing(True)
         by_name = {value["name"]:key for key,value in PERSONAS.items()}
         self.selected = list(dict.fromkeys(by_name[v.get()] for v in self.app.persona_vars[:self.app.settings["count"]]))
         self._selection_feedback()
         self.view.show("start2")
+
+    def _set_editing(self, editing):
+        self.editing = editing
+        self.persona_page.itemconfigure("setup-progress",state="hidden" if editing else "normal")
+        offset = -48 if editing else 0
+        delta = (offset-self.edit_offset)*self.view.scale
+        self.persona_page.move("setup-heading",0,delta)
+        for widget in (*self.cards,self.back,self.next):
+            widget.place_configure(y=float(widget.place_info()["y"])+delta)
+        self.edit_offset = offset
+        self.persona_page.resize_height(674 if editing else 775)
+        self.next.configure(text="저장" if editing else "다음")
+        vector_visible(self.next,self.next.arrow,not editing)
+        self.next.coords(self.next.label,float(self.next.cget("width"))/2-(0 if editing else 8*self.view.scale),
+                         float(self.next.cget("height"))/2)
 
     def _selection_feedback(self):
         names = [PERSONAS[key]["name"] for key in self.selected]
@@ -120,7 +138,7 @@ class Onboarding:
         self._selection_feedback()
 
     def to_personas(self):
-        self.next.configure(text="다음")
+        self._set_editing(False)
         if len(self.description.get("1.0","end-1c")) > 1000:
             messagebox.showerror("방송 설명","방송 설명은 1,000자까지 입력할 수 있습니다.",parent=self.app.root)
             return

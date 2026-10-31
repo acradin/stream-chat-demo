@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Settings } from "lucide-react";
 import { useSessionStore } from "@/store/sessionStore";
 import { useUiStore } from "@/store/uiStore";
@@ -9,6 +9,9 @@ import { Logo } from "@/components/shared/Logo";
 import { ChatGenerateOrb } from "@/components/main/ChatGenerateOrb";
 import { MemberSlider } from "@/components/main/MemberSlider";
 import { UpgradeCta } from "@/components/main/UpgradeCta";
+import { DemoVideoPanel } from "@/components/main/DemoVideoPanel";
+import { captureVideoFrame, DEMO_VIDEOS } from "@/lib/demoVideos";
+import { newId } from "@/lib/ids";
 
 export function MainScreen() {
   const generate = useSessionStore((s) => s.generate);
@@ -17,23 +20,62 @@ export function MainScreen() {
   const config = useSessionStore((s) => s.config);
   const messages = useSessionStore((s) => s.messages);
   const goTo = useUiStore((s) => s.goTo);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoId, setVideoId] = useState(DEMO_VIDEOS[0].id);
+  const [videoReady, setVideoReady] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const setVideo = useSessionStore((s) => s.setVideo);
+  const bumpContextVersion = useSessionStore((s) => s.bumpContextVersion);
+
+  useEffect(() => {
+    setVideo("sample", newId());
+    return () => setVideo("none", null);
+  }, [videoId, setVideo]);
+
+  function selectVideo(id: string) {
+    if (id === videoId) return;
+    setVideoReady(false);
+    setVideoError(null);
+    bumpContextVersion();
+    setVideoId(id);
+  }
 
   const handleGenerate = useCallback(() => {
     const s = useSessionStore.getState();
     if (!s.canGenerate()) return;
+    const video = videoRef.current;
+    if (!video || !videoReady) return;
+    if (!s.config?.supports_frames) {
+      setVideoError("현재 연결된 서버가 영상 분석을 지원하지 않습니다.");
+      return;
+    }
+    let frameJpeg: string;
+    try {
+      frameJpeg = captureVideoFrame(video);
+      video.pause();
+      setVideoError(null);
+    } catch (error) {
+      setVideoError(error instanceof Error ? error.message : "영상 장면을 읽지 못했습니다.");
+      return;
+    }
     void generate({
       clickedAt: performance.now(),
-      videoSessionId: null,
-      clickedVideoS: null,
+      videoSessionId: s.videoSessionId,
+      clickedVideoS: video.currentTime,
       contextVersion: s.contextVersion,
-      readVideoTime: () => null,
+      readVideoTime: () => videoRef.current?.currentTime ?? null,
+      frameJpeg,
+      demoVideoId: videoId,
     });
-  }, [generate]);
+  }, [generate, videoReady, videoId]);
 
   useSpaceHotkey(handleGenerate);
 
   return (
-    <AppWindow width={420}>
+    <AppWindow width={420} aside={
+      <DemoVideoPanel selectedId={videoId} onSelect={selectVideo} videoRef={videoRef}
+        onReady={setVideoReady} onSeek={bumpContextVersion} error={videoError} onError={setVideoError} />
+    }>
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 pt-6">
         <Logo />
@@ -52,7 +94,7 @@ export function MainScreen() {
 
       {/* 중앙 오브 */}
       <div className="flex flex-col items-center px-6 pb-2 pt-7">
-        <ChatGenerateOrb onGenerate={handleGenerate} />
+        <ChatGenerateOrb onGenerate={handleGenerate} unavailable={!videoReady} />
       </div>
 
       <p role="status" className={`px-6 text-center text-[12px] ${connection === "error" || feedback.kind === "error" ? "text-status-error" : "text-ink-faint"}`}>
@@ -65,7 +107,8 @@ export function MainScreen() {
       )}
       {config && !config.is_mock && (
         <p className="mt-2 px-6 text-center text-[11px] text-ink-faint">
-          AI 체험 · 입력한 방송 설명으로 생성 · 세션당 최대 {config.session_limit ?? 10}회
+          AI 체험 · 선택한 영상 장면과 방송 설명으로 생성
+          {config.session_limit ? ` · 세션당 최대 ${config.session_limit}회` : ""}
           <br />웹 채팅은 이 화면에 표시됩니다.
         </p>
       )}

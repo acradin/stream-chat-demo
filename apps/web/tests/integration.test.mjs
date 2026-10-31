@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { existsSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { createServer as createTcpServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -73,12 +73,22 @@ test("web integration with the real local Mock API", { timeout: 30000 }, async (
   assert.ok(ready, `Mock backend failed to start: ${backendOutput}`);
   process.env.API_TARGET = backendUrl;
   vite = await createServer({ root: webRoot, configFile: path.join(webRoot, "vite.config.ts"),
-    server: { port: 0, host: "127.0.0.1" }, optimizeDeps: { noDiscovery: true, include: [] }, logLevel: "error" });
+    server: { port: await availablePort(), host: "127.0.0.1" }, optimizeDeps: { noDiscovery: true, include: [] }, logLevel: "error" });
   await vite.listen();
   const origin = `http://127.0.0.1:${vite.httpServer.address().port}`;
   const config = await (await realFetch(`${origin}/api/config`)).json();
   const payload = () => ({ client_request_id: crypto.randomUUID(), persona: "witty_friend",
     channel_context: "테스트 방송", clicked_video_s: null, video_session_id: null });
+
+  await t.test("landing links to the existing React demo entry", async () => {
+    const landing = await (await realFetch(origin)).text();
+    assert.match(landing, /방송은 계속 티키타카/);
+    assert.match(landing, /href="\/demo\/index\.html"/);
+    assert.doesNotMatch(landing, /id="root"/);
+    const demo = await (await realFetch(`${origin}/demo/index.html`)).text();
+    assert.match(demo, /id="root"/);
+    assert.match(demo, /src="\/src\/main\.tsx"/);
+  });
 
   await t.test("proxy rejects foreign origins and missing tokens", async () => {
     for (const headers of [
@@ -139,11 +149,48 @@ test("web integration with the real local Mock API", { timeout: 30000 }, async (
     assert.equal(logged.at(-1).discard_reason, "video_context_changed");
   });
 
-  await t.test("built preview keeps the same POST proxy contract", async () => {
+  await t.test("a video frame is generated, displayed and logged without image data", async () => {
+    const frame = (await readFile(path.join(webRoot, "public/assets/demo-videos/demo-01.jpg"))).toString("base64");
+    useSessionStore.getState().setVideo("sample", "sample-video");
+    useSessionStore.getState().setPersona("analyst");
+    const count = useSessionStore.getState().messages.length;
+    assert.equal(useSessionStore.getState().config.supports_frames, true);
+    await useSessionStore.getState().generate({ ...context(), videoSessionId: "sample-video",
+      clickedVideoS: 2.5, readVideoTime: () => 2.5, frameJpeg: frame, demoVideoId: "demo-01" });
+    assert.equal(useSessionStore.getState().messages.length, count + 1);
+    const logged = (await records()).at(-1);
+    assert.equal(logged.status, "displayed");
+    assert.equal(logged.input_kind, "image");
+    assert.equal(logged.demo_video_id, "demo-01");
+    assert.equal(logged.clicked_video_s, 2.5);
+    assert.equal(logged.displayed_video_s, 2.5);
+    assert.ok(!JSON.stringify(logged).includes(frame));
+    useSessionStore.getState().setVideo("none", null);
+  });
+
+  await t.test("built preview keeps the same POST proxy contract and all three videos", async () => {
     assert.ok(existsSync(path.join(webRoot, "dist/index.html")), "Run npm run build before npm test");
     previewServer = await preview({ root: webRoot, configFile: path.join(webRoot, "vite.config.ts"),
-      preview: { port: 0, host: "127.0.0.1" }, logLevel: "error" });
+      preview: { port: await availablePort(), host: "127.0.0.1" }, logLevel: "error" });
     const previewOrigin = `http://127.0.0.1:${previewServer.httpServer.address().port}`;
+    const landing = await (await realFetch(previewOrigin)).text();
+    assert.match(landing, /href="\/demo\/index\.html"/);
+    const demo = await (await realFetch(`${previewOrigin}/demo/index.html`)).text();
+    assert.match(demo, /id="root"/);
+    assert.match(demo, /src="\/assets\/demo-[^"]+\.js"/);
+    assert.doesNotMatch(demo, /방송은 계속 티키타카/);
+    const { DEMO_VIDEOS } = await vite.ssrLoadModule("/src/lib/demoVideos.ts");
+    assert.equal(DEMO_VIDEOS.length, 3);
+    assert.deepEqual(DEMO_VIDEOS.map(video => video.title), ["동영상 1", "동영상 2", "동영상 3"]);
+    for (const video of DEMO_VIDEOS) {
+      const clip = await realFetch(`${previewOrigin}${video.src}`, { headers: { Range: "bytes=0-31" } });
+      assert.equal(clip.status, 206);
+      assert.match(clip.headers.get("Content-Type"), /video\/mp4/);
+      assert.equal((await clip.arrayBuffer()).byteLength, 32);
+      const poster = await realFetch(`${previewOrigin}${video.poster}`);
+      assert.equal(poster.status, 200);
+      assert.match(poster.headers.get("Content-Type"), /image\/jpeg/);
+    }
     const response = await realFetch(`${previewOrigin}/api/trigger`, { method: "POST",
       headers: { Origin: previewOrigin, "Content-Type": "application/json", "X-Demo-Token": config.session_token },
       body: JSON.stringify({ ...payload(), persona: "dry_comic" }) });

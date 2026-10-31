@@ -7,8 +7,8 @@ import time
 
 from aiohttp import web
 
-from apps.web.server import ManualSession
-from backend.manual_provider import MockManualProvider
+from apps.web.server import ManualSession, MAX_WEB_REQUEST
+from backend.web_provider import MockWebProvider
 
 
 COOKIE = "__Host-tiki-demo"
@@ -26,7 +26,7 @@ class PublicWeb:
         self.directory = Path(directory).resolve()
         self.origin, self.clock = origin, clock
         self.capacity, self.ttl, self.max_records = capacity, ttl, max_records
-        self.provider = provider or MockManualProvider(.2)
+        self.provider = provider or MockWebProvider(.2)
         self.is_live = self.provider.provider != "mock"
         if self.is_live:
             self.max_records = min(max_records,10)
@@ -34,7 +34,7 @@ class PublicWeb:
         self.files = {}
         for path in self.directory.rglob("*"):
             if (path.is_file() and not path.is_symlink() and path.resolve().is_relative_to(self.directory)
-                    and path.suffix in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".webp", ".woff2", ".ttf"}
+                    and path.suffix in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".webp", ".woff2", ".ttf", ".mp4"}
                     and not any(part.startswith(".") for part in path.relative_to(self.directory).parts)):
                 self.files["/" + path.relative_to(self.directory).as_posix()] = path
         if "/index.html" not in self.files:
@@ -103,7 +103,11 @@ class PublicWeb:
             return web.json_response({"error": "데모 세션을 확인해주세요."}, status=403)
         if request.content_type != "application/json":
             raise ValueError("JSON required")
-        payload = await request.clone(client_max_size=16 * 1024).json()
+        limit = MAX_WEB_REQUEST if request.path == "/api/trigger" else 16 * 1024
+        body = await request.clone(client_max_size=limit).read()
+        payload = json.loads(body)
+        if isinstance(payload, dict) and "frame_jpeg" not in payload and len(body) > 16 * 1024:
+            raise web.HTTPRequestEntityTooLarge(max_size=16 * 1024, actual_size=len(body))
         if request.path == "/api/trigger":
             data = session._validate_trigger(payload)
             repeated = data["client_request_id"] in session.client_requests

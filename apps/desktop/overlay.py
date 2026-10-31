@@ -490,7 +490,7 @@ class Overlay:
             self.recording_hotkey = False
             self.next_trigger = max(self.next_trigger, time.monotonic() + .5)
             self.hotkey_record.configure(text="변경")
-            self.hotkey_hint.set("설정 적용을 누르면 새 단축키가 등록됩니다.")
+            self.hotkey_hint.set("변경을 누른 다음 원하는 키 조합을 누르세요.")
 
     def _hotkey_focus_lost(self, event):
         def finish_if_unfocused():
@@ -500,10 +500,7 @@ class Overlay:
 
     def _capture_hotkey(self, event):
         if not self.recording_hotkey:
-            if event.keysym == "Return":
-                self.apply_hotkey()
-                return "break"
-            return None
+            return "break"
         if event.keysym == "Escape":
             self._finish_hotkey_recording()
             return "break"

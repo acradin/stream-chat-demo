@@ -7,6 +7,7 @@ import { formatHotkey } from "@/lib/format";
 
 interface ChatGenerateOrbProps {
   onGenerate: () => void;
+  unavailable?: boolean;
 }
 
 /**
@@ -14,14 +15,14 @@ interface ChatGenerateOrbProps {
  * 흰 말풍선 캐릭터 + 단축키 + "채팅을 생성하세요!".
  * 클릭/단축키로 기존 수동 생성(sessionStore.generate) 실행. 로딩 중 중복 방지.
  */
-export function ChatGenerateOrb({ onGenerate }: ChatGenerateOrbProps) {
+export function ChatGenerateOrb({ onGenerate, unavailable = false }: ChatGenerateOrbProps) {
   const config = useSessionStore((s) => s.config);
   const inFlight = useSessionStore((s) => s.inFlight);
   const hotkey = useUiStore((s) => s.hotkey);
   const remaining = useCooldownTick();
 
   const cooling = remaining > 0;
-  const disabled = !config || inFlight || cooling;
+  const disabled = unavailable || !config || inFlight || cooling;
 
   // 저장값(단일 소스)을 공용 포매터로 표시. 하드코딩 매핑 제거.
   const hotkeyLabel = formatHotkey(hotkey);

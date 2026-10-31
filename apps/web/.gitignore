@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vite
+.DS_Store
+
+# tsc -b (composite) 산출물
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

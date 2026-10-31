@@ -82,7 +82,7 @@ test("web integration with the real local Mock API", { timeout: 30000 }, async (
 
   await t.test("landing links to the existing React demo entry", async () => {
     const landing = await (await realFetch(origin)).text();
-    assert.match(landing, /방송은 계속 티키타카/);
+    assert.match(landing, /당신의 방송은<br\s*\/?>계속 티키타카/);
     assert.match(landing, /href="\/demo\/index\.html"/);
     assert.doesNotMatch(landing, /id="root"/);
     const demo = await (await realFetch(`${origin}/demo/index.html`)).text();
@@ -178,7 +178,7 @@ test("web integration with the real local Mock API", { timeout: 30000 }, async (
     const demo = await (await realFetch(`${previewOrigin}/demo/index.html`)).text();
     assert.match(demo, /id="root"/);
     assert.match(demo, /src="\/assets\/demo-[^"]+\.js"/);
-    assert.doesNotMatch(demo, /방송은 계속 티키타카/);
+    assert.doesNotMatch(demo, /당신의 방송은<br\s*\/?>계속 티키타카/);
     const { DEMO_VIDEOS } = await vite.ssrLoadModule("/src/lib/demoVideos.ts");
     assert.equal(DEMO_VIDEOS.length, 3);
     assert.deepEqual(DEMO_VIDEOS.map(video => video.title), ["동영상 1", "동영상 2", "동영상 3"]);

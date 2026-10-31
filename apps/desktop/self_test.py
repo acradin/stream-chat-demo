@@ -126,6 +126,16 @@ def run(report_path: Path) -> int:
             if "<svg" not in (ASSETS / "logo.svg").read_text(encoding="utf-8"):
                 raise ValueError("Original SVG is missing from the distribution")
             check_taskbar_identity(root)
+            if sys.platform == "darwin":
+                from apps.desktop.mac.shell import mapped
+                from AppKit import NSApplication
+                root.update_idletasks()
+                mapped(root)
+                window = next(w for w in NSApplication.sharedApplication().windows() if w.title()==root.title())
+                if window.backgroundColor().alphaComponent() != 0:
+                    raise ValueError("Rounded corners have an opaque native backing")
+                if window.contentView().layer().contentsScale() != window.backingScaleFactor():
+                    raise ValueError("Retina text backing scale is incorrect")
             if app.view.current != "start":
                 raise ValueError("A new installation did not open the welcome screen")
             wizard = app.view.onboarding
@@ -141,6 +151,27 @@ def run(report_path: Path) -> int:
                 raise ValueError("Settings background was duplicated on its root")
             if root.attributes("-alpha") != 1.0:
                 raise ValueError("Panel paint opacity leaked into window/content opacity")
+            app.view.show("settings")
+            root.update_idletasks()
+            if app.view.main.winfo_manager() != "pack" or app.view.settings.winfo_toplevel() is root:
+                raise ValueError("Settings replaced Main instead of opening a sibling window")
+            main_geometry = root.geometry()
+            app.view.show("settings")
+            if root.geometry() != main_geometry:
+                raise ValueError("Opening Settings resized Main")
+            if not app.view.close_settings() or app.view.main.winfo_manager() != "pack":
+                raise ValueError("Closing Settings also closed Main")
+            # Exercise the exact Windows/Linux image path on every build host.
+            from types import SimpleNamespace
+            from unittest.mock import patch
+            from apps.desktop import vector
+            fallback = tk.Canvas(root)
+            with patch.object(vector, "sys", SimpleNamespace(platform="win32")):
+                for name in ("header", "settings", "orb-face", "welcome-face", "wordmark", "arrow", "edit", "crown"):
+                    vector.draw(fallback, name, 0, 0)
+            if len(fallback._vector_photos) != 8:
+                raise ValueError("High-resolution fallback artwork did not load")
+            fallback.destroy()
             for page in ("start", "start1", "start2", "start3", "start_end", "settings", "controls", "chat", "main"):
                 app.view.show(page)
                 root.update_idletasks()
@@ -243,7 +274,7 @@ def run(report_path: Path) -> int:
         atomic_json(report_path, {"status": "ok", "frozen": bool(getattr(sys, "frozen", False)),
                                   "python": sys.version.split()[0], "tk": tk.TkVersion,
                                   "state_directory": str(state_directory()),
-                                  "checks": ["tls", "jpeg", "bundled_pretendard_regular_semibold_bold", "font_license", "app_icons", "bundled_original_svg", "figma_panels", "onboarding_without_broadcast_link", "page_navigation", "member_slider", "content_opacity", "hidden_overlay", "topmost", "manual_generation",
+                                  "checks": ["tls", "jpeg", "bundled_pretendard_regular_semibold_bold", "font_license", "app_icons", "bundled_original_svg", "figma_panels", "sibling_settings_window", "high_resolution_windows_artwork", "onboarding_without_broadcast_link", "page_navigation", "member_slider", "content_opacity", "hidden_overlay", "topmost", "manual_generation",
                                              "realtime_start_stop_restart", "mode_switch", "output_switch",
                                              "channel_link_extraction", "broadcast_link_always_visible", "custom_hotkey", "settings_save"]
                                             + (["titlebar_icon", "taskbar_identity"] if sys.platform == "win32" else []),

@@ -2,6 +2,16 @@
 
 Source: [tiki Figma](https://www.figma.com/design/jfQdgEwHlOaAqwSfHh8MO8?node-id=2011-609), exported 2026-11-01 through the Figma MCP. These files are local and bundled; no temporary asset URLs are used at runtime.
 
+The desktop SVG renderer now loads original vectors through AppKit on macOS.
+Windows/Linux use bundled 4x renders and resize from those originals at the actual
+desktop DPI. Regenerate these with `apps/desktop/packaging/render_vector_assets.py`
+(build dependency: `resvg-py==0.5.0`). Tk 8.6's 1x macOS PhotoImage path is avoided
+for vector artwork. The newer 3x persona exports remain available for DPI scaling.
+
+`v2-source-count-slider.svg` is the untouched export of [Main/ChatbotCountSlider](https://www.figma.com/design/jfQdgEwHlOaAqwSfHh8MO8?node-id=2011-207).
+Its five generated states preserve the original paths, number outlines and gradients;
+only the active rail width, thumb position and demo lock visibility vary.
+
 | File | Source node / slot | Display geometry |
 |---|---|---|
 | header.png | Common/AppHeader `2011:70` | 70 × 21 |

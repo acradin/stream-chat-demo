@@ -336,6 +336,9 @@ class Overlay:
     def _apply_window_settings(self):
         self.root.attributes("-topmost", self.settings["topmost"])
         self.root.attributes("-alpha", self.settings["opacity"])
+        if hasattr(self, "view"):
+            self.view.settings_window.attributes("-topmost", self.settings["topmost"])
+            self.view.settings_window.attributes("-alpha", self.settings["opacity"])
 
     def _register_hotkey(self):
         if self.hotkey is None:

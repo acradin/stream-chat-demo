@@ -3,6 +3,7 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 
 from apps.desktop.panel import BG, INK, MINT, panel_color
+from apps.desktop.vector import draw as draw_vector
 
 
 def surface(parent, x, y, width, height, *, opacity=.1, gradient=False, key=False):
@@ -47,7 +48,7 @@ class DesignButton(tk.Canvas):
         self.label = self.create_text(width/2-(8 if arrow else 0),height/2,text=text,
                                       font=(view.family,-14),fill=INK)
         if arrow:
-            self.create_image(width/2+33,height/2,image=view.photos["arrow"])
+            draw_vector(self,"arrow",width/2+24,height/2-10)
         self.focus_outline = self.create_rectangle(2,2,width-3,height-3,outline=MINT,state="hidden")
         self.bind("<Button-1>", self.invoke)
         self.bind("<Return>", self.invoke)

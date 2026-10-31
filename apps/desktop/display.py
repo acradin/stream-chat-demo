@@ -23,12 +23,14 @@ def scale_layout(root, factor, photos=()):
     collect(root)
     images = {str(photo): photo for photo in photos}
     for widget in widgets:
-        for name in ("photo", "photos", "images"):
+        for name in ("photo", "photos", "images", "_vector_photos"):
             value = getattr(widget, name, ())
             values = value.values() if isinstance(value, dict) else value if isinstance(value, (list, tuple)) else (value,)
             images.update((str(photo), photo) for photo in values if isinstance(photo, ImageTk.PhotoImage))
     resized = {}
-    originals = getattr(root, "_design_image_sources", {})
+    originals = {}
+    for widget in widgets:
+        originals.update(getattr(widget,"_design_image_sources",{}))
     def image(name):
         if name not in resized:
             photo = images[name]
@@ -48,6 +50,7 @@ def scale_layout(root, factor, photos=()):
         values = (value,) if isinstance(value,(int,float)) else root.tk.splitlist(value)
         return tuple(round(float(item)*factor) for item in values)
     for widget in widgets:
+        widget._tiki_display_scale = factor
         if widget is root:
             continue
         if isinstance(widget, tk.Canvas):

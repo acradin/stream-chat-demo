@@ -141,6 +141,12 @@ class Panel(tk.Canvas):
         layers = paint_layers(width, height, variant)
         self.surface = layers[1]
         self.variant = variant
-        self.images = [ImageTk.PhotoImage(layer, master=self) for layer in layers]
-        for photo, name in zip(self.images, ("Drop shadow", self.background_owner, "Glass Effect")):
-            self.create_image(0, 0, image=photo, anchor="nw", tags=(name,))
+        # Composite before handing the image to Tk. On transparent macOS
+        # windows, drawing a mostly transparent PhotoImage over another image
+        # can clear the native backing surface instead of preserving the body.
+        surface = Image.new("RGBA", (width, height))
+        for layer in layers:
+            surface = Image.alpha_composite(surface, layer)
+        self.images = [ImageTk.PhotoImage(surface, master=self)]
+        self.create_image(0, 0, image=self.images[0], anchor="nw",
+                          tags=("Drop shadow", self.background_owner, "Glass Effect"))

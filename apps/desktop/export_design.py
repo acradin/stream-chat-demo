@@ -28,9 +28,9 @@ from apps.desktop.overlay import Overlay
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "design" / "desktop"
 SOURCES = tuple("apps/desktop/" + name for name in
-                ("panel.py", "figma_ui.py", "onboarding.py", "design_widgets.py", "display.py", "overlay.py", "connection.py", "branding.py", "fonts.py",
+                ("panel.py", "figma_ui.py", "onboarding.py", "design_widgets.py", "display.py", "vector.py", "count_slider.py", "overlay.py", "connection.py", "branding.py", "fonts.py",
                  "shell.py", "window/branding.py", "window/shell.py", "window/fonts.py",
-                 "mac/branding.py", "mac/shell.py", "mac/fonts.py", "linux/branding.py", "linux/shell.py", "linux/fonts.py"))
+                 "mac/branding.py", "mac/shell.py", "mac/fonts.py", "mac/artwork.py", "linux/branding.py", "linux/shell.py", "linux/fonts.py"))
 IGNORE_OPTIONS = {"command", "validatecommand", "invalidcommand", "postcommand", "xscrollcommand",
                   "yscrollcommand", "textvariable", "variable", "class", "container", "use"}
 
@@ -293,9 +293,9 @@ def export():
                             padding=[9,5]),
         images=dict(orb_base=dict(file="v2-orb-base.png", display_px=[196,196], alpha=.72, center=[99,100]),
                     orb_glow=dict(file="v2-orb-glow.png", display_px=[158,158], alpha=.72, center=[99,99]),
-                    orb_face=dict(file="v2-orb-face.png", display_px=[84,80], center=[99,80]),
-                    header=dict(file="v2-header.png", display_px=[70,21], position=[28,27]),
-                    settings=dict(file="v2-settings.png", display_px=[15,14], slot=[197,31,15,14]),
+                    orb_face=dict(file="v2-source-orb-face.svg", display_px=[84,80], position=[57,40]),
+                    header=dict(file="v2-header.svg", display_px=[70,21], position=[28,28]),
+                    settings=dict(file="v2-source-settings.svg", display_px=[15,14.4776], slot=[194,28,21,21]),
                     persona=dict(file="v2-persona-*.png", display_px=[51,48], position=[28,355])))
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     result = dict(schema_version=1, exported_at=datetime.now(timezone.utc).isoformat(), git_revision=revision,

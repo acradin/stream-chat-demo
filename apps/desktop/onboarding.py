@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from apps.desktop.design_widgets import DesignButton, field
+from apps.desktop.vector import draw as draw_vector
 from backend.personas import PERSONAS
 from backend.chzzk_target import parse_channel_id
 
@@ -51,7 +52,9 @@ class Onboarding:
     def _welcome(self,page,done):
         view = self.view
         # The exported 99x118 asset includes the shadow around the 69x85 logo.
-        page.create_image(89,34 if done else 45,anchor="nw",image=view.photos["welcome-logo"])
+        top = 34 if done else 45
+        draw_vector(page,"welcome-face",89,top)
+        draw_vector(page,"wordmark",117.5,top+83)
         view.text(page,138.5,172 if done else 183,"설정 완료!" if done else "어서오세요!",24,
                   anchor="center",weight=True)
         copy = ("이제 방송에서 언제든\ntiki를 사용할 수 있어요.\n설정에서 언제든 변경할 수 있어요." if done else

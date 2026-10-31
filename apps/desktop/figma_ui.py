@@ -16,6 +16,8 @@ from apps.desktop.panel import Panel, BG, INPUT, INK, MUTED, MINT, configure_the
 from backend.personas import PERSONAS
 from apps.desktop.design_widgets import DesignButton, field, surface
 from apps.desktop.display import display_scale, scale_layout
+from apps.desktop.vector import draw as draw_vector, StatusBadge
+from apps.desktop.count_slider import CountSlider
 
 PERSONA_ASSETS = {"witty_friend": "persona-witty", "analyst": "persona-analyst",
                   "coach": "persona-coach", "hype_commentator": "persona-reaction",
@@ -47,10 +49,10 @@ class GenerateOrb(tk.Canvas):
         super().__init__(master, width=198, height=198, bg=BG, highlightthickness=0,
                          takefocus=1, cursor="hand2")
         self.app, self.disabled = app, False
-        self.photos = [asset(self, name) for name in ("orb-base", "orb-glow", "orb-face")]
+        self.photos = [asset(self, name) for name in ("orb-base", "orb-glow")]
         self.create_image(99, 100, image=self.photos[0])
         self.create_image(99, 99, image=self.photos[1])
-        self.create_image(99, 80, image=self.photos[2])
+        draw_vector(self, "orb-face", 57, 40)
         self.key_label = self.create_text(99, 127, fill=INK, font=(app.view.semibold, -16),
                                           text=app.settings["hotkey"])
         self.caption = self.create_text(99, 146, fill=INK, font=(app.view.family, -8), text="채팅을 생성하세요!")
@@ -97,7 +99,17 @@ class FigmaView:
         self.root.bind("<Escape>", self._escape)
         self.pages = {}
         self.current = "main"
-        self.photos = {name: asset(self.root, name) for name in ("header", "settings", "welcome-logo", "arrow", "edit", "crown", *PERSONA_ASSETS.values())}
+        self.settings_window = tk.Toplevel(self.root)
+        self.settings_window.withdraw()
+        self.settings_window.title("tiki — 설정")
+        self.settings_window.transient(self.root)
+        self.settings_window.resizable(False, False)
+        configure_window(self.settings_window)
+        self.settings_window.overrideredirect(not sys.platform.startswith("linux"))
+        self.settings_window.protocol("WM_DELETE_WINDOW", self.close_settings)
+        self.settings_window.bind("<Escape>", self._escape)
+        self.settings_window.bind("<Map>", self._settings_mapped, add="+")
+        self.photos = {name: asset(self.root, name) for name in PERSONA_ASSETS.values()}
         self.main = self._page("main", 277, 347)
         self.settings = self._page("settings", 420, 491)
         self.controls = self._page("controls", 420, 690)
@@ -113,32 +125,45 @@ class FigmaView:
         scale_layout(self.root, factor, self.photos.values())
         self.scale = factor
         self.root._tiki_display_scale = factor
+        self.settings_window._tiki_display_scale = factor
         scaled = getattr(self.root,"_scaled_design_images",{})
         self.photos = {name:scaled.get(str(photo),photo) for name,photo in self.photos.items()}
         self.show("main" if app.settings["onboarding_complete"] else "start")
+        self.root.bind("<Configure>", self._shape_changed, add="+")
+        self.settings_window.bind("<Configure>", self._shape_changed, add="+")
         apply_window_icon(self.root)
 
+    def _shape_changed(self, event):
+        window = event.widget
+        if window in (self.root, self.settings_window) and window.state() == "normal":
+            mapped(window)
+
     def _page(self, name, width, height, *, variant="main", header=True):
-        page = Panel(self.root, width, height, settings=name == "settings", variant=variant)
+        page = Panel(self.settings_window if name == "settings" else self.root,
+                     width, height, settings=name == "settings", variant=variant)
         self.pages[name] = page
         if header:
-            logo = page.create_image(28, 28, anchor="nw", image=self.photos["header"])
+            logo = draw_vector(page, "header", 28, 28)
             page.tag_bind(logo,"<Button-1>",self.open_menu)
-            badge = ttk.Label(page, text="• Demo", foreground=INK, background="#d52b30", font=(self.family, -8))
-            badge.place(x=105, y=32, width=36, height=12)
+            badge = StatusBadge(page, 105, 32, self.family)
         # The badge is truthful: service status switches it after usage returns.
         if not hasattr(self, "badges"):
             self.badges = []
         if header:
             self.badges.append(badge)
         if name == "main":
-            button = tk.Button(page, image=self.photos["settings"], command=lambda: self.show("settings"),
-                               bg=BG, activebackground=INPUT, borderwidth=0, cursor="hand2", takefocus=1)
-            button.place(x=197, y=31, width=15, height=15)
+            button = tk.Canvas(page, bg=BG, highlightthickness=0, bd=0,
+                               cursor="hand2", takefocus=1)
+            draw_vector(button, "settings", 3, 3)
+            button.bind("<Button-1>", lambda _: self.show("settings"))
+            button.bind("<Return>", lambda _: self.show("settings"))
+            button.bind("<space>", lambda _: self.show("settings"))
+            button.place(x=194, y=28, width=21, height=21)
+            self.settings_button = button
         elif header and name != "settings":
             ttk.Button(page, text="‹", width=2, command=lambda: self.show("main")).place(x=width-112, y=21)
-        for x, color, command, symbol in ((width-53, "#ff736a", self.app.close, "×"),
-                                          (width-36, "#febc2e", self.minimize, "−")):
+        for x, color, command, symbol in ((width-53, "#ff736a", self.close_settings if name == "settings" else self.app.close, "×"),
+                                          (width-36, "#febc2e", self.minimize_settings if name == "settings" else self.minimize, "−")):
             top = 30 if not header else 33
             dot = page.create_oval(x, top, x+10, top+10, fill=color, outline="")
             page.tag_bind(dot,"<Button-1>",lambda _,action=command: action())
@@ -174,11 +199,56 @@ class FigmaView:
             self.show("main")
 
     def _drag_start(self, event):
-        self.drag = (event.x_root-self.root.winfo_x(), event.y_root-self.root.winfo_y()) if event.y < 62*self.scale else None
+        window = event.widget.winfo_toplevel()
+        self.drag = (window, event.x_root-window.winfo_x(), event.y_root-window.winfo_y()) if event.y < 62*self.scale else None
 
     def _drag(self, event):
         if getattr(self, "drag", None):
-            self.root.geometry(f"+{event.x_root-self.drag[0]}+{event.y_root-self.drag[1]}")
+            window, x, y = self.drag
+            window.geometry(f"+{event.x_root-x}+{event.y_root-y}")
+
+    def _settings_mapped(self, event):
+        if event.widget is self.settings_window and self.settings_window.state() == "normal":
+            self.settings_window.overrideredirect(not sys.platform.startswith("linux"))
+            mapped(self.settings_window)
+
+    def minimize_settings(self):
+        if self.close_settings():
+            self.current = "main"
+
+    def close_settings(self):
+        if self.settings_window.state() == "withdrawn":
+            return True
+        if not self.app.save_settings():
+            messagebox.showerror("설정 확인", self.app.status.get(), parent=self.settings_window)
+            return False
+        if self.app.recording_hotkey:
+            self.app._finish_hotkey_recording()
+        self.settings_window.withdraw()
+        self.current = "main"
+        return True
+
+    def open_settings(self):
+        if self.settings_window.state() != "withdrawn":
+            self.settings_window.lift()
+            return
+        self.show("main")
+        self.settings.pack()
+        self.root.update_idletasks()
+        width, height = int(self.settings.cget("width")), int(self.settings.cget("height"))
+        screen_width = self.root.winfo_screenwidth()
+        x = self.root.winfo_x()+self.root.winfo_width()+12
+        if x+width > screen_width:
+            x = max(0, self.root.winfo_x()-width-12)
+        y = max(0, min(self.root.winfo_y(), self.root.winfo_screenheight()-height-40))
+        self.settings_window.geometry(f"{width}x{height}+{x}+{y}")
+        self.settings_window.attributes("-topmost", self.root.attributes("-topmost"))
+        self.settings_window.attributes("-alpha", self.root.attributes("-alpha"))
+        # Export/packaged self-tests intentionally keep the root withdrawn.
+        if self.root.state() != "withdrawn":
+            self.settings_window.deiconify()
+            self.settings_window.lift()
+        self.current = "settings"
 
     def _mapped(self, event):
         if event.widget is self.root and self.root.state() == "normal":
@@ -194,14 +264,16 @@ class FigmaView:
     def show(self, name):
         if name not in self.pages:
             return
-        if self.current == "settings" and name != "settings" and hasattr(self.app,"mode_var"):
-            if not self.app.save_settings():
-                messagebox.showerror("설정 확인",self.app.status.get(),parent=self.root)
-                return
+        if name == "settings":
+            self.open_settings()
+            return
+        if not self.close_settings():
+            return
         if self.app.recording_hotkey and name != "settings":
             self.app._finish_hotkey_recording()
-        for page in self.pages.values():
-            page.pack_forget()
+        for key, page in self.pages.items():
+            if key != "settings":
+                page.pack_forget()
         self.current = name
         page = self.pages[name]
         page.pack()
@@ -251,19 +323,9 @@ class FigmaView:
         self.text(self.main,50,239,"채팅 멤버")
         ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14)).place(x=200,y=237,width=30,height=20)
         self.count = tk.IntVar(value=app.settings["count"])
-        self.slider = tk.Canvas(self.main,width=181,height=32,bg=BG,highlightthickness=0,takefocus=1,cursor="hand2")
+        self.slider = CountSlider(self.main,self._count_changed)
         self.slider.place(x=48,y=267)
-        self.slider.create_line(4,6,177,6,fill="#434547",width=8,capstyle="round")
-        self.slider_active = self.slider.create_line(7,6,7,6,fill="#00c5a5",width=8,capstyle="round")
-        for i in range(5):
-            x = 7+i*42
-            self.slider.create_line(x,1,x,11,fill="#8a8b8c")
-            self.slider.create_text(x,20,text=str(i+1),fill=INK,font=(self.family,-8))
-        self.slider_knob = self.slider.create_oval(1,0,13,12,fill="#2dff8f",outline=INK,width=1)
-        for event in ("<Button-1>","<B1-Motion>"):
-            self.slider.bind(event,lambda e:self._count_changed(max(1,min(5,round((e.x/self.scale-7)/42)+1))))
-        self.slider.bind("<Left>",lambda _:self._count_changed(max(1,self.count.get()-1)))
-        self.slider.bind("<Right>",lambda _:self._count_changed(min(5,self.count.get()+1)))
+        self.slider_active, self.slider_knob = self.slider.active, self.slider.knob
         self.count.trace_add("write",lambda *_:self._draw_count())
         self._draw_count()
         self.text(self.main,138.5,313,"데모 · 1~5명 모두 사용할 수 있어요",8,anchor="center")
@@ -273,9 +335,7 @@ class FigmaView:
         self.app.change_count(value-self.app.settings["count"])
 
     def _draw_count(self):
-        x = 7 + (self.count.get()-1)*42
-        self.slider.coords(self.slider_active, *(v*self.scale for v in (7,6,x,6)))
-        self.slider.coords(self.slider_knob, *(v*self.scale for v in (x-6,0,x+6,12)))
+        self.slider.set_value(self.count.get())
 
     def _settings(self):
         app, page = self.app, self.settings
@@ -297,7 +357,7 @@ class FigmaView:
         app.context = field(page,self,28,227,364,92,multiline=True,component="Settings/Description")
         app.context.insert("1.0",app.settings["context"])
         app.context.bind("<<Modified>>",app._context_changed)
-        app.context.design_surface.create_image(329,14,anchor="nw",image=self.photos["edit"])
+        draw_vector(app.context.design_surface,"edit",329,14)
         counter = tk.Label(app.context.design_surface,textvariable=app.context_count,bg=app.context.cget("bg"),fg=INK,font=(self.family,-8))
         counter.place(x=275,y=70,width=74,height=12)
         self.text(page,30,331,"페르소나")

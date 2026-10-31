@@ -6,13 +6,14 @@ import tempfile
 import tkinter as tk
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 from apps.desktop.export_design import OfflineService
 from apps.desktop.overlay import Overlay
 from backend.personas import PERSONAS
 
 
-@unittest.skipUnless(sys.platform == "win32" or os.environ.get("DISPLAY"), "Native Tk display required")
+@unittest.skipUnless(sys.platform in ("win32","darwin") or os.environ.get("DISPLAY"), "Native Tk display required")
 class DesktopLayoutTests(unittest.TestCase):
     def test_images_text_and_slider_stay_aligned_at_desktop_scales(self):
         for factor in (1.0, 1.25, 1.5):
@@ -20,7 +21,7 @@ class DesktopLayoutTests(unittest.TestCase):
                 root = tk.Tk()
                 root.withdraw()
                 try:
-                    with patch("apps.desktop.figma_ui.display_scale",return_value=factor), patch.object(Overlay,"refresh_service_usage",lambda _:None):
+                    with patch("apps.desktop.figma_ui.display_scale",return_value=factor), patch("apps.desktop.vector.sys",SimpleNamespace(platform="win32")), patch.object(Overlay,"refresh_service_usage",lambda _:None):
                         app = Overlay(root,Path(directory),service=OfflineService(),enable_hotkey=False,window_list=lambda:[])
                     view = app.view
                     root.update_idletasks()
@@ -32,8 +33,16 @@ class DesktopLayoutTests(unittest.TestCase):
                                 self.assertEqual(int(root.tk.call("image","width",name)),int(page.cget("width")))
                     app.view._count_changed(5)
                     knob = view.slider.coords(view.slider_knob)
-                    self.assertAlmostEqual((knob[0]+knob[2])/2,175*factor)
+                    self.assertAlmostEqual((knob[0]+knob[2])/2,169*factor)
                     self.assertEqual(app.settings["count"],5)
+                    view.show("settings")
+                    root.update_idletasks()
+                    self.assertEqual(view.main.winfo_manager(),"pack")
+                    self.assertEqual(int(view.settings.cget("width")),round(420*factor))
+                    self.assertEqual(str(view.settings_window.transient()),str(root))
+                    for page in (view.main,view.settings):
+                        header = next(item for item in page.find_all() if page.type(item)=="image" and any(tag.startswith("vector-header-") for tag in page.gettags(item)))
+                        self.assertEqual(int(root.tk.call("image","width",page.itemcget(header,"image"))),round(70*factor))
                     for key in PERSONAS:
                         app.persona_vars[0].set(PERSONAS[key]["name"])
                         view.refresh_persona()

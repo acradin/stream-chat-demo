@@ -93,7 +93,7 @@ class FigmaView:
         self.root.minsize(1, 1)
         configure_window(self.root)
         # Linux retains WM management for topmost/minimize, with Motif decorations disabled.
-        self.root.overrideredirect(not sys.platform.startswith("linux"))
+        self.root.overrideredirect(sys.platform == "win32")
         self.root.bind("<Map>", self._mapped, add="+")
         self.root.bind("<Alt-F4>", lambda _: app.close())
         self.root.bind("<Escape>", self._escape)
@@ -105,19 +105,24 @@ class FigmaView:
         self.settings_window.transient(self.root)
         self.settings_window.resizable(False, False)
         configure_window(self.settings_window)
-        self.settings_window.overrideredirect(not sys.platform.startswith("linux"))
+        self.settings_window.overrideredirect(sys.platform == "win32")
         self.settings_window.protocol("WM_DELETE_WINDOW", self.close_settings)
         self.settings_window.bind("<Escape>", self._escape)
         self.settings_window.bind("<Map>", self._settings_mapped, add="+")
         self.photos = {name: asset(self.root, name) for name in PERSONA_ASSETS.values()}
+        for key, name in PERSONA_ASSETS.items():
+            self.photos["member-"+key] = ImageTk.PhotoImage(
+                ImageTk.getimage(self.photos[name]).resize((38,36), Image.Resampling.LANCZOS), master=self.root)
         self.main = self._page("main", 277, 347)
-        self.settings = self._page("settings", 420, 491)
+        self.settings = self._page("settings", 420, 540)
         self.controls = self._page("controls", 420, 690)
         self.chat = self._page("chat", 420, 530)
+        self.chzzk = self._page("chzzk", 420, 620)
         self._main()
         self._settings()
         self._controls()
         self._chat()
+        self._chzzk()
         self._menu()
         from apps.desktop.onboarding import Onboarding
         self.onboarding = Onboarding(self)
@@ -178,7 +183,7 @@ class FigmaView:
 
     def _menu(self):
         self.menu = tk.Menu(self.root,tearoff=False)
-        for title,name in (("메인","main"),("설정","settings"),("사용 방식 / 서비스 연결","controls"),("채팅 보기","chat")):
+        for title,name in (("메인","main"),("설정","settings"),("사용 방식 / 서비스 연결","controls"),("채팅 보기","chat"),("치지직 전송","chzzk")):
             self.menu.add_command(label=title,command=lambda page=name: self.show(page))
         self.menu.add_separator()
         self.menu.add_command(label="설정 적용",command=self.app.save_settings)
@@ -209,7 +214,7 @@ class FigmaView:
 
     def _settings_mapped(self, event):
         if event.widget is self.settings_window and self.settings_window.state() == "normal":
-            self.settings_window.overrideredirect(not sys.platform.startswith("linux"))
+            self.settings_window.overrideredirect(sys.platform == "win32")
             mapped(self.settings_window)
 
     def minimize_settings(self):
@@ -248,11 +253,12 @@ class FigmaView:
         if self.root.state() != "withdrawn":
             self.settings_window.deiconify()
             self.settings_window.lift()
+            self.settings_window.focus_set()
         self.current = "settings"
 
     def _mapped(self, event):
         if event.widget is self.root and self.root.state() == "normal":
-            self.root.overrideredirect(not sys.platform.startswith("linux"))
+            self.root.overrideredirect(sys.platform == "win32")
             # Keep a frameless native window available in taskbar and Alt+Tab.
             mapped(self.root)
             apply_window_icon(self.root)
@@ -285,7 +291,7 @@ class FigmaView:
     def _content(self, page, y=66, bottom=24):
         width = int(page.cget("width"))-56
         height = int(page.cget("height"))-y-bottom
-        if page is self.chat:
+        if page in (self.chat, self.chzzk):
             frame = ttk.Frame(page)
             frame.place(x=28, y=y, width=width, height=height)
             return frame
@@ -328,7 +334,8 @@ class FigmaView:
         self.slider_active, self.slider_knob = self.slider.active, self.slider.knob
         self.count.trace_add("write",lambda *_:self._draw_count())
         self._draw_count()
-        self.text(self.main,138.5,313,"데모 · 1~5명 모두 사용할 수 있어요",8,anchor="center")
+        self.chat_button = DesignButton(self.main,self,"채팅 보기",lambda:self.show("chat"),28,305,107,29)
+        self.chzzk_button = DesignButton(self.main,self,"치지직 전송",lambda:self.show("chzzk"),142,305,107,29)
 
     def _count_changed(self, value):
         self.count.set(value)
@@ -353,19 +360,26 @@ class FigmaView:
         app.hotkey_entry.bind("<FocusOut>",app._hotkey_focus_lost)
         app.hotkey_record = DesignButton(page,self,"변경",app.record_hotkey,311,161,height=29)
         app.hotkey_hint = tk.StringVar(value="키 조합을 입력하고 메인으로 돌아가면 저장됩니다.")
-        self.text(page,30,203,"방송 설명")
+        tk.Label(page,textvariable=app.hotkey_hint,bg=BG,fg=MUTED,font=(self.family,-8),anchor="w").place(x=31,y=193,width=358,height=11)
+        self.text(page,30,210,"방송 설명")
         app.context = field(page,self,28,227,364,92,multiline=True,component="Settings/Description")
         app.context.insert("1.0",app.settings["context"])
         app.context.bind("<<Modified>>",app._context_changed)
         draw_vector(app.context.design_surface,"edit",329,14)
         counter = tk.Label(app.context.design_surface,textvariable=app.context_count,bg=app.context.cget("bg"),fg=INK,font=(self.family,-8))
         counter.place(x=275,y=70,width=74,height=12)
-        self.text(page,30,331,"페르소나")
+        self.persona_heading = self.text(page,30,331,"페르소나")
         self.persona_image = page.create_image(28,355,anchor="nw",image=self.photos["persona-witty"])
         self.persona_title = self.text(page,89,355,"")
         self.persona_description = self.text(page,89,375,"",12,fill="#eaeaea",width=210)
         app.persona_preview = tk.StringVar()
-        DesignButton(page,self,"수정",lambda:self.onboarding.select_personas(),313,365,height=29)
+        DesignButton(page,self,"수정",lambda:self.onboarding.select_personas(),313,329,height=29)
+        self.persona_members = []
+        for index in range(5):
+            x = 28+72*index
+            avatar = page.create_image(x,359,anchor="nw",image=self.photos["member-witty_friend"],state="hidden")
+            label = page.create_text(x+19,403,text="",anchor="center",fill=INK,font=(self.family,-8),state="hidden")
+            self.persona_members.append((avatar,label))
         self.text(page,30,415,"사용량")
         self.usage_caption = self.text(page,30,439,"이번 달 생성 요청",8)
         self.usage_value = self.text(page,372,439,"—",8,anchor="ne")
@@ -373,6 +387,14 @@ class FigmaView:
         # There is no server quota contract yet; an empty rail must not imply a made-up limit.
         for item in (self.usage_caption,self.usage_value,self.usage_track):
             page.tag_bind(item,"<Button-1>",lambda _:self.show("controls"))
+        tk.Label(page,textvariable=app.status,bg=BG,fg=MUTED,font=(self.family,-9),anchor="w",justify="left",wraplength=260).place(x=28,y=486,width=270,height=38)
+        self.save_button = DesignButton(page,self,"저장",self.save_settings,311,493,height=29)
+
+    def save_settings(self):
+        if not self.app.save_settings():
+            messagebox.showerror("설정 확인", self.app.status.get(), parent=self.settings_window)
+            return False
+        return True
 
     def refresh_persona(self,index=0):
         selected = self.app.persona_vars[index].get()
@@ -381,6 +403,18 @@ class FigmaView:
         self.settings.itemconfigure(self.persona_title,text=persona["name"])
         self.settings.itemconfigure(self.persona_description,text=persona["description"])
         self.settings.itemconfigure(self.persona_image,image=self.photos[PERSONA_ASSETS.get(key,"persona-witty")])
+        count = self.app.settings["count"]
+        multiple = count > 1
+        self.settings.itemconfigure(self.persona_heading,text=f"페르소나 · {count}명")
+        for item in (self.persona_image,self.persona_title,self.persona_description):
+            self.settings.itemconfigure(item,state="hidden" if multiple else "normal")
+        by_name = {p["name"]:key for key,p in PERSONAS.items()}
+        for slot,(avatar,label) in enumerate(self.persona_members):
+            visible = multiple and slot < count
+            name = self.app.persona_vars[slot].get()
+            member = by_name[name]
+            self.settings.itemconfigure(avatar,image=self.photos["member-"+(member if member in PERSONA_ASSETS else "witty_friend")],state="normal" if visible else "hidden")
+            self.settings.itemconfigure(label,text=name,state="normal" if visible else "hidden")
 
     def refresh_usage(self,usage):
         label = "이번 달 생성 요청" + (" · 데모" if usage and usage["is_demo"] else "")
@@ -390,25 +424,16 @@ class FigmaView:
         self.settings.itemconfigure(self.usage_value,text=f"{usage['generation_requests']:,}회 · 한도 미설정" if usage else "확인 중")
 
     def _controls(self):
-        from apps.desktop.overlay import MODES, DESTINATIONS
+        from apps.desktop.overlay import MODES
         app, frame = self.app, self._content(self.controls)
         app.chat_tab = frame
-        app.channel_controls = ttk.Frame(frame)
-        app.channel_controls.pack(fill="x")
-        app.channel_check = ttk.Button(app.channel_controls,text="치지직 연결 확인",command=app.refresh_channel)
-        app.channel_check.pack(fill="x")
-        ttk.Label(app.channel_controls,textvariable=app.channel_info,wraplength=350).pack(fill="x",pady=6)
+        ttk.Button(frame,text="치지직 인증 / 전송 설정",command=lambda:self.show("chzzk")).pack(fill="x",pady=(0,8))
         ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED).pack(fill="x",pady=6)
         self._label(frame, "사용 방식")
         app.mode_var = tk.StringVar(value=next(label for label, value in MODES.items() if value == app.settings["mode"]))
         app.mode_selector = ttk.Combobox(frame, textvariable=app.mode_var, values=list(MODES), state="readonly")
         app.mode_selector.pack(fill="x", pady=(0, 10))
         app.mode_selector.bind("<<ComboboxSelected>>", app._mode_changed)
-        self._label(frame, "채팅 표시 위치")
-        app.destination_var = tk.StringVar(value=next(label for label, value in DESTINATIONS.items() if value == app.settings["destination"]))
-        app.destination_selector = ttk.Combobox(frame, textvariable=app.destination_var, values=list(DESTINATIONS), state="readonly")
-        app.destination_selector.pack(fill="x", pady=(0, 10))
-        app.destination_selector.bind("<<ComboboxSelected>>", app._destination_changed)
         self._label(frame, "멤버별 페르소나")
         app.persona_rows = []
         for index, variable in enumerate(app.persona_vars):
@@ -461,6 +486,7 @@ class FigmaView:
     def _chat(self):
         app, frame = self.app, self._content(self.chat)
         self._label(frame, "생성된 채팅", font=(self.family, 11, "bold"))
+        self._label(frame, "전송 여부와 관계없이 생성된 채팅을 모아 보여줍니다.", foreground=MUTED, wraplength=355)
         app.chat_log = scrolledtext.ScrolledText(frame, height=14, wrap="word", state="disabled", relief="flat",
                                                 bg=BG, fg=INK, padx=4, pady=4)
         app.chat_log.pack(fill="both", expand=True)
@@ -468,6 +494,37 @@ class FigmaView:
         app.chat_log.tag_configure("error", foreground="#ff938b")
         ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED).pack(fill="x", pady=8)
         ttk.Button(frame, text="화면 캡처 / 실시간 시작·중지", command=app.generate).pack(fill="x")
+
+    def _chzzk(self):
+        from apps.desktop.overlay import DESTINATIONS
+        app, frame = self.app, self._content(self.chzzk)
+        self._label(frame,"치지직 전송",font=(self.family,11,"bold"))
+        self._label(frame,"방송 계정으로 인증한 뒤 전송을 켜세요.\n생성된 채팅은 앱에서도 항상 볼 수 있습니다.",foreground=MUTED)
+        self._label(frame,"방송 링크")
+        app.delivery_channel_entry = ttk.Entry(frame,textvariable=app.channel_var)
+        app.delivery_channel_entry.pack(fill="x",pady=(0,8))
+        app.channel_controls = ttk.Frame(frame)
+        app.channel_controls.pack(fill="x")
+        app.channel_authorize = ttk.Button(app.channel_controls,text="치지직 인증",command=app.authorize_channel)
+        app.channel_authorize.pack(side="left")
+        app.channel_check = ttk.Button(app.channel_controls,text="연결 확인",command=app.refresh_channel)
+        app.channel_check.pack(side="left",padx=6)
+        app.auth_copy = ttk.Button(app.channel_controls,text="인증 링크 복사",command=app.copy_authorization_link,state="disabled")
+        app.auth_copy.pack(side="right")
+        ttk.Label(frame,textvariable=app.channel_info,wraplength=355).pack(fill="x",pady=(8,4))
+        app.auth_info = tk.StringVar(value="인증 버튼을 누르면 브라우저에서 치지직 승인을 진행합니다.")
+        ttk.Label(frame,textvariable=app.auth_info,wraplength=355,foreground=MUTED).pack(fill="x",pady=(0,8))
+        app.destination_var = tk.StringVar(value=next(label for label,value in DESTINATIONS.items() if value == app.settings["destination"]))
+        app.send_enabled = tk.BooleanVar(value=app.settings["destination"] == "chzzk")
+        app.destination_selector = ttk.Checkbutton(frame,text="치지직으로 전송",variable=app.send_enabled,command=app.toggle_delivery)
+        app.destination_selector.pack(anchor="w",pady=(0,4))
+        self._label(frame,"켜면 다음 생성부터 방송에 전송합니다. 관찰 중에는 먼저 중지해주세요.",foreground=MUTED,wraplength=355)
+        ttk.Button(frame,text="실시간 관찰 중지",command=app.stop_live).pack(fill="x",pady=(0,8))
+        self._label(frame,"전송 내역",font=(self.family,10,"bold"))
+        app.delivery_log = scrolledtext.ScrolledText(frame,height=5,wrap="word",state="disabled",relief="flat",bg=BG,fg=INK,padx=4,pady=4)
+        app.delivery_log.pack(fill="both",expand=True)
+        app.delivery_log.tag_configure("name",foreground=MINT)
+        app.delivery_log.tag_configure("error",foreground="#ff938b")
 
     def refresh(self):
         usage = self.app.service.usage()

@@ -1,4 +1,4 @@
-"""Public, browser-isolated Mock demo alongside the private desktop service."""
+"""Public, browser-isolated demo alongside the private desktop service."""
 
 import json
 from pathlib import Path
@@ -22,10 +22,14 @@ HEADERS = {
 
 
 class PublicWeb:
-    def __init__(self, directory, origin, *, clock=time.monotonic, capacity=128, ttl=1800, max_records=100):
+    def __init__(self, directory, origin, *, clock=time.monotonic, capacity=128, ttl=1800, max_records=100, provider=None):
         self.directory = Path(directory).resolve()
         self.origin, self.clock = origin, clock
         self.capacity, self.ttl, self.max_records = capacity, ttl, max_records
+        self.provider = provider or MockManualProvider(.2)
+        self.is_live = self.provider.provider != "mock"
+        if self.is_live:
+            self.max_records = min(max_records,10)
         self.sessions = {}
         self.files = {}
         for path in self.directory.rglob("*"):
@@ -73,11 +77,16 @@ class PublicWeb:
                 if len(self.sessions) >= self.capacity:
                     return web.json_response({"error": "접속이 많습니다. 잠시 후 다시 시도해주세요."}, status=503)
                 cookie = secrets.token_urlsafe(32)
-                session = ManualSession(MockManualProvider(.2), self.directory, persist=False)
+                session = ManualSession(self.provider, self.directory, persist=False,
+                                        cooldown_s=3 if self.is_live else 1,
+                                        max_age_s=40 if self.is_live else 8, timeout_s=35 if self.is_live else 20)
             else:
                 session = entry[0]
             self.sessions[cookie] = (session, now)
-            response = web.json_response(session.config())
+            config = session.config()
+            config.update(provider="tiki",model="",session_limit=self.max_records,
+                          remaining_requests=max(0,self.max_records-len(session.records)))
+            response = web.json_response(config)
             response.set_cookie(COOKIE, cookie, max_age=self.ttl, secure=True, httponly=True, samesite="Lax", path="/")
             return response
         if entry is None:
@@ -85,7 +94,9 @@ class PublicWeb:
         session = entry[0]
         self.sessions[cookie] = (session, now)
         if request.path == "/api/export":
-            return web.Response(text=session.export(), content_type="application/x-ndjson",
+            fields = {"request_id","status","persona","channel_context","comment","api_latency_ms","button_to_display_ms","model_calls"}
+            exported = "".join(json.dumps({key:value for key,value in record.items() if key in fields},ensure_ascii=False)+"\n" for record in session.records.values())
+            return web.Response(text=exported, content_type="application/x-ndjson",
                                 headers={"Content-Disposition": 'attachment; filename="tiki-demo.jsonl"'})
         supplied = request.headers.get("X-Demo-Token", "")
         if not secrets.compare_digest(supplied.encode(), session.session_token.encode()):
@@ -94,7 +105,13 @@ class PublicWeb:
             raise ValueError("JSON required")
         payload = await request.clone(client_max_size=16 * 1024).json()
         if request.path == "/api/trigger":
-            if len(session.records) >= self.max_records:
+            data = session._validate_trigger(payload)
+            repeated = data["client_request_id"] in session.client_requests
+            if not repeated and len(session.records) >= self.max_records:
                 return web.json_response({"status": "error", "error": "이번 데모 세션의 체험 횟수를 모두 사용했습니다. 잠시 후 다시 방문해주세요."}, status=429)
-            return web.json_response(await session.trigger(payload))
+            result = await session.trigger(payload)
+            return web.json_response(result)
         return web.json_response(session.acknowledge(payload))
+
+    async def close(self):
+        await self.provider.close()

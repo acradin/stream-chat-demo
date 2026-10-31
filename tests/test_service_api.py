@@ -105,6 +105,39 @@ class ServiceApiTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("OpenAI", json.dumps(result))
         self.assertNotIn("sk-private", json.dumps(result))
 
+    async def test_desktop_authorization_is_authenticated_and_validates_target_and_url(self):
+        calls = []
+        target = "b"*32
+        reply = {"channel_id":target,"expires_in":600,
+                 "authorization_url":"https://chzzk.naver.com/account-interlock?clientId=app&state=test-state"}
+        async def authorize(request):
+            calls.append((request.path, request.headers.get("Authorization"), await request.json()))
+            return web.json_response(reply)
+        app = web.Application()
+        app.router.add_post("/api/chzzk/authorize",authorize)
+        server = TestServer(app)
+        await server.start_server()
+        self.addAsyncCleanup(server.close)
+        client = ServiceClient(base_url=str(server.make_url("")),token=TOKEN_A)
+        link = "https://chzzk.naver.com/live/"+target
+        self.assertEqual(await client.authorize_chzzk(link),reply)
+        self.assertEqual(calls,[("/api/chzzk/authorize","Bearer "+TOKEN_A,{"channel_url":link})])
+        original = dict(reply)
+        for change in ({"channel_id":"a"*32},{"expires_in":True},{"expires_in":601},
+                       {"authorization_url":"https://evil.example/account-interlock?state=x"},
+                       {"authorization_url":"https://chzzk.naver.com@evil.example/account-interlock?state=x"},
+                       {"authorization_url":"https://chzzk.naver.com/account-interlock"}):
+            reply.clear()
+            reply.update({**original,**change})
+            with self.assertRaises(ValueError):
+                await client.authorize_chzzk(link)
+        self.assertEqual(self.providers,[])
+
+    async def test_authorization_unavailable_on_old_server_is_actionable(self):
+        with self.assertRaisesRegex(ValueError,"배포된 서버"):
+            await self.client.authorize_chzzk("b"*32)
+        self.assertEqual(self.providers,[])
+
     async def test_client_never_follows_redirect_with_screenshot(self):
         reached = []
         async def redirect(request):

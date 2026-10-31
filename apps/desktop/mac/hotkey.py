@@ -1,6 +1,6 @@
 """Cmd-aware native key monitors. Events are neither recorded nor transmitted."""
 
-MODIFIERS = {"Ctrl": 1 << 18, "Alt": 1 << 19, "Shift": 1 << 17, "Cmd": 1 << 20}
+MODIFIERS = {"Cmd": 1 << 20, "Ctrl": 1 << 18, "Option": 1 << 19, "Shift": 1 << 17}
 KEYS = dict(zip("ASDFHGZXCVBQWERYT123465=97-80]OU[IPLJ'K;\\,/NM.",
                 (0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,37,38,39,40,41,42,43,44,45,46,47)))
 # Physical ANSI keys are stable with a Korean input source too.
@@ -17,7 +17,7 @@ for symbol, name in {"=":"Equals", "-":"Minus", "[":"BracketLeft", "]":"BracketR
                      "'":"Quote", ";":"Semicolon", "\\":"Backslash", ",":"Comma", ".":"Period", "/":"Slash"}.items():
     KEYS[name] = KEYS.pop(symbol)
 ALIASES = {name.casefold(): name for name in (*MODIFIERS, *KEYS)}
-ALIASES.update({"control":"Ctrl", "option":"Alt", "opt":"Alt", "command":"Cmd", "⌘":"Cmd",
+ALIASES.update({"control":"Ctrl", "alt":"Option", "opt":"Option", "command":"Cmd", "⌘":"Cmd",
                 "win":"Cmd", "windows":"Cmd", "super":"Cmd", "return":"Enter", "esc":"Escape",
                 "spacebar":"Space", "pgup":"PageUp", "pgdn":"PageDown", "del":"Delete"})
 MODIFIER_MASK = sum(MODIFIERS.values())
@@ -33,7 +33,7 @@ def parse_hotkey(value):
     key = keys[0]
     modifiers = [name for name in MODIFIERS if name in parts]
     if not modifiers and not (key.startswith("F") and key[1:].isdigit()):
-        raise ValueError("일반 키에는 Ctrl/Alt/Shift/Cmd를 함께 눌러주세요.")
+        raise ValueError("일반 키에는 Cmd/Control/Option/Shift를 함께 눌러주세요.")
     return "+".join([*modifiers, key]), sum(MODIFIERS[name] for name in modifiers), KEYS[key]
 
 

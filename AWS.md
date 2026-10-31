@@ -10,9 +10,10 @@
 - 서비스 주소: `https://tiki-chat.duckdns.org`.
 - 백엔드 설치와 내부 `/healthz`, 공개 HTTPS `/healthz`, 인증된 `/api/usage` 검사 통과. `check` 결과: `HTTPS and authenticated service verified`.
 - DuckDNS A 레코드는 `52.200.103.213`으로 반영됐습니다. 이 도메인을 쓰는 데 추가 도메인 구매나 Route 53 등록은 필요하지 않습니다.
-- Caddy 인증서 발급 완료. 치지직 콜백은 `https://tiki-chat.duckdns.org/oauth/chzzk/callback`이며 사용자가 개발자 센터 redirect URL 수정 완료를 확인했습니다. 원격 승인 왕복 검증은 아직 남아 있습니다.
-- 루트 `/`는 `apps/web`의 React 프론트엔드입니다. 공개 웹은 예시 채팅을 생성하는 Mock 데모이며 유료 AI 호출·치지직 전송을 하지 않습니다. 데스크톱 생성·사용량·치지직 API는 계속 서비스 인증이 필요합니다. 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
-- 웹 세션은 Secure/HttpOnly 쿠키로 방문자마다 분리합니다. 서버 메모리에 최대 128세션, 세션당 100회 생성, 30분 비활성 만료로 제한하며 재배포 시 초기화됩니다. 웹 입력·예시 채팅을 서버 디스크에 기록하지 않습니다.
+- Caddy 인증서 발급 완료. 치지직 콜백은 `https://tiki-chat.duckdns.org/oauth/chzzk/callback`이며 redirect URL 수정과 상대방 방송 계정의 승인·전송을 확인했습니다.
+- 루트 `/`는 최신 `feat/demo-frontend`를 통합한 React 프론트엔드입니다. 공개 웹에서 입력한 방송 설명과 페르소나로 OpenAI 텍스트 채팅을 생성합니다. 영상 분석·치지직 전송은 하지 않습니다. 데스크톱 생성·사용량·치지직 API는 계속 서비스 인증이 필요합니다. 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
+- 웹 세션은 Secure/HttpOnly 쿠키로 방문자마다 분리됩니다. 최대 128세션, 세션당 10회, 30분 비활동 만료이며 세션은 재배포 때 초기화됩니다. 전체 방문자 합계 UTC 하루 100회, 동시 OpenAI 호출 최대 2개입니다. 일일 호출 횟수만 상태 디스크에 저장해 재시작 후에도 한도를 유지하고 실패한 호출도 계산합니다. 웹 입력·채팅 내용은 서버 디스크에 기록하지 않습니다.
+- GitHub push는 AWS에 자동 반영되지 않습니다. 현재 Actions는 Mac/Linux 앱 빌드용이며, 웹 빌드 후 아래 `deploy` 명령으로 기존 EC2를 갱신합니다. 이번 재배포 후 HTTPS/인증 검사와 공개 웹 실제 AI 생성 1회를 통과했습니다.
 
 초기 Ubuntu 설치에서 APT의 `awscli` 패키지를 찾지 못한 문제는 공식 AWS CLI v2 설치 파일로 수정했습니다. 같은 서버에서 초기 설정을 복구하고 백엔드를 설치했습니다. 이전 cloud-init 실패 기록이 있어도 완료 표시 파일이 있는 경우에만 배포를 계속합니다.
 
@@ -54,7 +55,7 @@ npm.cmd --prefix apps/web run build
 
 결과는 `dist/aws/`에 있습니다.
 
-- `stream-chat-backend.tar.gz`: 백엔드, 웹용 Mock 세션 코드, 서버 실행 파일, 빌드된 `apps/web/dist` 공개 파일을 포함. 웹 빌드가 없으면 기존 안내 화면만 제공하므로 배포 전 위 빌드를 실행합니다.
+- `stream-chat-backend.tar.gz`: 백엔드, 웹 세션·AI 생성 코드, 서버 실행 파일, 빌드된 `apps/web/dist` 공개 파일을 포함. 웹 빌드가 없으면 기존 안내 화면만 제공하므로 배포 전 위 빌드를 실행합니다.
 - `cloudformation.json`: 생성할 AWS 리소스 설정. 비밀 값 없음.
 - `manifest.json`: 파일 목록과 압축파일 SHA-256.
 
@@ -103,6 +104,6 @@ npm.cmd --prefix apps/web run build
 - 설치 또는 내부 상태 검사 실패 시 직전 코드·서버 설정으로 복구를 시도합니다. 실제 EC2에서의 복구 검증은 최초 배포 때 진행해야 합니다. 공개 DNS/인증서 문제는 코드 복구 대신 `check`로 재확인합니다.
 - SSM → Run Command에서 출력된 명령 ID로 설치 결과를 확인합니다. Session Manager에서 `sudo systemctl status stream-chat caddy`, `sudo journalctl -u stream-chat -n 50`으로 서버를 확인할 수 있습니다. 키 파일 내용을 출력하거나 공유하지 않습니다.
 - EBS 데이터 볼륨 역할을 하는 루트 디스크는 인스턴스 종료 후에도 보존하도록 설정했습니다. 스택 삭제 시 소스 S3 버킷도 보존됩니다. 이들과 별도로 만든 SSM 설정 파라미터는 자동 삭제되지 않으므로, 완전 종료할 때는 필요한 데이터를 백업한 뒤 AWS 콘솔에서 잔여 리소스를 확인합니다. EC2를 정지해도 디스크·공인 IP 요금은 발생할 수 있습니다.
-- AWS 계정 인증, CloudFormation 생성, 실제 Linux 부팅, SSM 관리 연결, 백엔드 설치와 내부 상태, 공개 DNS/TLS 및 인증된 사용량 API를 확인했습니다. 배포 서버를 통한 실제 AI 생성과 상대방의 치지직 승인은 아직 검증하지 않았습니다.
+- AWS 계정 인증, CloudFormation 생성, 실제 Linux 부팅, SSM 관리 연결, 백엔드 설치와 내부 상태, 공개 DNS/TLS 및 인증된 사용량 API를 확인했습니다. 공개 웹 실제 AI 생성 1회와 상대방 방송 계정의 치지직 승인·전송도 검증했습니다. 이번 웹 배포 검사에서는 방송 채팅을 전송하지 않았습니다.
 
 구성 근거: [Ubuntu AMI](https://ubuntu.com/aws/docs/aws-how-to/instances/build-cloudformation-templates/), [SSM Ubuntu 지원](https://docs.aws.amazon.com/systems-manager/latest/userguide/agent-install-ubuntu.html), [Parameter Store Standard](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html), [Caddy HTTPS](https://caddyserver.com/docs/automatic-https).

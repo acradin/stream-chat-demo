@@ -9,7 +9,7 @@ import json
 import os
 import re
 import threading
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 import aiohttp
 
@@ -61,7 +61,7 @@ class ServiceClient:
                     candidate[key] = max(candidate[key], previous[key])
         self._usage = candidate
 
-    async def _request(self, method, path, payload=None, *, timeout=165):
+    async def _request(self, method, path, payload=None, *, timeout=165, errors=None):
         if not self._token:
             raise ValueError("서비스 연결이 준비되지 않았습니다. 운영자에게 문의해주세요.")
         try:
@@ -69,8 +69,9 @@ class ServiceClient:
                 async with session.request(method, self.base_url + path, json=payload,
                         headers={"Authorization": "Bearer " + self._token}, allow_redirects=False) as response:
                     if response.status != 200:
-                        raise ValueError({401: "서비스 인증이 만료되었거나 유효하지 않습니다.",
-                                          413: "캡처한 화면 데이터가 너무 큽니다."}.get(
+                        raise ValueError({400: "앱의 요청을 처리하지 못했습니다. 앱과 서버를 최신 버전으로 다시 실행해주세요.",
+                                          401: "서비스 인증이 만료되었거나 유효하지 않습니다.",
+                                          413: "캡처한 화면 데이터가 너무 큽니다.", **(errors or {})}.get(
                                               response.status, "서비스 연결에 실패했습니다. 잠시 후 다시 시도해주세요."))
                     chunks, size = [], 0
                     async for chunk in response.content.iter_chunked(65536):
@@ -96,6 +97,27 @@ class ServiceClient:
             raise ValueError("치지직 연결 상태를 확인할 수 없습니다.")
         if value["connected"]:
             parse_channel_id(value["channelId"])
+        return value
+
+    async def authorize_chzzk(self, channel_url):
+        target = parse_channel_id(channel_url)
+        value = await self._request("POST", "/api/chzzk/authorize", {"channel_url": channel_url}, timeout=30,
+                                    errors={400: "방송 링크와 서비스의 치지직 인증 설정을 확인해주세요.",
+                                            404: "이 서버는 앱 인증을 지원하지 않습니다. 서비스 연결에서 배포된 서버 주소를 설정해주세요."})
+        if (not isinstance(value, dict) or value.get("channel_id") != target
+                or type(value.get("expires_in")) is not int or not 1 <= value["expires_in"] <= 600
+                or not isinstance(value.get("authorization_url"), str)):
+            raise ValueError("치지직 인증 안내를 확인할 수 없습니다.")
+        try:
+            parts = urlsplit(value["authorization_url"])
+            query = parse_qs(parts.query)
+            valid = (parts.scheme == "https" and parts.netloc == "chzzk.naver.com"
+                     and parts.path == "/account-interlock" and not parts.fragment
+                     and len(query.get("state", [])) == 1 and bool(query["state"][0]))
+        except ValueError:
+            valid = False
+        if not valid:
+            raise ValueError("안전한 치지직 인증 주소를 확인할 수 없습니다.")
         return value
 
     @staticmethod

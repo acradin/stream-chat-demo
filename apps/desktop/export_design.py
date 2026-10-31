@@ -283,7 +283,7 @@ def export():
                                                            side_fade="abs(1 - 2*y/max(1,height-1))"))),
         window=dict(default_opacity=1, allowed_opacity=[.6, 1], default_topmost=True,
                     frameless=True, resizable=False, drag_header_height_px=62),
-        page_sizes_px=dict(main=[277,347], settings=[420,491], controls=[420,690], chat=[420,530],
+        page_sizes_px=dict(main=[277,347], settings=[420,540], controls=[420,690], chat=[420,530], chzzk=[420,620],
                            start=[277,347], start1=[339,430], start2=[339,775], start3=[339,286], start_end=[277,347]),
         fonts=dict(default_family_preference=["Pretendard", "맑은 고딕"], default_size_px=12,
                    sizes_px=[8,11,12,14,16,24], title_and_usage_family="Pretendard SemiBold",

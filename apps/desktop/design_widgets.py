@@ -105,4 +105,14 @@ def field(parent, view, x, y, width, height, *, variable=None, multiline=False,
             refresh()
     canvas.place(x=x,y=y,width=width,height=height)
     widget.design_surface = canvas
+    def select_all(event):
+        if multiline:
+            widget.tag_add("sel", "1.0", "end-1c")
+        else:
+            widget.selection_range(0, "end")
+            widget.icursor("end")
+        return "break"
+    widget.bind("<Control-a>", select_all)
+    if widget.tk.call("tk", "windowingsystem") == "aqua":
+        widget.bind("<Command-a>", select_all)
     return widget

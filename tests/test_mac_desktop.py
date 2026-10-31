@@ -86,8 +86,9 @@ class MacShortcutTests(unittest.TestCase):
         application.sharedApplication.assert_not_called()
 
     def test_cmd_option_and_physical_key_mapping(self):
-        self.assertEqual(hotkey.parse_hotkey("command+shift+g"), ("Shift+Cmd+G", (1 << 17) | (1 << 20), 5))
-        self.assertEqual(hotkey.parse_hotkey("option+Space"), ("Alt+Space", 1 << 19, 49))
+        self.assertEqual(hotkey.parse_hotkey("command+shift+g"), ("Cmd+Shift+G", (1 << 17) | (1 << 20), 5))
+        self.assertEqual(hotkey.parse_hotkey("option+Space"), ("Option+Space", 1 << 19, 49))
+        self.assertEqual(hotkey.parse_hotkey("alt+Space"), ("Option+Space", 1 << 19, 49))
         self.assertEqual(hotkey.parse_hotkey("F12"), ("F12", 0, 111))
         for invalid in (None, "A", "Cmd", "Cmd+Cmd+G", "Cmd+invalid", "F25"):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):

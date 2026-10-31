@@ -2,9 +2,10 @@
 
 ## 최신 상태 · 2026-11-01 Figma v2 / Linux / 공개 웹
 
-- 아래 과거 배포 준비 기록보다 이 절이 우선합니다. AWS `us-east-1` 배포와 DuckDNS HTTPS 연결을 완료했습니다. `https://tiki-chat.duckdns.org/`는 팀원 React 웹 프론트이며 방문자별 Mock 체험입니다. 실제 AI·치지직 전송은 하지 않습니다. 데스크톱 API는 계속 서비스 토큰 인증을 요구합니다.
-- 공개 웹은 `backend/public_web.py`: 메모리 세션, 30분 TTL, 최대 128개 세션/세션당 100개 기록, 쿠키·Origin·CSRF 확인. `npm run build`를 `apps/web`에서 실행한 다음 AWS 패키지/배포를 진행합니다. 웹 디자인에는 데스크톱 Figma 변경을 적용하지 않았습니다.
-- `prompt.zip`과 Figma v2의 메인 277×347, 설정 420×491, 시작 안내 5개 화면을 공통 Tk UI에 적용했습니다. 원본 SVG/PNG와 Pretendard 3개 굵기를 저장소에 포함합니다. 인원 1~5명, 기존 설정·서비스 연결·두 생성 모드를 유지합니다. 로고 클릭/우클릭으로 사용 방식과 채팅 메뉴를 엽니다.
+- 메인 하단의 **채팅 보기**와 **치지직 전송**이 별도 화면입니다. 후자에서 방송 링크 → 인증(브라우저 승인/앱 상태 확인) → 전송 스위치를 켭니다. 인증 시작 및 서비스 연결 변경 시 전송을 끄며 자동으로 다시 켜지 않습니다. 수동/실시간 전송 내역은 `delivery_log`, 생성 결과는 `chat_log`에 분리합니다. 현재 개발 PC의 무시된 `apps/desktop/.env`는 AWS 주소로 변경했고 기존 서비스 토큰을 유지했습니다.
+- 아래 과거 배포 준비 기록보다 이 절이 우선합니다. AWS `us-east-1` 배포와 DuckDNS HTTPS 연결을 완료했습니다. `https://tiki-chat.duckdns.org/`는 최신 `feat/demo-frontend`를 통합한 React 웹이며 실제 OpenAI 텍스트 채팅을 생성합니다. 영상 분석·치지직 전송은 하지 않습니다. 데스크톱 API는 계속 서비스 토큰 인증을 요구합니다.
+- 공개 웹은 `backend/public_web.py`: 메모리 세션, 30분 TTL, 최대 128개 세션/세션당 10회, 쿠키·Origin·CSRF 확인. `backend/web_provider.py`는 전체 방문자 UTC 하루 100회 한도를 디스크에 유지하며 실패 호출도 계산합니다. 키와 공급자 상세 오류는 브라우저에 노출하지 않습니다. `npm run build`를 `apps/web`에서 실행한 다음 AWS 패키지/배포를 진행합니다. GitHub에서 AWS로 자동 배포하는 워크플로는 없습니다.
+- `prompt.zip`과 Figma v2의 메인 277×347, 설정 420×540(저장 버튼 추가), 시작 안내 5개 화면을 공통 Tk UI에 적용했습니다. 원본 SVG/PNG와 Pretendard 3개 굵기를 저장소에 포함합니다. 페르소나 다중 선택 시 인원·미리보기를 함께 갱신하며 메인 하단에 **채팅 보기** 버튼이 있습니다. 방송 링크는 설정의 **저장**으로 적용합니다. 단축키 녹화는 즉시 적용하고 Mac 기본값은 `Cmd+Shift+Space`입니다.
 - Windows/Mac/Linux 공통 UI는 `figma_ui.py`, `onboarding.py`, `design_widgets.py`; OS 구현은 `window/`, `mac/`, `linux/`입니다. Linux는 X11 대상이며 WSL에서 빌드·가상 화면 검증을 완료했습니다. Wayland/WSLg 캡처·전역 단축키는 지원하지 않습니다. Mac 빌드는 GitHub의 macOS 러너를 사용합니다.
 - 페르소나 6종을 Figma 선택창에 연결했고 기존 `dry_comic`도 유지합니다. 서버의 `backend/personas.py`가 기준입니다. 실제 GLASS 굴절과 외부 그림자는 Tk에서 근사하므로 픽셀 단위 동일성을 주장하지 않습니다.
 - Windows 설치본과 Linux 묶음은 `dist/`, 디자인 값/자산 ZIP은 `dist/tiki-desktop-design.zip`입니다. 플랫폼별 검사·빌드 증거와 남은 수동 확인은 `VALIDATION.md`를 참고하세요.

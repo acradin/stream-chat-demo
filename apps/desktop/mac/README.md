@@ -49,7 +49,8 @@ Finder에서 `.command`를 더블클릭하려면 최초 한 번 `chmod +x start_
   실제로는 오디오를 수집하지 않습니다. 터미널에서 소스로 실행할 때는 시스템에 표시되는 Terminal/Python 실행 주체를 허용해야 할 수 있습니다.
 - 전역 단축키는 **손쉬운 사용** 권한이 필요합니다. 허용 후 앱에서 **설정 적용**을 다시 누릅니다.
   권한이 없어도 생성 버튼과 앱 내부 `Ctrl+Enter`/`Cmd+Enter`는 사용할 수 있습니다.
-- `Cmd`, `Command`, `⌘`, `Option`, `Alt` 표기를 인식합니다. 예: `Cmd+Shift+G`.
+- 기본 단축키는 `Cmd+Shift+Space`입니다. 이전 공통 기본값 `Ctrl+Alt+Space`만 새 기본값으로 바꾸며 다른 사용자 지정 조합은 유지합니다.
+- `Cmd`, `Command`, `⌘`, `Option`, `Alt` 표기를 인식하고 Mac 화면에는 `Option`으로 표시합니다. 예: `Cmd+Shift+G`.
   Mac 전역 이벤트 모니터는 키를 독점하지 않으므로 다른 앱/OS 단축키와 겹치지 않는 조합을 선택합니다.
 - ScreenCaptureKit으로 선택한 창 ID와 소유 프로세스를 확인합니다. 창이 사라지면 오류로 종료하며 다른 창이나 전체 화면으로 대체하지 않습니다.
 - Pretendard Regular/SemiBold/Bold는 앱에 동봉하여 프로세스 내부에만 등록합니다.

@@ -60,7 +60,9 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
         from backend.public_web import PublicWeb
         if not public_url:
             raise ValueError("The public web demo requires its HTTPS origin.")
-        public_web = PublicWeb(web_dir, public_url)
+        from backend.web_provider import OpenAIWebProvider
+        web_provider = OpenAIWebProvider(Path(state_dir)/"public-web-usage.json",model) if provider == "openai" else None
+        public_web = PublicWeb(web_dir, public_url, provider=web_provider)
     # RequestKey was added after aiohttp 3.9, our supported minimum.
     account_key = web.RequestKey("service_account", str) if hasattr(web, "RequestKey") else "service_account"
 
@@ -178,6 +180,10 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
     async def shutdown(app):
         await asyncio.gather(*(socket.close(code=1001, message=b"Service shutdown") for socket in list(active)))
 
+    async def cleanup(app):
+        if public_web:
+            await public_web.close()
+
     app = web.Application(middlewares=[authenticate], client_max_size=7_000_000)
     app.router.add_get("/", home)
     app.router.add_get("/healthz", health)
@@ -189,6 +195,7 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
     app.router.add_post("/api/chat/generate", generate)
     app.router.add_get("/api/chat/realtime", realtime)
     app.on_shutdown.append(shutdown)
+    app.on_cleanup.append(cleanup)
     return app
 
 

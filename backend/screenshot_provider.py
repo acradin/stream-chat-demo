@@ -107,7 +107,9 @@ class OpenAIScreenshotProvider:
         }
 
     async def generate(self, context: dict, screenshot: bytes) -> dict:
-        payload = self.payload(context, screenshot)
+        return await self._generate_payload(self.payload(context, screenshot))
+
+    async def _generate_payload(self, payload: dict) -> dict:
         if self._session is None:
             self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30), trust_env=True)
         started = time.perf_counter()

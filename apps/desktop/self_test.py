@@ -132,6 +132,8 @@ def run(report_path: Path) -> int:
                 root.update_idletasks()
                 mapped(root)
                 window = next(w for w in NSApplication.sharedApplication().windows() if w.title()==root.title())
+                if root.overrideredirect() or not window.canBecomeKeyWindow():
+                    raise ValueError("The Mac overlay cannot receive keyboard input")
                 if window.backgroundColor().alphaComponent() != 0:
                     raise ValueError("Rounded corners have an opaque native backing")
                 if window.contentView().layer().contentsScale() != window.backingScaleFactor():
@@ -140,10 +142,18 @@ def run(report_path: Path) -> int:
                 raise ValueError("A new installation did not open the welcome screen")
             wizard = app.view.onboarding
             wizard.to_personas()
+            wizard.toggle("analyst")
+            wizard.toggle("coach")
             wizard.to_link()
             wizard.finish()
             if not app.settings["onboarding_complete"] or app.view.current != "start_end":
                 raise ValueError("Onboarding did not save without a broadcast link")
+            app.view.show("main")
+            if app.settings["count"] != 3 or app.view.slider.value != 3:
+                raise ValueError("Persona selection did not update the active member count")
+            app.view.chat_button.invoke()
+            if app.view.current != "chat":
+                raise ValueError("The Main chat button did not open generated messages")
             app.view.show("main")
             if app.view.current != "main" or app.view.main.background_owner != "Screen/Main":
                 raise ValueError("Figma main panel was not installed")
@@ -229,13 +239,13 @@ def run(report_path: Path) -> int:
             app.next_trigger = 0
             app.generate()
             pump_until(lambda: not app.busy)
-            if service.outputs[-1] != "chzzk" or "모의 전송 완료" not in app.chat_log.get("1.0", "end"):
+            if service.outputs[-1] != "chzzk" or "모의 전송 완료" not in app.delivery_log.get("1.0", "end"):
                 raise ValueError("Manual delivery switch failed")
             app.mode_var.set("실시간 화면 모드")
             app._mode_changed()
             app.source_selector.current(0)
             app.generate()
-            pump_until(lambda: "실시간 모의 전송 완료" in app.chat_log.get("1.0", "end"))
+            pump_until(lambda: "실시간 모의 전송 완료" in app.delivery_log.get("1.0", "end"))
             if service.outputs[-1] != "chzzk" or str(app.destination_selector.cget("state")) != "disabled":
                 raise ValueError("Realtime delivery switch failed")
             app.stop_live()

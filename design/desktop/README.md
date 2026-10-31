@@ -6,7 +6,7 @@ Windows, Mac, Linux X11은 같은 `figma_ui.py`, `onboarding.py`, `design_widget
 
 ## 전달 파일
 
-- `desktop-design.json`: 토큰, 실제 위젯 좌표·폰트·Canvas 항목, 17개 화면/상태, 원본 자산 해시, 소스 위치.
+- `desktop-design.json`: 토큰, 실제 위젯 좌표·폰트·Canvas 항목, 18개 화면/상태, 원본 자산 해시, 소스 위치.
 - `reference-tokens.css`: 다른 구현으로 이식하기 위한 참고 변수이며 앱이 읽는 CSS가 아닙니다.
 - `../../dist/tiki-desktop-design.zip`: 위 문서와 UI 소스, SVG/PNG/ICO/TTF 및 라이선스를 포함하는 전달용 파일.
 
@@ -18,12 +18,13 @@ Windows, Mac, Linux X11은 같은 `figma_ui.py`, `onboarding.py`, `design_widget
 | Figma 화면 | 크기(px) |
 |---|---|
 | Screen/Main | 277×347 |
-| Screen/Settings | 420×491 |
+| Screen/Settings (저장 버튼 포함) | 420×540 |
 | Screen/Start, Screen/StartEnd | 277×347 |
 | Screen/Start1 | 339×430 |
 | Screen/Start2 | 339×775 |
 | Screen/Start3 | 339×286 |
 | 추가 사용 방식, 채팅 보기 | 420×690, 420×530 |
+| 치지직 인증·전송 내역 | 420×620 |
 
 Pretendard 1.3.9 Regular(400), SemiBold(600), Bold(700)를 동봉합니다. 새 Figma 화면은 음수 Tk 폰트 크기로
 픽셀 단위(8/12/14/16/24px)를 지정합니다. JSON에는 실제 선택된 family, weight, metrics가 있습니다.
@@ -53,7 +54,10 @@ Pretendard 1.3.9 Regular(400), SemiBold(600), Bold(700)를 동봉합니다. 새 
 
 메인 로고 또는 우클릭 메뉴로 사용 방식·채팅 보기·설정 적용·치지직 연결 확인·안내 다시 보기에 접근합니다.
 Settings는 Main을 교체하지 않는 별도 창입니다. Main 옆에 열리고, Main의 transient 자식으로 연결해 겹칠 때 Settings가 앞에 표시됩니다. Settings를 닫아도 Main은 유지합니다.
-설정은 Esc로 나가거나 다른 화면으로 이동할 때 저장합니다. 페르소나 편집은 설정의 수정 아이콘으로 엽니다.
+설정 하단의 **저장** 버튼으로 방송 링크·설명을 적용합니다. Esc로 나가거나 다른 화면으로 이동할 때도 저장합니다.
+단축키 녹화는 새 조합을 누르면 바로 적용하며 직접 입력한 조합은 Enter 또는 저장으로 적용합니다.
+페르소나 편집은 설정의 수정 아이콘으로 엽니다. 선택한 인원만큼 멤버 수와 미리보기가 함께 바뀝니다.
+메인 하단 왼쪽 **채팅 보기**로 생성된 채팅 목록을, 오른쪽 **치지직 전송**으로 인증·전송 스위치·전송 내역을 엽니다.
 
 ## 다시 추출
 

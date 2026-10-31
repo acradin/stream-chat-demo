@@ -1,8 +1,9 @@
-"""Public demo visitors cannot reach paid providers or each other's state."""
+"""Public demo sessions stay isolated from private desktop APIs and one another."""
 import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import AsyncMock, patch
 from aiohttp import ClientSession
 from aiohttp.test_utils import TestServer
 from backend.server import create_app
@@ -98,3 +99,29 @@ class PublicWebTests(unittest.IsolatedAsyncioTestCase):
         now[0] += 31
         self.assertEqual((await demo.dispatch(make_mocked_request("GET", "/api/config"))).status, 200)
         self.assertEqual(len(demo.sessions), 1)
+
+    async def test_live_web_uses_server_provider_and_keeps_desktop_private(self):
+        from backend.manual_provider import MockManualProvider
+        provider = MockManualProvider(0)
+        provider.provider, provider.model = "openai", "private-model"
+        provider.generate = AsyncMock(return_value={"comment":"새로운 AI 응답","model_calls":1,"usage":{"private":"not-public"}})
+        with patch("backend.web_provider.OpenAIWebProvider",return_value=provider):
+            app = create_app(self.directory/"live",accounts={"demo":"s"*40},provider="openai",public_url=ORIGIN,web_dir=self.directory/"web")
+        server = TestServer(app)
+        await server.start_server()
+        self.addAsyncCleanup(server.close)
+        response = await self.http.get(server.make_url("/api/config"))
+        config = await response.json()
+        self.assertFalse(config["is_mock"])
+        self.assertEqual(config["session_limit"],10)
+        self.assertEqual(config["model"],"")
+        cookie = response.cookies["__Host-tiki-demo"]
+        headers = {"Origin":ORIGIN,"Cookie":cookie.key+"="+cookie.value,"X-Demo-Token":config["session_token"]}
+        for _ in range(2):
+            response = await self.http.post(server.make_url("/api/trigger"),json=self.payload(),headers=headers)
+            self.assertEqual((await response.json())["comment"],"새로운 AI 응답")
+        provider.generate.assert_awaited_once()
+        exported = await (await self.http.get(server.make_url("/api/export"),headers=headers)).text()
+        self.assertNotIn("not-public",exported)
+        self.assertNotIn("private-model",exported)
+        self.assertEqual((await self.http.get(server.make_url("/api/usage"),headers=headers)).status,401)

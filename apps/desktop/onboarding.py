@@ -35,6 +35,7 @@ class Onboarding:
         self.persona_caption = self._heading(self.persona_page,81,2,"채팅 페르소나 선택",
                       "어떤 AI에게 댓글을 받고 싶으세요?\n여러 개를 선택할 수도 있어요.")
         self.cards = []
+        self.selection_marks = []
         for index,key in enumerate(self.personas):
             card = DesignButton(self.persona_page,view,"",lambda p=key:self.toggle(p),31,205+73*index,278,65)
             card.design_component = None
@@ -42,12 +43,14 @@ class Onboarding:
             card.create_image(12,8,anchor="nw",image=view.photos[PERSONA_ASSETS[key]])
             card.create_text(73,8,anchor="nw",text=PERSONAS[key]["name"],fill="white",font=(view.family,-14))
             card.create_text(73,28,anchor="nw",text=PERSONAS[key]["description"],fill="#eaeaea",font=(view.family,-11),width=193)
+            self.selection_marks.append(card.create_rectangle(1,1,277,64,outline="#2dff8f",width=2,state="hidden"))
             self.cards.append(card)
         self.back, self.next = self._navigation(self.persona_page,38,663,self.persona_back,self.to_link)
         self._heading(self.link_page,43,3,"이제 마지막 단계에요","방송 링크를 첨부해주세요.")
         self.link = field(self.link_page,view,34,153,272,31,variable=self.app.channel_var,
                           placeholder="https://chzzk.naver.com/")
         self._navigation(self.link_page,34,212,lambda:view.show("start2"),self.finish)
+        self._selection_feedback()
 
     def _welcome(self,page,done):
         view = self.view
@@ -94,6 +97,7 @@ class Onboarding:
 
     def select_personas(self):
         self.editing = True
+        self.next.configure(text="적용")
         by_name = {value["name"]:key for key,value in PERSONAS.items()}
         self.selected = list(dict.fromkeys(by_name[v.get()] for v in self.app.persona_vars[:self.app.settings["count"]]))
         self._selection_feedback()
@@ -103,6 +107,8 @@ class Onboarding:
         names = [PERSONAS[key]["name"] for key in self.selected]
         caption = "선택: " + ", ".join(names[:3]) + ("\n" + ", ".join(names[3:]) if len(names)>3 else "\n최대 5명 · 다시 누르면 선택 해제")
         self.persona_page.itemconfigure(self.persona_caption,text=caption)
+        for key,card,mark in zip(self.personas,self.cards,self.selection_marks):
+            card.itemconfigure(mark,state="normal" if key in self.selected else "hidden")
 
     def toggle(self,key):
         if key in self.selected:
@@ -114,6 +120,7 @@ class Onboarding:
         self._selection_feedback()
 
     def to_personas(self):
+        self.next.configure(text="다음")
         if len(self.description.get("1.0","end-1c")) > 1000:
             messagebox.showerror("방송 설명","방송 설명은 1,000자까지 입력할 수 있습니다.",parent=self.app.root)
             return
@@ -137,6 +144,8 @@ class Onboarding:
         if self.editing:
             if self.app.save_settings():
                 self.view.show("settings")
+            else:
+                messagebox.showerror("설정 저장",self.app.status.get(),parent=self.app.root)
         else:
             self.view.show("start3")
 

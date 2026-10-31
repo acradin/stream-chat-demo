@@ -63,6 +63,12 @@ export function MainScreen() {
           Mock 데모 · 예시 채팅이며 방송으로 전송되지 않습니다.
         </p>
       )}
+      {config && !config.is_mock && (
+        <p className="mt-2 px-6 text-center text-[11px] text-ink-faint">
+          AI 체험 · 입력한 방송 설명으로 생성 · 세션당 최대 {config.session_limit ?? 10}회
+          <br />웹 채팅은 이 화면에 표시됩니다.
+        </p>
+      )}
       <div role="log" aria-label="생성된 채팅" aria-live="polite" className="mt-4 max-h-40 space-y-2 overflow-y-auto px-6">
         {messages.slice(-5).map((message) => (
           <p key={message.requestId} className="rounded-xl bg-surface px-3 py-2 text-[13px] text-ink">

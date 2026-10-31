@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+import webbrowser
 from tkinter import messagebox, ttk
 
 from apps.desktop.hotkey import GlobalHotkey, SingleInstance, parse_hotkey, pressed_hotkey
@@ -27,7 +28,7 @@ from apps.desktop.capture import capture_primary_screen, capture_window, list_wi
 MAX_PARTICIPANTS = 5
 DEFAULT_SETTINGS = {"count": 1,
                     "personas": [DEFAULT_PERSONA, "warm_supporter", "hype_commentator", "dry_comic", DEFAULT_PERSONA],
-                    "context": "", "hotkey": "Ctrl+Alt+Space", "topmost": True, "opacity": 1.0,
+                    "context": "", "hotkey": "Cmd+Shift+Space" if sys.platform == "darwin" else "Ctrl+Alt+Space", "topmost": True, "opacity": 1.0,
                     "mode": "manual", "interval": 5, "duration": 60,
                     "destination": "app", "channel_url": "", "onboarding_complete": False}
 MODES = {"버튼 캡처 모드": "manual", "실시간 화면 모드": "realtime"}
@@ -37,6 +38,8 @@ DESTINATIONS = {"앱에만 표시 (시연)": "app", "치지직에도 전송": "c
 def clean_settings(data: dict) -> dict:
     """Explicit allowlist: API keys can never enter the saved settings object."""
     result = {**DEFAULT_SETTINGS, "personas": list(DEFAULT_SETTINGS["personas"])}
+    if sys.platform == "darwin":
+        result["hotkey"] = "Cmd+Shift+Space"
     if not isinstance(data, dict):
         raise ValueError("설정 파일 형식이 올바르지 않습니다.")
     if type(data.get("count")) is int and 1 <= data["count"] <= MAX_PARTICIPANTS:
@@ -47,7 +50,10 @@ def clean_settings(data: dict) -> dict:
     if isinstance(data.get("context"), str) and len(data["context"]) <= 1000:
         result["context"] = data["context"]
     try:
-        result["hotkey"] = parse_hotkey(data.get("hotkey"))[0]
+        hotkey = data.get("hotkey")
+        if sys.platform == "darwin" and hotkey == "Ctrl+Alt+Space":
+            hotkey = "Cmd+Shift+Space"  # Migrate the former cross-platform default.
+        result["hotkey"] = parse_hotkey(hotkey)[0]
     except ValueError:
         pass
     if type(data.get("topmost")) is bool:
@@ -90,6 +96,13 @@ class Overlay:
         self.usage_error = None
         self.channel_loading = False
         self.connected_channel = None
+        self.auth_loading = False
+        self.auth_epoch = 0
+        self.auth_deadline = 0.0
+        self.auth_target = ""
+        self.authorization_link = ""
+        self.auth_poll_id = None
+        self.live_comments = {}
         self.events = queue.Queue()
         self.busy = self.closing = self.collapsed = False
         self.configuring = False
@@ -157,13 +170,42 @@ class Overlay:
                                "interval": int(self.interval_var.get()), "duration": int(self.duration_var.get())})
 
     def _destination_changed(self, event=None):
+        self.send_enabled.set(DESTINATIONS[self.destination_var.get()] == "chzzk")
         self._channel_link_changed()
         if DESTINATIONS[self.destination_var.get()] == "chzzk":
             self.refresh_channel()
         else:
             self.status.set("앱에만 표시 · 치지직 로그인 없이 시연할 수 있습니다.")
 
+    def toggle_delivery(self):
+        wanted = "chzzk" if self.send_enabled.get() else "app"
+        try:
+            if self.busy:
+                raise ValueError("생성이나 관찰을 마친 뒤 전송 설정을 바꿔주세요.")
+            if wanted == "chzzk":
+                self._output_options({"destination": wanted, "channel_url": self.channel_var.get()})
+            candidate = {**self.settings, "destination": wanted, "channel_url": self.channel_var.get().strip()}
+            atomic_json(self.settings_path, candidate)
+            self.settings = candidate
+        except (ValueError, OSError) as error:
+            self.send_enabled.set(self.settings["destination"] == "chzzk")
+            self.status.set(str(error))
+            self.channel_info.set(str(error))
+            return False
+        self.destination_var.set(next(label for label,value in DESTINATIONS.items() if value == wanted))
+        self._destination_changed()
+        self.status.set("치지직 전송 켜짐 · 다음 생성부터 전송합니다." if wanted == "chzzk" else "치지직 전송 꺼짐 · 채팅은 앱에만 표시합니다.")
+        return True
+
     def _channel_link_changed(self):
+        if self.auth_target:
+            try:
+                changed = parse_channel_id(self.channel_var.get()) != self.auth_target
+            except ValueError:
+                changed = True
+            if changed:
+                self._clear_authorization()
+                self.auth_info.set("방송 링크가 바뀌었습니다. 이 방송으로 다시 인증해주세요.")
         if DESTINATIONS[self.destination_var.get()] == "app":
             try:
                 parse_channel_id(self.channel_var.get())
@@ -197,6 +239,83 @@ class Overlay:
                 value = {"connected": False, "message": "연결을 확인하지 못했습니다. 서비스 연결을 확인해주세요."}
             self.events.put(("channel", (service, value)))
         threading.Thread(target=work, name="chzzk-status", daemon=True).start()
+
+    def _clear_authorization(self):
+        self.auth_epoch += 1
+        self.auth_loading = False
+        self.auth_deadline = 0.0
+        self.auth_target = ""
+        self.authorization_link = ""
+        if self.auth_poll_id:
+            self.root.after_cancel(self.auth_poll_id)
+            self.auth_poll_id = None
+        self.auth_copy.configure(state="disabled")
+        self.channel_authorize.configure(state="disabled" if self.busy else "normal")
+
+    def authorize_channel(self):
+        if self.busy or self.closing or self.configuring or self.auth_loading:
+            return
+        try:
+            target = parse_channel_id(self.channel_var.get())
+        except ValueError as error:
+            self.auth_info.set(str(error))
+            return
+        self.send_enabled.set(False)
+        if not self.toggle_delivery():
+            return
+        self._clear_authorization()
+        self.auth_loading = True
+        self.auth_target = target
+        self.channel_authorize.configure(state="disabled")
+        self.auth_info.set("치지직 인증 링크를 준비하고 있습니다…")
+        source, epoch, link = self.service, self.auth_epoch, self.channel_var.get()
+        def work():
+            try:
+                result, error = asyncio.run(source.authorize_chzzk(link)), ""
+            except Exception as exc:
+                result, error = None, str(exc) if isinstance(exc, ValueError) else "인증 링크를 만들지 못했습니다. 서비스 연결을 확인해주세요."
+            self.events.put(("authorization", (source, epoch, result, error)))
+        threading.Thread(target=work,name="chzzk-authorize",daemon=True).start()
+
+    def _authorization_ready(self, source, epoch, result, error):
+        if self.closing or source is not self.service or epoch != self.auth_epoch:
+            return
+        self.auth_loading = False
+        self.channel_authorize.configure(state="disabled" if self.busy else "normal")
+        if error:
+            self.auth_info.set(error)
+            return
+        self.authorization_link = result["authorization_url"]
+        self.auth_deadline = time.monotonic()+result["expires_in"]
+        self.auth_copy.configure(state="normal")
+        self.auth_info.set("브라우저에서 해당 방송 계정으로 승인해주세요.\n앱에서 연결을 확인하고 있습니다. 전송은 꺼져 있습니다.")
+        try:
+            opened = webbrowser.open(self.authorization_link,new=2)
+        except Exception:
+            opened = False
+        if not opened:
+            self.auth_info.set("브라우저를 열지 못했습니다. 인증 링크 복사 후 브라우저에서 열어주세요.")
+        self.auth_poll_id = self.root.after(3000,self._poll_authorization)
+
+    def copy_authorization_link(self):
+        if not self.authorization_link or time.monotonic() >= self.auth_deadline:
+            self._clear_authorization()
+            self.auth_info.set("인증 링크가 만료됐습니다. 인증 버튼으로 새 링크를 만들어주세요.")
+            return
+        self.root.clipboard_clear()
+        self.root.clipboard_append(self.authorization_link)
+        self.auth_info.set("인증 링크를 복사했습니다. 해당 방송 계정의 브라우저에서 열어주세요.")
+
+    def _poll_authorization(self):
+        self.auth_poll_id = None
+        if self.closing or not self.auth_deadline:
+            return
+        if time.monotonic() >= self.auth_deadline:
+            self._clear_authorization()
+            self.auth_info.set("인증 확인 시간이 지났습니다. 연결 확인 또는 새 인증을 진행해주세요.")
+            return
+        self.refresh_channel()
+        self.auth_poll_id = self.root.after(3000,self._poll_authorization)
 
     def _output_options(self, snapshot):
         if snapshot["destination"] == "app":
@@ -236,16 +355,19 @@ class Overlay:
     def _set_busy(self, busy):
         self.busy = busy
         self.trigger_button.configure(state="disabled" if busy else "normal")
-        for selector in (self.mode_selector, self.source_selector, self.interval_selector, self.duration_selector,
-                         self.destination_selector):
+        for selector in (self.mode_selector, self.source_selector, self.interval_selector, self.duration_selector):
             selector.configure(state="disabled" if busy else "readonly")
+        self.destination_selector.configure(state="disabled" if busy else "normal")
         self.source_refresh.configure(state="disabled" if busy else "normal")
         self.channel_entry.configure(state="disabled" if busy else "normal")
+        self.delivery_channel_entry.configure(state="disabled" if busy else "normal")
+        self.channel_authorize.configure(state="disabled" if busy or self.auth_loading else "normal")
         self.channel_check.configure(state="disabled" if busy or self.channel_loading else "normal")
 
     def start_live(self):
         if self.busy or self.closing or self.configuring:
             return
+        self.live_comments.clear()
         index = self.source_selector.current()
         if index < 0 or index >= len(self.sources):
             self.status.set("실시간으로 볼 창을 먼저 선택해주세요.")
@@ -376,6 +498,9 @@ class Overlay:
 
     def _capture_hotkey(self, event):
         if not self.recording_hotkey:
+            if event.keysym == "Return":
+                self.apply_hotkey()
+                return "break"
             return None
         if event.keysym == "Escape":
             self._finish_hotkey_recording()
@@ -385,9 +510,18 @@ class Overlay:
             if name:
                 self.hotkey_var.set(name)
                 self._finish_hotkey_recording()
+                self.apply_hotkey()
         except ValueError as exc:
             self.hotkey_hint.set(str(exc))
         return "break"
+
+    def apply_hotkey(self):
+        if self.save_settings():
+            self.hotkey_hint.set(f"적용됨: {self.settings['hotkey']}")
+        else:
+            self.hotkey_var.set(self.settings["hotkey"])
+            self.hotkey_hint.set(self.status.get())
+            messagebox.showerror("단축키 변경", self.status.get(), parent=self.view.settings_window)
 
     def save_settings(self):
         if self.busy:
@@ -395,6 +529,8 @@ class Overlay:
             return False
         try:
             hotkey = parse_hotkey(self.hotkey_var.get())[0]
+            if self.channel_var.get().strip():
+                parse_channel_id(self.channel_var.get().strip())
             candidate = {**self._snapshot_settings(),
                          "hotkey": hotkey,
                          "topmost": self.topmost_var.get(), "opacity": self.opacity_var.get()}
@@ -431,6 +567,10 @@ class Overlay:
         try:
             dialog = ConnectionDialog(self.root, DESKTOP_ENV, self.service.base_url)
             if dialog.result:
+                self._clear_authorization()
+                self.send_enabled.set(False)
+                if not self.toggle_delivery():
+                    return
                 self.service = ServiceClient(**dialog.result)
                 self.connected_channel = None
                 self._channel_link_changed()
@@ -505,12 +645,25 @@ class Overlay:
         self.chat_log.insert("end", (line["comment"] if line["status"] == "ready" else line["error"]) + "\n\n",
                              "error" if line["status"] != "ready" else "")
         if line.get("delivery"):
-            receipt = line["delivery"]
-            self.chat_log.insert("end", receipt["message"] + "\n\n", "" if receipt["status"] == "sent" else "error")
+            self._append_delivery(line)
         if int(self.chat_log.index("end-1c").split(".")[0]) > 300:
             self.chat_log.delete("1.0", "100.0")
         self.chat_log.configure(state="disabled")
         self.chat_log.see("end")
+
+    def _append_delivery(self, line):
+        receipt = line["delivery"]
+        self.delivery_log.configure(state="normal")
+        name = PERSONAS[line["persona"]]["name"]
+        self.delivery_log.insert("end",f"{time.strftime('%H:%M:%S')} · AI {line['participant']} · {name}\n","name")
+        comment = line.get("comment") or self.live_comments.get(line["participant"], "")
+        if comment:
+            self.delivery_log.insert("end",comment+"\n")
+        self.delivery_log.insert("end",receipt["message"]+"\n\n","" if receipt["status"] == "sent" else "error")
+        if int(self.delivery_log.index("end-1c").split(".")[0]) > 300:
+            self.delivery_log.delete("1.0","100.0")
+        self.delivery_log.configure(state="disabled")
+        self.delivery_log.see("end")
 
     def _poll(self):
         while True:
@@ -532,24 +685,26 @@ class Overlay:
                         if not self.channel_var.get().strip():
                             self.channel_var.set("https://chzzk.naver.com/" + result["channelId"])
                         self._channel_link_changed()
+                        if self.auth_deadline and result["channelId"] == self.auth_target:
+                            self._clear_authorization()
+                            self.auth_info.set("이 방송에 연결되어 있습니다. 전송 스위치를 켜면 다음 생성부터 전송합니다.")
                     else:
                         self.channel_info.set(result["message"])
+            elif kind == "authorization":
+                self._authorization_ready(*value)
             elif kind == "live":
-                if not self.live_stop.is_set():
+                if value["type"] == "delivery" or not self.live_stop.is_set():
                     if value["type"] == "ready":
                         self.status.set("실시간 관찰 중 · 선택한 창을 초당 1장 촬영합니다.")
                     elif value["type"] == "decision":
                         if value["result"] == "chat":
+                            self.live_comments[value["participant"]] = value["comment"]
                             self._append_line({**value, "status": "ready", "error": ""})
                         self.status.set(f"실시간 관찰 중 · 분석 {value['decisions']}회 · 채팅 {value['chats']}개")
                         self._refresh_usage()
                     elif value["type"] == "delivery":
                         receipt = value["delivery"]
-                        self.chat_log.configure(state="normal")
-                        self.chat_log.insert("end", f"AI {value['participant']} · {receipt['message']}\n\n",
-                                             "" if receipt["status"] == "sent" else "error")
-                        self.chat_log.configure(state="disabled")
-                        self.chat_log.see("end")
+                        self._append_delivery(value)
                         self.status.set(receipt["message"])
             elif kind == "live_done":
                 self.live_running = False
@@ -607,6 +762,7 @@ class Overlay:
             self._destroy()
 
     def _destroy(self):
+        self._clear_authorization()
         try:
             atomic_json(self.settings_path, self._snapshot_settings())
         except (ValueError, OSError):

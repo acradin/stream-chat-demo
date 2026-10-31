@@ -15,6 +15,8 @@ export interface ServerConfig {
   session_token: string;
   cooldown_s: number;
   max_age_s: number;
+  session_limit?: number;
+  remaining_requests?: number;
   default_persona: string;
   personas: PersonaConfig[];
 }

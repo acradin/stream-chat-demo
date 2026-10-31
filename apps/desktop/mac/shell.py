@@ -9,6 +9,11 @@ def transparent_color():
 
 
 def configure_window(root):
+    # Override-redirect windows are excluded from Tk's macOS focus changes.
+    # A document window without its title bar stays editable and frameless.
+    root.overrideredirect(False)
+    root.tk.call("::tk::unsupported::MacWindowStyle", "style", root._w,
+                 "document", ("noTitleBar", "noShadow"))
     root.configure(bg=transparent_color())
     root.attributes("-transparent", False)
 

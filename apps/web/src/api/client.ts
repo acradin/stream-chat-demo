@@ -59,7 +59,7 @@ export async function postJson<TReq, TRes>(
 
   // 400(입력 오류) / 403(토큰·origin 거절)은 본문이 있더라도 명확히 구분한다.
   if (response.status === 403) {
-    throw new ApiError("로컬 접근이 거부됐어요 (토큰/origin).", 403);
+    throw new ApiError("체험 세션이 끝났어요. 페이지를 새로고침해주세요.", 403);
   }
   if (response.status === 400) {
     const data = await parseJson<{ error?: string }>(response);

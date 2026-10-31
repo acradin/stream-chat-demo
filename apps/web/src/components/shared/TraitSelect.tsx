@@ -36,12 +36,15 @@ export function TraitSelect() {
                 : undefined
             }
           >
-            <span
-              className="grid h-8 w-8 place-items-center rounded-lg text-[15px] font-bold"
-              style={{ color: t.accent, background: `${t.accent}1a` }}
-            >
-              {t.glyph}
-            </span>
+            <img
+              src={t.image}
+              alt=""
+              aria-hidden="true"
+              width={51}
+              height={48}
+              className="h-10 w-10 flex-none select-none object-contain"
+              draggable={false}
+            />
             <span className="text-[13px] font-semibold text-ink">{t.label}</span>
             <span className="text-[10px] leading-snug text-ink-faint">
               {t.description}

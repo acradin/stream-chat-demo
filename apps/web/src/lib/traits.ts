@@ -8,7 +8,7 @@ export interface Trait {
   label: string;
   description: string;
   accent: string;
-  glyph: string;
+  image: string;
   /** 이 성향이 매핑되는 백엔드 persona id */
   mapsTo: string;
 }
@@ -17,49 +17,49 @@ export const TRAITS: Trait[] = [
   {
     id: "cheerful",
     label: "유쾌한",
-    description: "밝고 경쾌하게 분위기를 띄워요",
+    description: "재치있는 드립과 적절한 놀림으로 방송을 활발하게 만들어주는 스타일",
     accent: "#f5b544",
-    glyph: "☺",
+    image: "/personas/witty.png",
     mapsTo: "witty_friend",
   },
   {
     id: "friendly",
     label: "친근한",
-    description: "편하게 말 거는 친구 같은 말투",
+    description: "끊임없는 질문과 대화로 방송의 적막을 채워주는 스타일",
     accent: "#f472b6",
-    glyph: "♥",
+    image: "/personas/chatter.png",
     mapsTo: "witty_friend",
   },
   {
     id: "immersive",
     label: "과몰입",
-    description: "상황에 푹 빠져 신나게 해설",
+    description: "사소한 순간에도 적극적으로 반응하며 방송의 재미를 살려주는 스타일",
     accent: "#f97316",
-    glyph: "⚡",
+    image: "/personas/reaction.png",
     mapsTo: "hype_commentator",
   },
   {
     id: "calm",
     label: "차분한",
-    description: "담백하고 낮은 톤으로 차분하게",
+    description: "게임 상황을 빠르게 분석하고 날카로운 판단과 전략을 제시하는 스타일",
     accent: "#818cf8",
-    glyph: "◎",
+    image: "/personas/analyst.png",
     mapsTo: "dry_comic",
   },
   {
     id: "playful",
     label: "장난스러운",
-    description: "툭툭 던지는 가벼운 장난과 드립",
+    description: "거침없는 참견과 잔소리로 방송에 재미를 더해주는 스타일",
     accent: "#2dd4bf",
-    glyph: "✸",
+    image: "/personas/coach.png",
     mapsTo: "witty_friend",
   },
   {
     id: "supportive",
     label: "응원하는",
-    description: "따뜻하게 힘을 실어주는 응원",
+    description: "아낌없는 칭찬과 긍정적인 반응으로 방송에 활력을 불어넣는 스타일",
     accent: "#34d399",
-    glyph: "✧",
+    image: "/personas/supporter.png",
     mapsTo: "warm_supporter",
   },
 ];

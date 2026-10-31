@@ -385,6 +385,7 @@ class Overlay:
         source = self.sources[index]
         self.live_stop.clear()
         self.live_running = True
+        self.view.open_chat()
         self._set_busy(True)
         self.stop_button.configure(state="normal")
         self.status.set("실시간 연결 중… 중지 버튼이나 단축키로 종료할 수 있습니다.")
@@ -459,8 +460,9 @@ class Overlay:
         self.root.attributes("-topmost", self.settings["topmost"])
         self.root.attributes("-alpha", self.settings["opacity"])
         if hasattr(self, "view"):
-            self.view.settings_window.attributes("-topmost", self.settings["topmost"])
-            self.view.settings_window.attributes("-alpha", self.settings["opacity"])
+            for window in (self.view.settings_window, self.view.chat_window):
+                window.attributes("-topmost", self.settings["topmost"])
+                window.attributes("-alpha", self.settings["opacity"])
 
     def _register_hotkey(self):
         if self.hotkey is None:
@@ -611,8 +613,12 @@ class Overlay:
         self._set_busy(True)
         self.started = time.monotonic()
         self.status.set("오버레이를 숨기고 주 모니터를 촬영합니다…")
-        self.restore_state = self.root.state()
-        self.root.withdraw()
+        windows = (self.root,self.view.settings_window,self.view.chat_window)
+        # Snapshot every state before withdrawing the owner changes its children.
+        self.capture_window_states = [(window,window.state()) for window in windows]
+        for window,state in reversed(self.capture_window_states):
+            if state != "withdrawn":
+                window.withdraw()
         # Let the window manager finish hiding the overlay before capture.
         self.root.after(180, lambda: self._start_worker(snapshot))
 
@@ -633,10 +639,16 @@ class Overlay:
         self.worker.start()
 
     def _restore_window(self):
-        if self.root.state() == "withdrawn":
-            self.root.deiconify()
-            if getattr(self, "restore_state", "normal") == "iconic":
-                self.root.iconify()
+        states = getattr(self,"capture_window_states",None)
+        if states is None:
+            return False
+        self.capture_window_states = None
+        for window,state in states:
+            if state == "normal":
+                window.deiconify()
+            elif state == "iconic":
+                window.iconify()
+        return True
 
     def _append_line(self, line):
         self.chat_log.configure(state="normal")
@@ -719,6 +731,7 @@ class Overlay:
                 self.refresh_service_usage()
             elif kind == "captured":
                 self._restore_window()
+                self.view.open_chat()
                 self.status.set("캡처 완료 · AI 채팅을 생성하고 있습니다…")
             elif kind == "line":
                 self._append_line(value)
@@ -729,7 +742,8 @@ class Overlay:
                 self._refresh_usage()
                 self._refresh_mode()
             elif kind in ("done", "failed"):
-                self._restore_window()
+                if self._restore_window():
+                    self.view.open_chat()
                 self._set_busy(False)
                 self.next_trigger = time.monotonic() + 1
                 self.trigger_button.configure(state="normal")

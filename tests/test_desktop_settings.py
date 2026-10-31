@@ -148,3 +148,83 @@ class DesktopSettingsTests(unittest.TestCase):
             app.copy_authorization_link()
             copy.assert_not_called()
         self.assertEqual(app.authorization_link,"")
+
+    def pump_until_idle(self):
+        deadline = time.monotonic()+3
+        while self.app.busy and time.monotonic() < deadline:
+            self.root.update()
+            time.sleep(.01)
+        self.assertFalse(self.app.busy)
+        self.root.update_idletasks()
+
+    def open_invisible_settings(self):
+        self.root.attributes("-alpha",0)
+        self.root.deiconify()
+        self.app.view.show("main")
+        self.app.view.open_settings()
+        self.root.update()
+
+    def test_button_and_hotkey_restore_settings_and_open_separate_chat_window(self):
+        app, view = self.app, self.app.view
+        app.capture = lambda: b"synthetic"
+        calls = []
+        async def generate(personas,context,*,on_line,**kwargs):
+            calls.append(context)
+            line = dict(participant=1,persona=personas[0],status="ready",comment="창 유지 테스트",error="")
+            on_line(line)
+            return {"status":"complete","lines":[line]}
+        app.service.generate = generate
+        self.open_invisible_settings()
+        app.context.insert("1.0","설정에 입력 중인 내용")
+        settings_geometry = view.settings_window.geometry()
+        for trigger in ("button","hotkey"):
+            with self.subTest(trigger=trigger):
+                view.close_chat()
+                app.next_trigger = 0
+                if trigger == "button":
+                    app.trigger_button.invoke()
+                else:
+                    app.events.put(("hotkey",time.monotonic()))
+                    self.root.after_cancel(app.poll_id)
+                    app._poll()
+                self.assertTrue(app.busy)
+                self.assertEqual([window.state() for window in (self.root,view.settings_window,view.chat_window)], ["withdrawn"]*3)
+                self.pump_until_idle()
+                self.assertEqual(view.settings_window.state(),"normal")
+                self.assertEqual(view.settings_window.geometry(),settings_geometry)
+                self.assertEqual(app.context.get("1.0","end-1c"),"설정에 입력 중인 내용")
+                self.assertEqual(view.chat_window.state(),"normal")
+                self.assertIs(view.chat.winfo_toplevel(),view.chat_window)
+                self.assertEqual(view.main.winfo_manager(),"pack")
+                self.assertIn("창 유지 테스트",app.chat_log.get("1.0","end"))
+                view.close_chat()
+                app._restore_window()  # A late completion must not reopen a closed window.
+                self.assertEqual(view.chat_window.state(),"withdrawn")
+                self.assertEqual(view.settings_window.state(),"normal")
+        self.assertEqual(calls,["설정에 입력 중인 내용"]*2)
+
+    def test_capture_failure_restores_settings_and_opens_chat_status(self):
+        app = self.app
+        self.open_invisible_settings()
+        app.capture = Mock(side_effect=ValueError("모의 캡처 실패"))
+        app.generate()
+        self.pump_until_idle()
+        self.assertEqual(app.view.settings_window.state(),"normal")
+        self.assertEqual(app.view.chat_window.state(),"normal")
+        self.assertEqual(app.status.get(),"모의 캡처 실패")
+
+    def test_realtime_start_keeps_settings_and_opens_chat(self):
+        app = self.app
+        self.open_invisible_settings()
+        app.mode_var.set("실시간 화면 모드")
+        app._mode_changed()
+        app.sources = [object()]
+        app.source_selector.configure(values=["모의 창"])
+        app.source_selector.current(0)
+        app.service.realtime = AsyncMock()
+        with patch.object(app,"refresh_service_usage"):
+            app.generate()
+            self.pump_until_idle()
+        self.assertEqual(app.view.settings_window.state(),"normal")
+        self.assertEqual(app.view.chat_window.state(),"normal")
+        app.service.realtime.assert_awaited_once()

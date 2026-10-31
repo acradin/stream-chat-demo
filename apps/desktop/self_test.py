@@ -152,8 +152,10 @@ def run(report_path: Path) -> int:
             if app.settings["count"] != 3 or app.view.slider.value != 3:
                 raise ValueError("Persona selection did not update the active member count")
             app.view.chat_button.invoke()
-            if app.view.current != "chat":
+            if app.view.current != "chat" or app.view.chat.winfo_toplevel() is not app.view.chat_window:
                 raise ValueError("The Main chat button did not open generated messages")
+            if app.view.main.winfo_manager() != "pack":
+                raise ValueError("Chat replaced the main overlay instead of opening a separate window")
             app.view.show("main")
             if app.view.current != "main" or app.view.main.background_owner != "Screen/Main":
                 raise ValueError("Figma main panel was not installed")

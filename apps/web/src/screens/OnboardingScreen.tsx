@@ -158,8 +158,8 @@ export function OnboardingScreen() {
         <div className="mt-6 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
+            onClick={() => step === 0 ? goTo("settings") : setStep((s) => s - 1)}
+            disabled={step === 0 && !onboarded}
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] text-ink-soft transition hover:text-ink disabled:opacity-40"
           >
             <ArrowLeft className="h-4 w-4" />

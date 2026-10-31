@@ -99,6 +99,7 @@ class FigmaView:
         self.root.bind("<Escape>", self._escape)
         self.pages = {}
         self.current = "main"
+        self.main_page = "main"
         self.settings_window = tk.Toplevel(self.root)
         self.settings_window.withdraw()
         self.settings_window.title("tiki — 설정")
@@ -108,7 +109,21 @@ class FigmaView:
         self.settings_window.overrideredirect(sys.platform == "win32")
         self.settings_window.protocol("WM_DELETE_WINDOW", self.close_settings)
         self.settings_window.bind("<Escape>", self._escape)
-        self.settings_window.bind("<Map>", self._settings_mapped, add="+")
+        self.settings_window.bind("<Map>", self._auxiliary_mapped, add="+")
+        self.chat_window = tk.Toplevel(self.root)
+        self.chat_window.withdraw()
+        self.chat_window.title("tiki — 생성된 채팅")
+        self.chat_window.transient(self.root)
+        self.chat_window.resizable(False, False)
+        configure_window(self.chat_window)
+        self.chat_window.overrideredirect(sys.platform == "win32")
+        self.chat_window.protocol("WM_DELETE_WINDOW", self.close_chat)
+        self.chat_window.bind("<Escape>", lambda _: self.close_chat())
+        self.chat_window.bind("<Alt-F4>", lambda _: self.close_chat())
+        self.chat_window.bind("<Control-Return>", lambda _: app.generate())
+        if sys.platform == "darwin":
+            self.chat_window.bind("<Command-Return>", lambda _: app.generate())
+        self.chat_window.bind("<Map>", self._auxiliary_mapped, add="+")
         self.photos = {name: asset(self.root, name) for name in PERSONA_ASSETS.values()}
         for key, name in PERSONA_ASSETS.items():
             self.photos["member-"+key] = ImageTk.PhotoImage(
@@ -131,20 +146,22 @@ class FigmaView:
         self.scale = factor
         self.root._tiki_display_scale = factor
         self.settings_window._tiki_display_scale = factor
+        self.chat_window._tiki_display_scale = factor
         scaled = getattr(self.root,"_scaled_design_images",{})
         self.photos = {name:scaled.get(str(photo),photo) for name,photo in self.photos.items()}
         self.show("main" if app.settings["onboarding_complete"] else "start")
         self.root.bind("<Configure>", self._shape_changed, add="+")
         self.settings_window.bind("<Configure>", self._shape_changed, add="+")
+        self.chat_window.bind("<Configure>", self._shape_changed, add="+")
         apply_window_icon(self.root)
 
     def _shape_changed(self, event):
         window = event.widget
-        if window in (self.root, self.settings_window) and window.state() == "normal":
+        if window in (self.root, self.settings_window, self.chat_window) and window.state() == "normal":
             mapped(window)
 
     def _page(self, name, width, height, *, variant="main", header=True):
-        page = Panel(self.settings_window if name == "settings" else self.root,
+        page = Panel(self.settings_window if name == "settings" else self.chat_window if name == "chat" else self.root,
                      width, height, settings=name == "settings", variant=variant)
         self.pages[name] = page
         if header:
@@ -166,9 +183,9 @@ class FigmaView:
             button.place(x=194, y=28, width=21, height=21)
             self.settings_button = button
         elif header and name != "settings":
-            ttk.Button(page, text="‹", width=2, command=lambda: self.show("main")).place(x=width-112, y=21)
-        for x, color, command, symbol in ((width-53, "#ff736a", self.close_settings if name == "settings" else self.app.close, "×"),
-                                          (width-36, "#febc2e", self.minimize_settings if name == "settings" else self.minimize, "−")):
+            ttk.Button(page, text="‹", width=2, command=self.close_chat if name == "chat" else lambda: self.show("main")).place(x=width-112, y=21)
+        for x, color, command, symbol in ((width-53, "#ff736a", self.close_settings if name == "settings" else self.close_chat if name == "chat" else self.app.close, "×"),
+                                          (width-36, "#febc2e", self.minimize_settings if name == "settings" else self.close_chat if name == "chat" else self.minimize, "−")):
             top = 30 if not header else 33
             dot = page.create_oval(x, top, x+10, top+10, fill=color, outline="")
             page.tag_bind(dot,"<Button-1>",lambda _,action=command: action())
@@ -212,10 +229,38 @@ class FigmaView:
             window, x, y = self.drag
             window.geometry(f"+{event.x_root-x}+{event.y_root-y}")
 
-    def _settings_mapped(self, event):
-        if event.widget is self.settings_window and self.settings_window.state() == "normal":
-            self.settings_window.overrideredirect(sys.platform == "win32")
-            mapped(self.settings_window)
+    def _auxiliary_mapped(self, event):
+        window = event.widget
+        if window in (self.settings_window, self.chat_window) and window.state() == "normal":
+            window.overrideredirect(sys.platform == "win32")
+            mapped(window)
+
+    def close_chat(self):
+        self.chat_window.withdraw()
+        if self.current == "chat":
+            self.current = "settings" if self.settings_window.state() == "normal" else self.main_page
+
+    def open_chat(self):
+        self.chat.pack()
+        self.root.update_idletasks()
+        if not getattr(self, "chat_positioned", False):
+            width, height = int(self.chat.cget("width")), int(self.chat.cget("height"))
+            anchor = self.settings_window if self.settings_window.state() == "normal" else self.root
+            x = anchor.winfo_x()+anchor.winfo_width()+12
+            if x+width > self.root.winfo_screenwidth():
+                x = max(0,self.root.winfo_x()-width-12)
+            y = max(0,min(anchor.winfo_y(),self.root.winfo_screenheight()-height-40))
+            self.chat_window.geometry(f"{width}x{height}+{x}+{y}")
+            self.chat_positioned = True
+        self.chat_window.attributes("-topmost",self.root.attributes("-topmost"))
+        self.chat_window.attributes("-alpha",self.root.attributes("-alpha"))
+        if self.root.state() == "iconic":
+            self.root.deiconify()
+        # Offline exports/self-tests keep the owner withdrawn.
+        if self.root.state() != "withdrawn":
+            self.chat_window.deiconify()
+            self.chat_window.lift()
+        self.current = "chat"
 
     def minimize_settings(self):
         if self.close_settings():
@@ -273,14 +318,18 @@ class FigmaView:
         if name == "settings":
             self.open_settings()
             return
+        if name == "chat":
+            self.open_chat()
+            return
         if not self.close_settings():
             return
         if self.app.recording_hotkey and name != "settings":
             self.app._finish_hotkey_recording()
         for key, page in self.pages.items():
-            if key != "settings":
+            if key not in ("settings", "chat"):
                 page.pack_forget()
         self.current = name
+        self.main_page = name
         page = self.pages[name]
         page.pack()
         width,height = int(page.cget("width")),int(page.cget("height"))

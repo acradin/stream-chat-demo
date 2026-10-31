@@ -1,6 +1,6 @@
 import { useSessionStore } from "@/store/sessionStore";
 import { useUiStore } from "@/store/uiStore";
-import { traitById } from "@/lib/traits";
+import { TRAITS, traitById } from "@/lib/traits";
 
 /**
  * 현재 선택된 페르소나 요약(아이콘 + 이름 + 2줄 설명 + 수정).
@@ -14,24 +14,37 @@ export function PersonaSummary() {
   const goTo = useUiStore((s) => s.goTo);
 
   const persona = config?.personas.find((p) => p.id === selected);
+  const chosenTraits = traitIds.map(traitById).filter((trait) => trait != null);
+  const images = chosenTraits.length
+    ? chosenTraits
+    : [TRAITS.find((trait) => trait.mapsTo === selected) ?? TRAITS[0]];
   // 성향을 골랐으면 그 라벨 조합을 이름으로, 아니면 백엔드 페르소나 이름.
   const traitLabels = traitIds
     .map((id) => traitById(id)?.label)
     .filter(Boolean);
   const name = persona?.name ?? "페르소나";
-  const description =
-    persona?.description ??
-    "재치있는 드립과 적절한 놀림으로 방송을 활발하게 만들어주는 스타일";
+  const description = images.map((trait) => trait.description).join("\n");
 
   return (
     <div className="flex items-center gap-4">
-      {/* 프로필 아이콘 (시안: 둥근 흰 사각형) */}
-      <div className="h-16 w-16 flex-none rounded-2xl bg-white" aria-hidden="true" />
+      <div className="grid w-16 flex-none grid-cols-2 gap-1" aria-hidden="true">
+        {images.map((trait) => (
+          <img
+            key={trait.id}
+            src={trait.image}
+            alt=""
+            width={51}
+            height={48}
+            className={`w-full select-none object-contain ${images.length === 1 ? "col-span-2 h-16" : "h-8"}`}
+            draggable={false}
+          />
+        ))}
+      </div>
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-bold text-ink">
           {traitLabels.length ? traitLabels.join(" · ") : name}
         </p>
-        <p className="mt-0.5 text-[12px] leading-snug text-ink-faint">
+        <p className="mt-0.5 whitespace-pre-line break-keep text-[12px] leading-snug text-ink-faint">
           {description}
         </p>
       </div>

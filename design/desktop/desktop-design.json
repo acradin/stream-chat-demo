@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "exported_at": "2026-10-31T20:07:13.580730+00:00",
-  "git_revision": "db508746c7d57114da557c34ff43d854a0c59cf3",
+  "exported_at": "2026-10-31T20:21:13.563964+00:00",
+  "git_revision": "3ec7b3ea851f8be83adf6217368dfeb2b3ab025c",
   "scope": "Main, Settings, five onboarding screens, Controls, Chat, service connection dialog; synthetic states",
   "privacy": {
     "user_settings_read": false,
@@ -489,16 +489,16 @@
         "requested": "device",
         "resolved": {
           "family": "Pretendard",
-          "size": 490932583,
-          "weight": "normal",
+          "size": 511358515,
+          "weight": "bold",
           "slant": "roman",
           "underline": 0,
           "overstrike": 0
         },
         "metrics": {
-          "ascent": 121,
+          "ascent": 219,
           "descent": 4800846,
-          "linespace": 4800967,
+          "linespace": 4801065,
           "fixed": 1
         }
       },
@@ -9883,12 +9883,12 @@
         ]
       },
       "chat_default": {
-        "path": ".!panel3",
+        "path": ".!toplevel2.!panel",
         "name": "chat",
         "widget_class": "Canvas",
         "manager": "pack",
         "layout": {
-          "in": ".",
+          "in": ".!toplevel2",
           "anchor": "center",
           "expand": 0,
           "fill": "none",
@@ -9928,8 +9928,8 @@
         "bounds_px": {
           "x": 0,
           "y": 0,
-          "width": 420,
-          "height": 530
+          "width": 1,
+          "height": 1
         },
         "requested_px": {
           "width": 420,
@@ -10193,12 +10193,12 @@
         },
         "children": [
           {
-            "path": ".!panel3.!button",
+            "path": ".!toplevel2.!panel.!button",
             "name": null,
             "widget_class": "TButton",
             "manager": "place",
             "layout": {
-              "in": ".!panel3",
+              "in": ".!toplevel2.!panel",
               "x": "308",
               "relx": "0",
               "y": "21",
@@ -10270,12 +10270,12 @@
             "children": []
           },
           {
-            "path": ".!panel3.!frame",
+            "path": ".!toplevel2.!panel.!frame",
             "name": null,
             "widget_class": "TFrame",
             "manager": "place",
             "layout": {
-              "in": ".!panel3",
+              "in": ".!toplevel2.!panel",
               "x": "28",
               "relx": "0",
               "y": "66",
@@ -10340,12 +10340,12 @@
             },
             "children": [
               {
-                "path": ".!panel3.!frame.!label",
+                "path": ".!toplevel2.!panel.!frame.!label",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel3.!frame",
+                  "in": ".!toplevel2.!panel.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -10422,12 +10422,12 @@
                 "children": []
               },
               {
-                "path": ".!panel3.!frame.!label2",
+                "path": ".!toplevel2.!panel.!frame.!label2",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel3.!frame",
+                  "in": ".!toplevel2.!panel.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -10504,12 +10504,12 @@
                 "children": []
               },
               {
-                "path": ".!panel3.!frame.!frame",
+                "path": ".!toplevel2.!panel.!frame.!frame",
                 "name": "chat_log",
                 "widget_class": "Frame",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel3.!frame",
+                  "in": ".!toplevel2.!panel.!frame",
                   "anchor": "center",
                   "expand": 1,
                   "fill": "both",
@@ -10536,8 +10536,8 @@
                   "width": 0
                 },
                 "bounds_px": {
-                  "x": 28,
-                  "y": 116,
+                  "x": -512,
+                  "y": -80,
                   "width": 364,
                   "height": 314
                 },
@@ -10547,12 +10547,12 @@
                 },
                 "children": [
                   {
-                    "path": ".!panel3.!frame.!frame.!scrollbar",
+                    "path": ".!toplevel2.!panel.!frame.!frame.!scrollbar",
                     "name": null,
                     "widget_class": "Scrollbar",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel3.!frame.!frame",
+                      "in": ".!toplevel2.!panel.!frame.!frame",
                       "anchor": "center",
                       "expand": 0,
                       "fill": "y",
@@ -10582,8 +10582,8 @@
                       "width": "17"
                     },
                     "bounds_px": {
-                      "x": 375,
-                      "y": 116,
+                      "x": -512,
+                      "y": -80,
                       "width": 17,
                       "height": 314
                     },
@@ -10594,12 +10594,12 @@
                     "children": []
                   },
                   {
-                    "path": ".!panel3.!frame.!frame",
+                    "path": ".!toplevel2.!panel.!frame.!frame",
                     "name": "chat_log",
                     "widget_class": "Text",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel3.!frame",
+                      "in": ".!toplevel2.!panel.!frame",
                       "anchor": "center",
                       "expand": 1,
                       "fill": "both",
@@ -10651,8 +10651,8 @@
                       "wrap": "word"
                     },
                     "bounds_px": {
-                      "x": 28,
-                      "y": 116,
+                      "x": -512,
+                      "y": -80,
                       "width": 347,
                       "height": 314
                     },
@@ -10771,12 +10771,12 @@
                 ]
               },
               {
-                "path": ".!panel3.!frame.!label3",
+                "path": ".!toplevel2.!panel.!frame.!label3",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel3.!frame",
+                  "in": ".!toplevel2.!panel.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -10850,12 +10850,12 @@
                 "children": []
               },
               {
-                "path": ".!panel3.!frame.!button",
+                "path": ".!toplevel2.!panel.!frame.!button",
                 "name": null,
                 "widget_class": "TButton",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel3.!frame",
+                  "in": ".!toplevel2.!panel.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -10929,7 +10929,7 @@
         ]
       },
       "chzzk_default": {
-        "path": ".!panel4",
+        "path": ".!panel3",
         "name": "chzzk",
         "widget_class": "Canvas",
         "manager": "pack",
@@ -11239,12 +11239,12 @@
         },
         "children": [
           {
-            "path": ".!panel4.!button",
+            "path": ".!panel3.!button",
             "name": null,
             "widget_class": "TButton",
             "manager": "place",
             "layout": {
-              "in": ".!panel4",
+              "in": ".!panel3",
               "x": "308",
               "relx": "0",
               "y": "21",
@@ -11316,12 +11316,12 @@
             "children": []
           },
           {
-            "path": ".!panel4.!frame",
+            "path": ".!panel3.!frame",
             "name": null,
             "widget_class": "TFrame",
             "manager": "place",
             "layout": {
-              "in": ".!panel4",
+              "in": ".!panel3",
               "x": "28",
               "relx": "0",
               "y": "66",
@@ -11386,12 +11386,12 @@
             },
             "children": [
               {
-                "path": ".!panel4.!frame.!label",
+                "path": ".!panel3.!frame.!label",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -11468,12 +11468,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!label2",
+                "path": ".!panel3.!frame.!label2",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -11550,12 +11550,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!label3",
+                "path": ".!panel3.!frame.!label3",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -11632,12 +11632,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!entry",
+                "path": ".!panel3.!frame.!entry",
                 "name": "delivery_channel_entry",
                 "widget_class": "TEntry",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -11710,12 +11710,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!frame",
+                "path": ".!panel3.!frame.!frame",
                 "name": "channel_controls",
                 "widget_class": "TFrame",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -11778,12 +11778,12 @@
                 },
                 "children": [
                   {
-                    "path": ".!panel4.!frame.!frame.!button",
+                    "path": ".!panel3.!frame.!frame.!button",
                     "name": "channel_authorize",
                     "widget_class": "TButton",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel4.!frame.!frame",
+                      "in": ".!panel3.!frame.!frame",
                       "anchor": "center",
                       "expand": 0,
                       "fill": "none",
@@ -11853,12 +11853,12 @@
                     "children": []
                   },
                   {
-                    "path": ".!panel4.!frame.!frame.!button2",
+                    "path": ".!panel3.!frame.!frame.!button2",
                     "name": "channel_check",
                     "widget_class": "TButton",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel4.!frame.!frame",
+                      "in": ".!panel3.!frame.!frame",
                       "anchor": "center",
                       "expand": 0,
                       "fill": "none",
@@ -11928,12 +11928,12 @@
                     "children": []
                   },
                   {
-                    "path": ".!panel4.!frame.!frame.!button3",
+                    "path": ".!panel3.!frame.!frame.!button3",
                     "name": "auth_copy",
                     "widget_class": "TButton",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel4.!frame.!frame",
+                      "in": ".!panel3.!frame.!frame",
                       "anchor": "center",
                       "expand": 0,
                       "fill": "none",
@@ -12007,12 +12007,12 @@
                 ]
               },
               {
-                "path": ".!panel4.!frame.!label4",
+                "path": ".!panel3.!frame.!label4",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -12089,12 +12089,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!label5",
+                "path": ".!panel3.!frame.!label5",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -12171,12 +12171,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!checkbutton",
+                "path": ".!panel3.!frame.!checkbutton",
                 "name": "destination_selector",
                 "widget_class": "TCheckbutton",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -12249,12 +12249,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!label6",
+                "path": ".!panel3.!frame.!label6",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -12331,12 +12331,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!button",
+                "path": ".!panel3.!frame.!button",
                 "name": null,
                 "widget_class": "TButton",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "center",
                   "expand": 0,
                   "fill": "x",
@@ -12409,12 +12409,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!label7",
+                "path": ".!panel3.!frame.!label7",
                 "name": null,
                 "widget_class": "TLabel",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "w",
                   "expand": 0,
                   "fill": "none",
@@ -12491,12 +12491,12 @@
                 "children": []
               },
               {
-                "path": ".!panel4.!frame.!frame2",
+                "path": ".!panel3.!frame.!frame2",
                 "name": "delivery_log",
                 "widget_class": "Frame",
                 "manager": "pack",
                 "layout": {
-                  "in": ".!panel4.!frame",
+                  "in": ".!panel3.!frame",
                   "anchor": "center",
                   "expand": 1,
                   "fill": "both",
@@ -12534,12 +12534,12 @@
                 },
                 "children": [
                   {
-                    "path": ".!panel4.!frame.!frame2.!scrollbar",
+                    "path": ".!panel3.!frame.!frame2.!scrollbar",
                     "name": null,
                     "widget_class": "Scrollbar",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel4.!frame.!frame2",
+                      "in": ".!panel3.!frame.!frame2",
                       "anchor": "center",
                       "expand": 0,
                       "fill": "y",
@@ -12581,12 +12581,12 @@
                     "children": []
                   },
                   {
-                    "path": ".!panel4.!frame.!frame2",
+                    "path": ".!panel3.!frame.!frame2",
                     "name": "delivery_log",
                     "widget_class": "Text",
                     "manager": "pack",
                     "layout": {
-                      "in": ".!panel4.!frame",
+                      "in": ".!panel3.!frame",
                       "anchor": "center",
                       "expand": 1,
                       "fill": "both",
@@ -12762,7 +12762,7 @@
         ]
       },
       "start_default": {
-        "path": ".!panel5",
+        "path": ".!panel4",
         "name": null,
         "widget_class": "Canvas",
         "manager": "pack",
@@ -13084,12 +13084,12 @@
         },
         "children": [
           {
-            "path": ".!panel5.!designbutton",
+            "path": ".!panel4.!designbutton",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel5",
+              "in": ".!panel4",
               "x": "40",
               "relx": "0",
               "y": "263",
@@ -13284,7 +13284,7 @@
         ]
       },
       "start1_default": {
-        "path": ".!panel6",
+        "path": ".!panel5",
         "name": null,
         "widget_class": "Canvas",
         "manager": "pack",
@@ -13715,12 +13715,12 @@
         },
         "children": [
           {
-            "path": ".!panel6.!canvas",
+            "path": ".!panel5.!canvas",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel6",
+              "in": ".!panel5",
               "x": "26",
               "relx": "0",
               "y": "175",
@@ -13849,12 +13849,12 @@
             ],
             "children": [
               {
-                "path": ".!panel6.!canvas.!text",
+                "path": ".!panel5.!canvas.!text",
                 "name": null,
                 "widget_class": "Text",
                 "manager": "place",
                 "layout": {
-                  "in": ".!panel6.!canvas",
+                  "in": ".!panel5.!canvas",
                   "x": "17",
                   "relx": "0",
                   "y": "14",
@@ -13970,12 +13970,12 @@
             ]
           },
           {
-            "path": ".!panel6.!designbutton",
+            "path": ".!panel5.!designbutton",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel6",
+              "in": ".!panel5",
               "x": "38",
               "relx": "0",
               "y": "348",
@@ -14141,12 +14141,12 @@
             "children": []
           },
           {
-            "path": ".!panel6.!designbutton2",
+            "path": ".!panel5.!designbutton2",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel6",
+              "in": ".!panel5",
               "x": "128",
               "relx": "0",
               "y": "348",
@@ -14341,7 +14341,7 @@
         ]
       },
       "start2_default": {
-        "path": ".!panel7",
+        "path": ".!panel6",
         "name": null,
         "widget_class": "Canvas",
         "manager": "pack",
@@ -14812,12 +14812,12 @@
         },
         "children": [
           {
-            "path": ".!panel7.!designbutton",
+            "path": ".!panel6.!designbutton",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "31",
               "relx": "0",
               "y": "205",
@@ -15149,12 +15149,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton2",
+            "path": ".!panel6.!designbutton2",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "31",
               "relx": "0",
               "y": "278",
@@ -15481,12 +15481,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton3",
+            "path": ".!panel6.!designbutton3",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "31",
               "relx": "0",
               "y": "351",
@@ -15813,12 +15813,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton4",
+            "path": ".!panel6.!designbutton4",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "31",
               "relx": "0",
               "y": "424",
@@ -16145,12 +16145,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton5",
+            "path": ".!panel6.!designbutton5",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "31",
               "relx": "0",
               "y": "497",
@@ -16477,12 +16477,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton6",
+            "path": ".!panel6.!designbutton6",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "31",
               "relx": "0",
               "y": "570",
@@ -16809,12 +16809,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton7",
+            "path": ".!panel6.!designbutton7",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "38",
               "relx": "0",
               "y": "663",
@@ -16980,12 +16980,12 @@
             "children": []
           },
           {
-            "path": ".!panel7.!designbutton8",
+            "path": ".!panel6.!designbutton8",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel7",
+              "in": ".!panel6",
               "x": "128",
               "relx": "0",
               "y": "663",
@@ -17180,7 +17180,7 @@
         ]
       },
       "start3_default": {
-        "path": ".!panel8",
+        "path": ".!panel7",
         "name": null,
         "widget_class": "Canvas",
         "manager": "pack",
@@ -17651,12 +17651,12 @@
         },
         "children": [
           {
-            "path": ".!panel8.!canvas",
+            "path": ".!panel7.!canvas",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel8",
+              "in": ".!panel7",
               "x": "34",
               "relx": "0",
               "y": "153",
@@ -17736,12 +17736,12 @@
             ],
             "children": [
               {
-                "path": ".!panel8.!canvas.!entry",
+                "path": ".!panel7.!canvas.!entry",
                 "name": null,
                 "widget_class": "Entry",
                 "manager": "place",
                 "layout": {
-                  "in": ".!panel8.!canvas",
+                  "in": ".!panel7.!canvas",
                   "x": "12",
                   "relx": "0",
                   "y": "7",
@@ -17812,12 +17812,12 @@
                 "children": []
               },
               {
-                "path": ".!panel8.!canvas.!label",
+                "path": ".!panel7.!canvas.!label",
                 "name": null,
                 "widget_class": "Label",
                 "manager": "place",
                 "layout": {
-                  "in": ".!panel8.!canvas",
+                  "in": ".!panel7.!canvas",
                   "x": "12",
                   "relx": "0",
                   "y": "6",
@@ -17889,12 +17889,12 @@
             ]
           },
           {
-            "path": ".!panel8.!designbutton",
+            "path": ".!panel7.!designbutton",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel8",
+              "in": ".!panel7",
               "x": "34",
               "relx": "0",
               "y": "212",
@@ -18060,12 +18060,12 @@
             "children": []
           },
           {
-            "path": ".!panel8.!designbutton2",
+            "path": ".!panel7.!designbutton2",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel8",
+              "in": ".!panel7",
               "x": "124",
               "relx": "0",
               "y": "212",
@@ -18260,7 +18260,7 @@
         ]
       },
       "start_end_default": {
-        "path": ".!panel9",
+        "path": ".!panel8",
         "name": null,
         "widget_class": "Canvas",
         "manager": "pack",
@@ -18582,12 +18582,12 @@
         },
         "children": [
           {
-            "path": ".!panel9.!designbutton",
+            "path": ".!panel8.!designbutton",
             "name": null,
             "widget_class": "Canvas",
             "manager": "place",
             "layout": {
-              "in": ".!panel9",
+              "in": ".!panel8",
               "x": "39",
               "relx": "0",
               "y": "268",
@@ -33075,7 +33075,7 @@
               "justify": "left",
               "wraplength": "",
               "takefocus": "",
-              "text": "5명",
+              "text": "1명",
               "underline": -1,
               "width": "",
               "image": "",
@@ -33092,7 +33092,7 @@
               "height": 20
             },
             "requested_px": {
-              "width": 24,
+              "width": 22,
               "height": 20
             },
             "ttk_style": "TLabel",
@@ -33196,10 +33196,15 @@
                   "anchor": "nw",
                   "disabledimage": "",
                   "image": "pyimage34",
-                  "state": "hidden",
+                  "state": "normal",
                   "tags": "vector-count-slider-1-0"
                 },
-                "bbox_px": null,
+                "bbox_px": [
+                  0,
+                  0,
+                  178,
+                  32
+                ],
                 "image": {
                   "name": "pyimage34",
                   "width": 178,
@@ -33284,15 +33289,10 @@
                   "anchor": "nw",
                   "disabledimage": "",
                   "image": "pyimage38",
-                  "state": "normal",
+                  "state": "hidden",
                   "tags": "vector-count-slider-5-4"
                 },
-                "bbox_px": [
-                  0,
-                  0,
-                  178,
-                  32
-                ],
+                "bbox_px": null,
                 "image": {
                   "name": "pyimage38",
                   "width": 178,
@@ -33303,9 +33303,9 @@
                 "id": 6,
                 "type": "oval",
                 "coordinates_px": [
-                  163.0,
+                  3.0,
                   0.0,
-                  175.0,
+                  15.0,
                   12.0
                 ],
                 "options": {
@@ -33341,7 +33341,7 @@
                 "coordinates_px": [
                   0.0,
                   6.0,
-                  169.0,
+                  9.0,
                   6.0
                 ],
                 "options": {
@@ -34188,14 +34188,14 @@
               "state": "",
               "stipple": "",
               "tags": "",
-              "text": "페르소나 · 5명",
+              "text": "페르소나 · 1명",
               "underline": "-1",
               "width": "0"
             },
             "bbox_px": [
               29,
               331,
-              111,
+              109,
               347
             ],
             "font": {
@@ -34228,10 +34228,15 @@
               "anchor": "nw",
               "disabledimage": "",
               "image": "pyimage8",
-              "state": "hidden",
+              "state": "normal",
               "tags": ""
             },
-            "bbox_px": null,
+            "bbox_px": [
+              28,
+              355,
+              79,
+              403
+            ],
             "image": {
               "name": "pyimage8",
               "width": 51,
@@ -34256,14 +34261,19 @@
               "font": "Pretendard -14",
               "justify": "left",
               "offset": "0,0",
-              "state": "hidden",
+              "state": "normal",
               "stipple": "",
               "tags": "",
               "text": "유쾌한 친구",
               "underline": "-1",
               "width": "0"
             },
-            "bbox_px": null,
+            "bbox_px": [
+              88,
+              355,
+              154,
+              371
+            ],
             "font": {
               "requested": "Pretendard -14",
               "resolved": {
@@ -34300,14 +34310,19 @@
               "font": "Pretendard -12",
               "justify": "left",
               "offset": "0,0",
-              "state": "hidden",
+              "state": "normal",
               "stipple": "",
               "tags": "",
               "text": "재치있는 드립과 적절한 놀림으로\n방송을 활발하게 만들어주는 스타일",
               "underline": "-1",
               "width": "210"
             },
-            "bbox_px": null,
+            "bbox_px": [
+              88,
+              375,
+              249,
+              403
+            ],
             "font": {
               "requested": "Pretendard -12",
               "resolved": {
@@ -34338,15 +34353,10 @@
               "anchor": "nw",
               "disabledimage": "",
               "image": "pyimage14",
-              "state": "normal",
+              "state": "hidden",
               "tags": ""
             },
-            "bbox_px": [
-              28,
-              359,
-              66,
-              395
-            ],
+            "bbox_px": null,
             "image": {
               "name": "pyimage14",
               "width": 38,
@@ -34371,19 +34381,14 @@
               "font": "Pretendard -8",
               "justify": "left",
               "offset": "0,0",
-              "state": "normal",
+              "state": "hidden",
               "stipple": "",
               "tags": "",
               "text": "유쾌한 친구",
               "underline": "-1",
               "width": "0"
             },
-            "bbox_px": [
-              28,
-              398,
-              67,
-              408
-            ],
+            "bbox_px": null,
             "font": {
               "requested": "Pretendard -8",
               "resolved": {
@@ -34414,15 +34419,10 @@
               "anchor": "nw",
               "disabledimage": "",
               "image": "pyimage19",
-              "state": "normal",
+              "state": "hidden",
               "tags": ""
             },
-            "bbox_px": [
-              100,
-              359,
-              138,
-              395
-            ],
+            "bbox_px": null,
             "image": {
               "name": "pyimage19",
               "width": 38,
@@ -34447,19 +34447,14 @@
               "font": "Pretendard -8",
               "justify": "left",
               "offset": "0,0",
-              "state": "normal",
+              "state": "hidden",
               "stipple": "",
               "tags": "",
               "text": "응원러",
               "underline": "-1",
               "width": "0"
             },
-            "bbox_px": [
-              108,
-              398,
-              131,
-              408
-            ],
+            "bbox_px": null,
             "font": {
               "requested": "Pretendard -8",
               "resolved": {
@@ -34490,15 +34485,10 @@
               "anchor": "nw",
               "disabledimage": "",
               "image": "pyimage17",
-              "state": "normal",
+              "state": "hidden",
               "tags": ""
             },
-            "bbox_px": [
-              172,
-              359,
-              210,
-              395
-            ],
+            "bbox_px": null,
             "image": {
               "name": "pyimage17",
               "width": 38,
@@ -34523,19 +34513,14 @@
               "font": "Pretendard -8",
               "justify": "left",
               "offset": "0,0",
-              "state": "normal",
+              "state": "hidden",
               "stipple": "",
               "tags": "",
               "text": "리액션봇",
               "underline": "-1",
               "width": "0"
             },
-            "bbox_px": [
-              176,
-              398,
-              206,
-              408
-            ],
+            "bbox_px": null,
             "font": {
               "requested": "Pretendard -8",
               "resolved": {
@@ -34566,15 +34551,10 @@
               "anchor": "nw",
               "disabledimage": "",
               "image": "pyimage14",
-              "state": "normal",
+              "state": "hidden",
               "tags": ""
             },
-            "bbox_px": [
-              244,
-              359,
-              282,
-              395
-            ],
+            "bbox_px": null,
             "image": {
               "name": "pyimage14",
               "width": 38,
@@ -34599,19 +34579,14 @@
               "font": "Pretendard -8",
               "justify": "left",
               "offset": "0,0",
-              "state": "normal",
+              "state": "hidden",
               "stipple": "",
               "tags": "",
               "text": "덤덤한 드립러",
               "underline": "-1",
               "width": "0"
             },
-            "bbox_px": [
-              240,
-              398,
-              286,
-              408
-            ],
+            "bbox_px": null,
             "font": {
               "requested": "Pretendard -8",
               "resolved": {
@@ -34642,15 +34617,10 @@
               "anchor": "nw",
               "disabledimage": "",
               "image": "pyimage14",
-              "state": "normal",
+              "state": "hidden",
               "tags": ""
             },
-            "bbox_px": [
-              316,
-              359,
-              354,
-              395
-            ],
+            "bbox_px": null,
             "image": {
               "name": "pyimage14",
               "width": 38,
@@ -34675,19 +34645,14 @@
               "font": "Pretendard -8",
               "justify": "left",
               "offset": "0,0",
-              "state": "normal",
+              "state": "hidden",
               "stipple": "",
               "tags": "",
               "text": "유쾌한 친구",
               "underline": "-1",
               "width": "0"
             },
-            "bbox_px": [
-              316,
-              398,
-              355,
-              408
-            ],
+            "bbox_px": null,
             "font": {
               "requested": "Pretendard -8",
               "resolved": {
@@ -37507,7 +37472,7 @@
     },
     {
       "path": "apps/desktop/figma_ui.py",
-      "sha256": "6a45e922cf60a0f774a9f7befa7047eb5c0ccfd53f81c69f39c448784b2a40c1",
+      "sha256": "0757a5885b9225bdb23b58756f40a994cd39f7a4ad94c8bdf8d7fae12b833491",
       "colors": [
         "#3c3e40",
         "#eaeaea",
@@ -37565,551 +37530,579 @@
           "expression": "self.root.minsize(1, 1)"
         },
         {
-          "line": 106,
+          "line": 107,
           "expression": "self.settings_window.resizable(False, False)"
         },
         {
-          "line": 114,
+          "line": 117,
+          "expression": "self.chat_window.resizable(False, False)"
+        },
+        {
+          "line": 129,
           "expression": "ImageTk.PhotoImage(\n                ImageTk.getimage(self.photos[name]).resize((38,36), Image.Resampling.LANCZOS), master=self.root)"
         },
         {
-          "line": 147,
-          "expression": "Panel(self.settings_window if name == \"settings\" else self.root,\n                     width, height, settings=name == \"settings\", variant=variant)"
+          "line": 164,
+          "expression": "Panel(self.settings_window if name == \"settings\" else self.chat_window if name == \"chat\" else self.root,\n                     width, height, settings=name == \"settings\", variant=variant)"
         },
         {
-          "line": 160,
+          "line": 177,
           "expression": "tk.Canvas(page, bg=BG, highlightthickness=0, bd=0,\n                               cursor=\"hand2\", takefocus=1)"
         },
         {
-          "line": 166,
+          "line": 183,
           "expression": "button.place(x=194, y=28, width=21, height=21)"
         },
         {
-          "line": 169,
-          "expression": "ttk.Button(page, text=\"‹\", width=2, command=lambda: self.show(\"main\")).place(x=width-112, y=21)"
+          "line": 186,
+          "expression": "ttk.Button(page, text=\"‹\", width=2, command=self.close_chat if name == \"chat\" else lambda: self.show(\"main\")).place(x=width-112, y=21)"
         },
         {
-          "line": 169,
-          "expression": "ttk.Button(page, text=\"‹\", width=2, command=lambda: self.show(\"main\"))"
+          "line": 186,
+          "expression": "ttk.Button(page, text=\"‹\", width=2, command=self.close_chat if name == \"chat\" else lambda: self.show(\"main\"))"
         },
         {
-          "line": 173,
+          "line": 190,
           "expression": "page.create_oval(x, top, x+10, top+10, fill=color, outline=\"\")"
         },
         {
-          "line": 181,
+          "line": 198,
           "expression": "page.create_text(x,y,text=text,anchor=anchor,fill=fill,\n                                font=(self.semibold if weight else self.family,-size),width=width)"
         },
         {
-          "line": 213,
+          "line": 230,
           "expression": "window.geometry(f\"+{event.x_root-x}+{event.y_root-y}\")"
         },
         {
-          "line": 241,
-          "expression": "self.settings.pack()"
+          "line": 244,
+          "expression": "self.chat.pack()"
         },
         {
-          "line": 249,
-          "expression": "self.settings_window.geometry(f\"{width}x{height}+{x}+{y}\")"
+          "line": 253,
+          "expression": "self.chat_window.geometry(f\"{width}x{height}+{x}+{y}\")"
         },
         {
-          "line": 250,
-          "expression": "self.settings_window.attributes(\"-topmost\", self.root.attributes(\"-topmost\"))"
+          "line": 255,
+          "expression": "self.chat_window.attributes(\"-topmost\",self.root.attributes(\"-topmost\"))"
         },
         {
-          "line": 250,
+          "line": 255,
           "expression": "self.root.attributes(\"-topmost\")"
         },
         {
-          "line": 251,
-          "expression": "self.settings_window.attributes(\"-alpha\", self.root.attributes(\"-alpha\"))"
+          "line": 256,
+          "expression": "self.chat_window.attributes(\"-alpha\",self.root.attributes(\"-alpha\"))"
         },
         {
-          "line": 251,
+          "line": 256,
           "expression": "self.root.attributes(\"-alpha\")"
         },
         {
-          "line": 285,
-          "expression": "page.pack()"
+          "line": 286,
+          "expression": "self.settings.pack()"
         },
         {
-          "line": 289,
-          "expression": "self.root.geometry(f\"{width}x{height}+{x}+{y}\")"
+          "line": 294,
+          "expression": "self.settings_window.geometry(f\"{width}x{height}+{x}+{y}\")"
         },
         {
           "line": 295,
-          "expression": "ttk.Frame(page)"
+          "expression": "self.settings_window.attributes(\"-topmost\", self.root.attributes(\"-topmost\"))"
+        },
+        {
+          "line": 295,
+          "expression": "self.root.attributes(\"-topmost\")"
         },
         {
           "line": 296,
+          "expression": "self.settings_window.attributes(\"-alpha\", self.root.attributes(\"-alpha\"))"
+        },
+        {
+          "line": 296,
+          "expression": "self.root.attributes(\"-alpha\")"
+        },
+        {
+          "line": 334,
+          "expression": "page.pack()"
+        },
+        {
+          "line": 338,
+          "expression": "self.root.geometry(f\"{width}x{height}+{x}+{y}\")"
+        },
+        {
+          "line": 344,
+          "expression": "ttk.Frame(page)"
+        },
+        {
+          "line": 345,
           "expression": "frame.place(x=28, y=y, width=width, height=height)"
         },
         {
-          "line": 298,
+          "line": 347,
           "expression": "tk.Canvas(page, bg=BG, highlightthickness=0, width=width, height=height)"
         },
         {
-          "line": 299,
+          "line": 348,
           "expression": "viewport.place(x=28, y=y, width=width, height=height)"
         },
         {
-          "line": 300,
+          "line": 349,
           "expression": "ttk.Scrollbar(page, orient=\"vertical\", command=viewport.yview)"
         },
         {
-          "line": 301,
+          "line": 350,
           "expression": "scrollbar.place(x=int(page.cget(\"width\"))-20, y=y, width=10, height=height)"
         },
         {
-          "line": 302,
+          "line": 351,
           "expression": "viewport.configure(yscrollcommand=scrollbar.set)"
         },
         {
-          "line": 303,
+          "line": 352,
           "expression": "ttk.Frame(viewport)"
         },
         {
-          "line": 304,
+          "line": 353,
           "expression": "viewport.create_window(0, 0, window=frame, anchor=\"nw\", width=width)"
         },
         {
-          "line": 305,
+          "line": 354,
           "expression": "viewport.configure(scrollregion=viewport.bbox(\"all\"))"
         },
         {
-          "line": 321,
+          "line": 370,
           "expression": "ttk.Label(frame, text=text, **kwargs)"
         },
         {
-          "line": 322,
+          "line": 371,
           "expression": "label.pack(anchor=\"w\", pady=(0, 5))"
         },
         {
-          "line": 327,
+          "line": 376,
           "expression": "GenerateOrb(self.main, app)"
         },
         {
-          "line": 328,
+          "line": 377,
           "expression": "app.trigger_button.place(x=40, y=45)"
         },
         {
-          "line": 330,
+          "line": 379,
           "expression": "ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14)).place(x=200,y=237,width=30,height=20)"
         },
         {
-          "line": 330,
+          "line": 379,
           "expression": "ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14))"
         },
         {
-          "line": 333,
+          "line": 382,
           "expression": "self.slider.place(x=48,y=267)"
         },
         {
-          "line": 358,
+          "line": 407,
           "expression": "app.hotkey_entry.configure(justify=\"center\")"
         },
         {
-          "line": 363,
+          "line": 412,
           "expression": "tk.Label(page,textvariable=app.hotkey_hint,bg=BG,fg=MUTED,font=(self.family,-8),anchor=\"w\").place(x=31,y=193,width=358,height=11)"
         },
         {
-          "line": 363,
+          "line": 412,
           "expression": "tk.Label(page,textvariable=app.hotkey_hint,bg=BG,fg=MUTED,font=(self.family,-8),anchor=\"w\")"
         },
         {
-          "line": 369,
+          "line": 418,
           "expression": "tk.Label(app.context.design_surface,textvariable=app.context_count,bg=app.context.cget(\"bg\"),fg=INK,font=(self.family,-8))"
         },
         {
-          "line": 370,
+          "line": 419,
           "expression": "counter.place(x=275,y=70,width=74,height=12)"
         },
         {
-          "line": 372,
+          "line": 421,
           "expression": "page.create_image(28,355,anchor=\"nw\",image=self.photos[\"persona-witty\"])"
         },
         {
-          "line": 380,
+          "line": 429,
           "expression": "page.create_image(x,359,anchor=\"nw\",image=self.photos[\"member-witty_friend\"],state=\"hidden\")"
         },
         {
-          "line": 381,
+          "line": 430,
           "expression": "page.create_text(x+19,403,text=\"\",anchor=\"center\",fill=INK,font=(self.family,-8),state=\"hidden\")"
         },
         {
-          "line": 386,
+          "line": 435,
           "expression": "page.create_line(32,459,370,459,width=8,capstyle=\"round\",fill=\"#3c3e40\")"
         },
         {
-          "line": 390,
+          "line": 439,
           "expression": "tk.Label(page,textvariable=app.status,bg=BG,fg=MUTED,font=(self.family,-9),anchor=\"w\",justify=\"left\",wraplength=260).place(x=28,y=486,width=270,height=38)"
         },
         {
-          "line": 390,
+          "line": 439,
           "expression": "tk.Label(page,textvariable=app.status,bg=BG,fg=MUTED,font=(self.family,-9),anchor=\"w\",justify=\"left\",wraplength=260)"
         },
         {
-          "line": 403,
+          "line": 452,
           "expression": "self.settings.itemconfigure(self.persona_title,text=persona[\"name\"])"
         },
         {
-          "line": 404,
+          "line": 453,
           "expression": "self.settings.itemconfigure(self.persona_description,text=persona[\"description\"])"
         },
         {
-          "line": 405,
+          "line": 454,
           "expression": "self.settings.itemconfigure(self.persona_image,image=self.photos[PERSONA_ASSETS.get(key,\"persona-witty\")])"
         },
         {
-          "line": 408,
+          "line": 457,
           "expression": "self.settings.itemconfigure(self.persona_heading,text=f\"페르소나 · {count}명\")"
         },
         {
-          "line": 410,
+          "line": 459,
           "expression": "self.settings.itemconfigure(item,state=\"hidden\" if multiple else \"normal\")"
         },
         {
-          "line": 416,
+          "line": 465,
           "expression": "self.settings.itemconfigure(avatar,image=self.photos[\"member-\"+(member if member in PERSONA_ASSETS else \"witty_friend\")],state=\"normal\" if visible else \"hidden\")"
         },
         {
-          "line": 417,
+          "line": 466,
           "expression": "self.settings.itemconfigure(label,text=name,state=\"normal\" if visible else \"hidden\")"
         },
         {
-          "line": 423,
+          "line": 472,
           "expression": "self.settings.itemconfigure(self.usage_caption,text=label)"
         },
         {
-          "line": 424,
+          "line": 473,
           "expression": "self.settings.itemconfigure(self.usage_value,text=f\"{usage['generation_requests']:,}회 · 한도 미설정\" if usage else \"확인 중\")"
         },
         {
-          "line": 430,
+          "line": 479,
           "expression": "ttk.Button(frame,text=\"치지직 인증 / 전송 설정\",command=lambda:self.show(\"chzzk\")).pack(fill=\"x\",pady=(0,8))"
         },
         {
-          "line": 430,
+          "line": 479,
           "expression": "ttk.Button(frame,text=\"치지직 인증 / 전송 설정\",command=lambda:self.show(\"chzzk\"))"
         },
         {
-          "line": 431,
+          "line": 480,
           "expression": "ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED).pack(fill=\"x\",pady=6)"
         },
         {
-          "line": 431,
+          "line": 480,
           "expression": "ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED)"
         },
         {
-          "line": 434,
+          "line": 483,
           "expression": "ttk.Combobox(frame, textvariable=app.mode_var, values=list(MODES), state=\"readonly\")"
         },
         {
-          "line": 435,
+          "line": 484,
           "expression": "app.mode_selector.pack(fill=\"x\", pady=(0, 10))"
         },
         {
-          "line": 440,
+          "line": 489,
           "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 441,
-          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5).pack(side=\"left\")"
-        },
-        {
-          "line": 441,
-          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5)"
-        },
-        {
-          "line": 442,
-          "expression": "ttk.Combobox(row, textvariable=variable, values=[p[\"name\"] for p in PERSONAS.values()], state=\"readonly\")"
-        },
-        {
-          "line": 443,
-          "expression": "selector.pack(side=\"left\", fill=\"x\", expand=True)"
-        },
-        {
-          "line": 446,
-          "expression": "ttk.Label(frame, text=\"선택한 인원만 채팅을 생성합니다.\", foreground=MUTED)"
-        },
-        {
-          "line": 447,
-          "expression": "app.persona_hint.pack(fill=\"x\", pady=(6, 8))"
-        },
-        {
-          "line": 448,
-          "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 449,
-          "expression": "ttk.Frame(app.live_controls)"
-        },
-        {
-          "line": 450,
-          "expression": "row.pack(fill=\"x\", pady=(0, 4))"
-        },
-        {
-          "line": 452,
-          "expression": "ttk.Combobox(row, textvariable=app.source_var, state=\"readonly\")"
-        },
-        {
-          "line": 453,
-          "expression": "app.source_selector.pack(side=\"left\", fill=\"x\", expand=True)"
-        },
-        {
-          "line": 454,
-          "expression": "ttk.Button(row, text=\"창 새로고침\", command=app.refresh_windows)"
-        },
-        {
-          "line": 455,
-          "expression": "app.source_refresh.pack(side=\"right\", padx=(4, 0))"
-        },
-        {
-          "line": 456,
-          "expression": "ttk.Frame(app.live_controls)"
-        },
-        {
-          "line": 457,
-          "expression": "row.pack(fill=\"x\")"
-        },
-        {
-          "line": 459,
-          "expression": "ttk.Label(row, text=\"분석 간격(초)\").pack(side=\"left\")"
-        },
-        {
-          "line": 459,
-          "expression": "ttk.Label(row, text=\"분석 간격(초)\")"
-        },
-        {
-          "line": 460,
-          "expression": "ttk.Combobox(row, textvariable=app.interval_var, values=(3, 5, 10), width=3, state=\"readonly\")"
-        },
-        {
-          "line": 461,
-          "expression": "app.interval_selector.pack(side=\"left\", padx=4)"
-        },
-        {
-          "line": 462,
-          "expression": "ttk.Label(row, text=\"종료(초)\").pack(side=\"left\", padx=(8, 0))"
-        },
-        {
-          "line": 462,
-          "expression": "ttk.Label(row, text=\"종료(초)\")"
-        },
-        {
-          "line": 463,
-          "expression": "ttk.Combobox(row, textvariable=app.duration_var, values=(30, 60, 120), width=4, state=\"readonly\")"
-        },
-        {
-          "line": 464,
-          "expression": "app.duration_selector.pack(side=\"left\", padx=4)"
-        },
-        {
-          "line": 465,
-          "expression": "ttk.Button(app.live_controls, text=\"실시간 중지\", command=app.stop_live, state=\"disabled\")"
-        },
-        {
-          "line": 466,
-          "expression": "app.stop_button.pack(fill=\"x\", pady=(6, 0))"
-        },
-        {
-          "line": 467,
-          "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 468,
-          "expression": "app.live_anchor.pack(fill=\"x\")"
-        },
-        {
-          "line": 470,
-          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=8)"
-        },
-        {
-          "line": 470,
-          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8))"
-        },
-        {
-          "line": 473,
-          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var).pack(anchor=\"w\")"
-        },
-        {
-          "line": 473,
-          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var)"
-        },
-        {
-          "line": 475,
-          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1).pack(fill=\"x\")"
-        },
-        {
-          "line": 475,
-          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1)"
-        },
-        {
-          "line": 476,
-          "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 477,
-          "expression": "row.pack(fill=\"x\", pady=(10, 6))"
-        },
-        {
-          "line": 478,
-          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection).pack(side=\"left\")"
-        },
-        {
-          "line": 478,
-          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection)"
-        },
-        {
-          "line": 479,
-          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings).pack(side=\"right\")"
-        },
-        {
-          "line": 479,
-          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings)"
-        },
-        {
-          "line": 480,
-          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=(6, 0))"
-        },
-        {
-          "line": 480,
-          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8))"
-        },
-        {
-          "line": 482,
-          "expression": "ttk.Frame(frame)"
-        },
-        {
-          "line": 483,
-          "expression": "app.usage_tab.pack(fill=\"x\",pady=12)"
         },
         {
           "line": 490,
-          "expression": "scrolledtext.ScrolledText(frame, height=14, wrap=\"word\", state=\"disabled\", relief=\"flat\",\n                                                bg=BG, fg=INK, padx=4, pady=4)"
+          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5).pack(side=\"left\")"
+        },
+        {
+          "line": 490,
+          "expression": "ttk.Label(row, text=f\"AI {index+1}\", width=5)"
+        },
+        {
+          "line": 491,
+          "expression": "ttk.Combobox(row, textvariable=variable, values=[p[\"name\"] for p in PERSONAS.values()], state=\"readonly\")"
         },
         {
           "line": 492,
-          "expression": "app.chat_log.pack(fill=\"both\", expand=True)"
-        },
-        {
-          "line": 493,
-          "expression": "app.chat_log.tag_configure(\"name\", foreground=MINT, font=(self.family, 9, \"bold\"))"
-        },
-        {
-          "line": 494,
-          "expression": "app.chat_log.tag_configure(\"error\", foreground=\"#ff938b\")"
+          "expression": "selector.pack(side=\"left\", fill=\"x\", expand=True)"
         },
         {
           "line": 495,
-          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED).pack(fill=\"x\", pady=8)"
-        },
-        {
-          "line": 495,
-          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED)"
+          "expression": "ttk.Label(frame, text=\"선택한 인원만 채팅을 생성합니다.\", foreground=MUTED)"
         },
         {
           "line": 496,
-          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate).pack(fill=\"x\")"
+          "expression": "app.persona_hint.pack(fill=\"x\", pady=(6, 8))"
         },
         {
-          "line": 496,
-          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate)"
-        },
-        {
-          "line": 504,
-          "expression": "ttk.Entry(frame,textvariable=app.channel_var)"
-        },
-        {
-          "line": 505,
-          "expression": "app.delivery_channel_entry.pack(fill=\"x\",pady=(0,8))"
-        },
-        {
-          "line": 506,
+          "line": 497,
           "expression": "ttk.Frame(frame)"
         },
         {
-          "line": 507,
-          "expression": "app.channel_controls.pack(fill=\"x\")"
+          "line": 498,
+          "expression": "ttk.Frame(app.live_controls)"
+        },
+        {
+          "line": 499,
+          "expression": "row.pack(fill=\"x\", pady=(0, 4))"
+        },
+        {
+          "line": 501,
+          "expression": "ttk.Combobox(row, textvariable=app.source_var, state=\"readonly\")"
+        },
+        {
+          "line": 502,
+          "expression": "app.source_selector.pack(side=\"left\", fill=\"x\", expand=True)"
+        },
+        {
+          "line": 503,
+          "expression": "ttk.Button(row, text=\"창 새로고침\", command=app.refresh_windows)"
+        },
+        {
+          "line": 504,
+          "expression": "app.source_refresh.pack(side=\"right\", padx=(4, 0))"
+        },
+        {
+          "line": 505,
+          "expression": "ttk.Frame(app.live_controls)"
+        },
+        {
+          "line": 506,
+          "expression": "row.pack(fill=\"x\")"
         },
         {
           "line": 508,
-          "expression": "ttk.Button(app.channel_controls,text=\"치지직 인증\",command=app.authorize_channel)"
+          "expression": "ttk.Label(row, text=\"분석 간격(초)\").pack(side=\"left\")"
+        },
+        {
+          "line": 508,
+          "expression": "ttk.Label(row, text=\"분석 간격(초)\")"
         },
         {
           "line": 509,
-          "expression": "app.channel_authorize.pack(side=\"left\")"
+          "expression": "ttk.Combobox(row, textvariable=app.interval_var, values=(3, 5, 10), width=3, state=\"readonly\")"
         },
         {
           "line": 510,
-          "expression": "ttk.Button(app.channel_controls,text=\"연결 확인\",command=app.refresh_channel)"
+          "expression": "app.interval_selector.pack(side=\"left\", padx=4)"
         },
         {
           "line": 511,
-          "expression": "app.channel_check.pack(side=\"left\",padx=6)"
+          "expression": "ttk.Label(row, text=\"종료(초)\").pack(side=\"left\", padx=(8, 0))"
+        },
+        {
+          "line": 511,
+          "expression": "ttk.Label(row, text=\"종료(초)\")"
         },
         {
           "line": 512,
-          "expression": "ttk.Button(app.channel_controls,text=\"인증 링크 복사\",command=app.copy_authorization_link,state=\"disabled\")"
+          "expression": "ttk.Combobox(row, textvariable=app.duration_var, values=(30, 60, 120), width=4, state=\"readonly\")"
         },
         {
           "line": 513,
-          "expression": "app.auth_copy.pack(side=\"right\")"
+          "expression": "app.duration_selector.pack(side=\"left\", padx=4)"
         },
         {
           "line": 514,
-          "expression": "ttk.Label(frame,textvariable=app.channel_info,wraplength=355).pack(fill=\"x\",pady=(8,4))"
+          "expression": "ttk.Button(app.live_controls, text=\"실시간 중지\", command=app.stop_live, state=\"disabled\")"
         },
         {
-          "line": 514,
-          "expression": "ttk.Label(frame,textvariable=app.channel_info,wraplength=355)"
-        },
-        {
-          "line": 516,
-          "expression": "ttk.Label(frame,textvariable=app.auth_info,wraplength=355,foreground=MUTED).pack(fill=\"x\",pady=(0,8))"
+          "line": 515,
+          "expression": "app.stop_button.pack(fill=\"x\", pady=(6, 0))"
         },
         {
           "line": 516,
-          "expression": "ttk.Label(frame,textvariable=app.auth_info,wraplength=355,foreground=MUTED)"
+          "expression": "ttk.Frame(frame)"
+        },
+        {
+          "line": 517,
+          "expression": "app.live_anchor.pack(fill=\"x\")"
         },
         {
           "line": 519,
-          "expression": "ttk.Checkbutton(frame,text=\"치지직으로 전송\",variable=app.send_enabled,command=app.toggle_delivery)"
+          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=8)"
         },
         {
-          "line": 520,
-          "expression": "app.destination_selector.pack(anchor=\"w\",pady=(0,4))"
-        },
-        {
-          "line": 522,
-          "expression": "ttk.Button(frame,text=\"실시간 관찰 중지\",command=app.stop_live).pack(fill=\"x\",pady=(0,8))"
+          "line": 519,
+          "expression": "ttk.Label(frame, textvariable=app.capture_hint, foreground=MUTED, wraplength=355, font=(self.family, 8))"
         },
         {
           "line": 522,
-          "expression": "ttk.Button(frame,text=\"실시간 관찰 중지\",command=app.stop_live)"
+          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var).pack(anchor=\"w\")"
+        },
+        {
+          "line": 522,
+          "expression": "ttk.Checkbutton(frame, text=\"항상 위에 표시\", variable=app.topmost_var)"
         },
         {
           "line": 524,
-          "expression": "scrolledtext.ScrolledText(frame,height=5,wrap=\"word\",state=\"disabled\",relief=\"flat\",bg=BG,fg=INK,padx=4,pady=4)"
+          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1).pack(fill=\"x\")"
+        },
+        {
+          "line": 524,
+          "expression": "ttk.Scale(frame, variable=app.opacity_var, from_=.6, to=1)"
         },
         {
           "line": 525,
-          "expression": "app.delivery_log.pack(fill=\"both\",expand=True)"
+          "expression": "ttk.Frame(frame)"
         },
         {
           "line": 526,
-          "expression": "app.delivery_log.tag_configure(\"name\",foreground=MINT)"
+          "expression": "row.pack(fill=\"x\", pady=(10, 6))"
         },
         {
           "line": 527,
-          "expression": "app.delivery_log.tag_configure(\"error\",foreground=\"#ff938b\")"
+          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection).pack(side=\"left\")"
+        },
+        {
+          "line": 527,
+          "expression": "ttk.Button(row, text=\"서비스 연결 설정\", command=app.configure_connection)"
+        },
+        {
+          "line": 528,
+          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings).pack(side=\"right\")"
+        },
+        {
+          "line": 528,
+          "expression": "ttk.Button(row, text=\"설정 적용\", command=app.save_settings)"
+        },
+        {
+          "line": 529,
+          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill=\"x\", pady=(6, 0))"
+        },
+        {
+          "line": 529,
+          "expression": "ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8))"
+        },
+        {
+          "line": 531,
+          "expression": "ttk.Frame(frame)"
         },
         {
           "line": 532,
+          "expression": "app.usage_tab.pack(fill=\"x\",pady=12)"
+        },
+        {
+          "line": 539,
+          "expression": "scrolledtext.ScrolledText(frame, height=14, wrap=\"word\", state=\"disabled\", relief=\"flat\",\n                                                bg=BG, fg=INK, padx=4, pady=4)"
+        },
+        {
+          "line": 541,
+          "expression": "app.chat_log.pack(fill=\"both\", expand=True)"
+        },
+        {
+          "line": 542,
+          "expression": "app.chat_log.tag_configure(\"name\", foreground=MINT, font=(self.family, 9, \"bold\"))"
+        },
+        {
+          "line": 543,
+          "expression": "app.chat_log.tag_configure(\"error\", foreground=\"#ff938b\")"
+        },
+        {
+          "line": 544,
+          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED).pack(fill=\"x\", pady=8)"
+        },
+        {
+          "line": 544,
+          "expression": "ttk.Label(frame, textvariable=app.status, wraplength=355, foreground=MUTED)"
+        },
+        {
+          "line": 545,
+          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate).pack(fill=\"x\")"
+        },
+        {
+          "line": 545,
+          "expression": "ttk.Button(frame, text=\"화면 캡처 / 실시간 시작·중지\", command=app.generate)"
+        },
+        {
+          "line": 553,
+          "expression": "ttk.Entry(frame,textvariable=app.channel_var)"
+        },
+        {
+          "line": 554,
+          "expression": "app.delivery_channel_entry.pack(fill=\"x\",pady=(0,8))"
+        },
+        {
+          "line": 555,
+          "expression": "ttk.Frame(frame)"
+        },
+        {
+          "line": 556,
+          "expression": "app.channel_controls.pack(fill=\"x\")"
+        },
+        {
+          "line": 557,
+          "expression": "ttk.Button(app.channel_controls,text=\"치지직 인증\",command=app.authorize_channel)"
+        },
+        {
+          "line": 558,
+          "expression": "app.channel_authorize.pack(side=\"left\")"
+        },
+        {
+          "line": 559,
+          "expression": "ttk.Button(app.channel_controls,text=\"연결 확인\",command=app.refresh_channel)"
+        },
+        {
+          "line": 560,
+          "expression": "app.channel_check.pack(side=\"left\",padx=6)"
+        },
+        {
+          "line": 561,
+          "expression": "ttk.Button(app.channel_controls,text=\"인증 링크 복사\",command=app.copy_authorization_link,state=\"disabled\")"
+        },
+        {
+          "line": 562,
+          "expression": "app.auth_copy.pack(side=\"right\")"
+        },
+        {
+          "line": 563,
+          "expression": "ttk.Label(frame,textvariable=app.channel_info,wraplength=355).pack(fill=\"x\",pady=(8,4))"
+        },
+        {
+          "line": 563,
+          "expression": "ttk.Label(frame,textvariable=app.channel_info,wraplength=355)"
+        },
+        {
+          "line": 565,
+          "expression": "ttk.Label(frame,textvariable=app.auth_info,wraplength=355,foreground=MUTED).pack(fill=\"x\",pady=(0,8))"
+        },
+        {
+          "line": 565,
+          "expression": "ttk.Label(frame,textvariable=app.auth_info,wraplength=355,foreground=MUTED)"
+        },
+        {
+          "line": 568,
+          "expression": "ttk.Checkbutton(frame,text=\"치지직으로 전송\",variable=app.send_enabled,command=app.toggle_delivery)"
+        },
+        {
+          "line": 569,
+          "expression": "app.destination_selector.pack(anchor=\"w\",pady=(0,4))"
+        },
+        {
+          "line": 571,
+          "expression": "ttk.Button(frame,text=\"실시간 관찰 중지\",command=app.stop_live).pack(fill=\"x\",pady=(0,8))"
+        },
+        {
+          "line": 571,
+          "expression": "ttk.Button(frame,text=\"실시간 관찰 중지\",command=app.stop_live)"
+        },
+        {
+          "line": 573,
+          "expression": "scrolledtext.ScrolledText(frame,height=5,wrap=\"word\",state=\"disabled\",relief=\"flat\",bg=BG,fg=INK,padx=4,pady=4)"
+        },
+        {
+          "line": 574,
+          "expression": "app.delivery_log.pack(fill=\"both\",expand=True)"
+        },
+        {
+          "line": 575,
+          "expression": "app.delivery_log.tag_configure(\"name\",foreground=MINT)"
+        },
+        {
+          "line": 576,
+          "expression": "app.delivery_log.tag_configure(\"error\",foreground=\"#ff938b\")"
+        },
+        {
+          "line": 581,
           "expression": "badge.configure(text=\"• Demo\" if usage and usage[\"is_demo\"] else \"• Online\" if usage else \"• Offline\")"
         },
         {
-          "line": 533,
+          "line": 582,
           "expression": "self.app.trigger_button.itemconfigure(self.app.trigger_button.key_label, text=self.app.settings[\"hotkey\"])"
         }
       ]
@@ -38393,7 +38386,7 @@
     },
     {
       "path": "apps/desktop/overlay.py",
-      "sha256": "daf05d6f341b3bf1174d0f8b4b3f9d68267d93fdbcb926a8c03d86c204fa16d4",
+      "sha256": "975285e241f70dd6d8f2127ade13f14e39998d0543de10833fcaac79a6ad8b06",
       "colors": [],
       "style_and_layout_calls": [
         {
@@ -38521,67 +38514,67 @@
           "expression": "self.channel_check.configure(state=\"disabled\" if busy or self.channel_loading else \"normal\")"
         },
         {
-          "line": 389,
+          "line": 390,
           "expression": "self.stop_button.configure(state=\"normal\")"
         },
         {
-          "line": 408,
+          "line": 409,
           "expression": "self.stop_button.configure(state=\"disabled\")"
         },
         {
-          "line": 416,
+          "line": 417,
           "expression": "row.pack(fill=\"x\", pady=(6, 0), before=self.persona_hint)"
         },
         {
-          "line": 459,
+          "line": 460,
           "expression": "self.root.attributes(\"-topmost\", self.settings[\"topmost\"])"
         },
         {
-          "line": 460,
+          "line": 461,
           "expression": "self.root.attributes(\"-alpha\", self.settings[\"opacity\"])"
         },
         {
-          "line": 462,
-          "expression": "self.view.settings_window.attributes(\"-topmost\", self.settings[\"topmost\"])"
+          "line": 464,
+          "expression": "window.attributes(\"-topmost\", self.settings[\"topmost\"])"
         },
         {
-          "line": 463,
-          "expression": "self.view.settings_window.attributes(\"-alpha\", self.settings[\"opacity\"])"
+          "line": 465,
+          "expression": "window.attributes(\"-alpha\", self.settings[\"opacity\"])"
         },
         {
-          "line": 482,
+          "line": 484,
           "expression": "self.hotkey_record.configure(text=\"취소\")"
         },
         {
-          "line": 490,
+          "line": 492,
           "expression": "self.hotkey_record.configure(text=\"변경\")"
         },
         {
-          "line": 642,
+          "line": 654,
           "expression": "self.chat_log.configure(state=\"normal\")"
         },
         {
-          "line": 651,
+          "line": 663,
           "expression": "self.chat_log.configure(state=\"disabled\")"
         },
         {
-          "line": 656,
+          "line": 668,
           "expression": "self.delivery_log.configure(state=\"normal\")"
         },
         {
-          "line": 665,
+          "line": 677,
           "expression": "self.delivery_log.configure(state=\"disabled\")"
         },
         {
-          "line": 681,
+          "line": 693,
           "expression": "self.channel_check.configure(state=\"disabled\" if self.busy else \"normal\")"
         },
         {
-          "line": 712,
+          "line": 724,
           "expression": "self.stop_button.configure(state=\"disabled\")"
         },
         {
-          "line": 735,
+          "line": 749,
           "expression": "self.trigger_button.configure(state=\"normal\")"
         }
       ]

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="방송자가 버튼을 누르면 예시 채팅이 나타나는 수동 트리거 체험 데모. 실제 AI 연결 없이 동작을 확인하세요.">
+<title>한 번 눌러, 한 줄 — 채팅 체험 데모</title>
+<style>
+    :root { --ink:#19252d; --muted:#67747c; --line:#dfe5e8; --paper:#f3f5f3; --white:#fff; --teal:#156b60; --teal-soft:#e5f1ed; --amber:#8b5b09; --amber-soft:#fff4d9; --danger:#a83c3c; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif; font-size:15px; line-height:1.55; }
+    button,input,textarea,select { font:inherit; }
+    button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+    button { cursor:pointer; }
+    button:disabled { cursor:not-allowed; }
+    button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:3px solid #80b7e2; outline-offset:3px; }
+    .shell { max-width:1240px; margin:auto; padding:32px 28px 28px; }
+    header { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:26px; }
+    .eyebrow { margin:0 0 8px; color:var(--teal); font-size:11px; font-weight:750; letter-spacing:.16em; }
+    h1 { margin:0; font-size:30px; line-height:1.3; letter-spacing:-.04em; }
+    .intro { margin:10px 0 0; color:var(--muted); }
+    .connection { display:flex; align-items:center; gap:8px; padding:9px 13px; background:#fff; border:1px solid var(--line); border-radius:999px; font-size:12px; white-space:nowrap; }
+    .dot { width:7px; height:7px; border-radius:50%; background:#98a4a9; }
+    .connection[data-state="ready"] .dot { background:var(--teal); }
+    .connection[data-state="error"] .dot { background:var(--danger); }
+    .banner { padding:12px 16px; margin-bottom:20px; border:1px solid #eddaa3; border-radius:10px; background:var(--amber-soft); color:#725313; font-size:13px; }
+    .banner strong { margin-right:8px; }
+    .workspace { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(340px,1fr); gap:22px; align-items:start; }
+    .card { border:1px solid var(--line); border-radius:15px; background:var(--white); box-shadow:0 3px 14px #21352b03; overflow:hidden; }
+    .section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid var(--line); }
+    .section-head h2 { margin:0; font-size:15px; font-weight:700; }
+    .section-head .note { color:var(--muted); font-size:11px; }
+    .stage { position:relative; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; background:#17262b; }
+    video { display:block; width:100%; height:100%; max-height:440px; object-fit:contain; }
+    video[hidden] { display:none; }
+    .empty-video { text-align:center; color:#d6e0e1; padding:28px; }
+    .play-icon { width:46px; height:46px; margin:0 auto 13px; border-radius:50%; border:1px solid #516367; display:grid; place-items:center; }
+    .play-icon svg { width:17px; height:17px; margin-left:3px; }
+    .empty-video p { margin:5px 0; font-size:13px; }
+    .empty-video .subtle { color:#9eafb3; font-size:12px; }
+    .file-row { display:flex; align-items:center; gap:12px; padding:14px 18px; border-top:1px solid var(--line); }
+    .file-row input { max-width:100%; width:100%; color:var(--muted); font-size:12px; }
+    input::file-selector-button { margin-right:12px; padding:8px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink); cursor:pointer; }
+    .privacy { margin:0; padding:0 18px 16px; color:var(--muted); font-size:12px; }
+    .controls { margin-top:20px; padding:20px; }
+    .controls h2 { font-size:15px; margin:0 0 16px; }
+    .fields { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    label { display:block; margin-bottom:6px; color:#46565e; font-size:12px; font-weight:650; }
+    label span { color:var(--muted); font-weight:400; }
+    select,input[type="text"],textarea { width:100%; color:var(--ink); background:#fcfdfc; border:1px solid #d7dfe1; border-radius:8px; padding:10px 11px; }
+    textarea { min-height:67px; resize:vertical; line-height:1.5; }
+    .field { margin-top:14px; }
+    .field-hint { color:var(--muted); font-size:11px; margin:6px 0 0; }
+    .trigger { width:100%; margin-top:19px; border:0; border-radius:10px; color:#fff; background:var(--teal); min-height:55px; font-size:17px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:11px; transition:background .15s,transform .15s; }
+    .trigger:hover:not(:disabled) { background:#0c594f; }
+    .trigger:active:not(:disabled) { transform:translateY(1px); }
+    .trigger:disabled { background:#92ada6; }
+    .trigger kbd { border:1px solid #ffffff50; padding:1px 5px; border-radius:4px; font:10px inherit; font-weight:400; opacity:.86; }
+    .trigger-hint { text-align:center; font-size:11px; color:var(--muted); margin:8px 0 0; }
+    .status { margin-top:16px; min-height:46px; padding:10px 12px; border-radius:8px; background:#f1f5f3; color:#52655e; font-size:12px; }
+    .status[data-kind="error"] { background:#fff0ee; color:var(--danger); }
+    .status[data-kind="working"] { background:#eaf1f8; color:#42627e; }
+    .right { display:flex; flex-direction:column; gap:20px; }
+    .chat { min-height:400px; }
+    .chat-log { padding:19px; min-height:330px; max-height:510px; overflow:auto; }
+    .empty-chat { padding:62px 15px; text-align:center; }
+    .empty-chat .mark { margin:0 auto 15px; width:39px; height:39px; border-radius:12px; display:grid; place-items:center; background:var(--teal-soft); color:var(--teal); font-size:19px; }
+    .empty-chat p { margin:5px 0; font-size:13px; color:var(--muted); }
+    .empty-chat strong { color:#495b61; font-weight:600; }
+    .message { margin-bottom:17px; animation:arrive .16s ease-out; }
+    .message:last-child { margin-bottom:0; }
+    .message-meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 7px 1px; font-size:11px; color:var(--muted); }
+    .bot-name { color:var(--teal); font-weight:750; }
+    .tag { padding:1px 6px; border-radius:4px; background:#f0f3f2; color:#627269; font-size:10px; }
+    .bubble { border:1px solid #dce9e3; background:#f1f8f4; border-radius:2px 12px 12px 12px; padding:13px 14px; font-size:15px; line-height:1.6; word-break:keep-all; overflow-wrap:anywhere; }
+    .message-timing { margin:5px 0 0; font-size:10px; color:#7a888c; }
+    .metrics { padding:20px; }
+    .metrics h2 { margin:0 0 14px; font-size:14px; }
+    .metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .metric-label { font-size:11px; color:var(--muted); }
+    .metric-value { font-size:24px; font-weight:650; margin:3px 0 0; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+    .metric-value span { font-size:12px; margin-left:4px; color:var(--muted); font-weight:400; letter-spacing:0; }
+    .metric-foot { border-top:1px solid var(--line); margin-top:17px; padding-top:12px; font-size:11px; color:var(--muted); line-height:1.65; }
+    .export { display:inline-flex; margin-top:11px; color:var(--teal); font-size:12px; font-weight:600; text-decoration:none; }
+    .export:hover { text-decoration:underline; }
+    .small-button { border:1px solid #c7d5ce; background:#fff; border-radius:6px; color:var(--teal); padding:5px 10px; margin-left:8px; font-size:12px; }
+    footer { padding-top:23px; display:flex; justify-content:space-between; gap:16px; font-size:11px; color:#839089; }
+    .model { max-width:45%; text-align:right; overflow-wrap:anywhere; }
+    [hidden] { display:none !important; }
+    @keyframes arrive { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
+    @media (max-width:850px) { .workspace { grid-template-columns:1fr; } .shell { padding:23px 18px; } h1 { font-size:26px; } .chat-log { min-height:240px; max-height:400px; } .chat { min-height:0; } header { gap:12px; } .connection { font-size:11px; padding:8px 10px; } }
+    @media (max-width:450px) { header { flex-direction:column; } .fields { grid-template-columns:1fr; } .metric-grid { gap:8px; } footer { flex-direction:column; } .model { max-width:100%; text-align:left; } }
+  
+    .sample-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:0 18px 12px; }
+    .sample-actions .small-button { margin:0; }
+    .source-label { padding:11px 18px 0; margin:0; font-size:12px; color:#53655e; overflow-wrap:anywhere; }
+    .banner { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .demo-help { margin:14px 0 0; padding:11px 12px; border-radius:8px; background:#f6f8f6; color:#65756b; font-size:12px; }
+    .action-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:12px; }
+    .action-row button { margin:0; }
+    .export { border:0; background:none; padding:0; margin:0; cursor:pointer; }
+    .export:disabled { opacity:.45; cursor:not-allowed; }
+    .right { position:sticky; top:22px; }
+    .trigger:disabled { background:#819f95; }
+    @media (max-width:850px) { .right { position:static; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <header>
+    <div>
+      <p class="eyebrow">STREAM CHAT · BUTTON DEMO</p>
+      <h1>한 번 눌러, 한 줄.</h1>
+      <p class="intro">반응할 순간을 직접 골라보세요. 버튼을 누르면 예시 채팅이 나타나요.</p>
+    </div>
+    <div class="connection" data-state="ready"><span class="dot" aria-hidden="true"></span><span>바로 체험 가능</span></div>
+  </header>
+  <div id="mockBanner" class="banner"><strong>체험 데모 · 예시 문장 / 실제 AI 미연결</strong><span>상황과 말투에 맞춰 준비된 문장을 보여줍니다. 영상 내용을 이해하거나 새로운 문장을 생성하지 않습니다.</span></div>
+  <div class="workspace">
+    <div>
+      <section class="card" aria-labelledby="videoHeading">
+        <div class="section-head"><h2 id="videoHeading">보면서 눌러보기</h2><span class="note">영상 선택은 자유롭게</span></div>
+        <div class="stage">
+          <video id="video" src="./sample.mp4" controls playsinline preload="metadata" aria-label="데모 영상"></video>
+          <div id="emptyVideo" class="empty-video" hidden>
+            <div class="play-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 2.5 17 10 4 17.5Z"/></svg></div>
+            <p>영상 없이도 버튼을 체험할 수 있어요.</p>
+            <p class="subtle">아래에서 예시 영상이나 내 동영상을 선택하세요.</p>
+          </div>
+        </div>
+        <p id="sourceLabel" class="source-label">합성 테스트 영상 · 실제 방송 아님 · 18초</p>
+        <div class="file-row"><input id="videoFile" type="file" accept="video/*" aria-label="내 동영상 선택"></div>
+        <div class="sample-actions"><button id="loadSample" class="small-button" type="button">예시 영상으로 돌아가기</button><button id="clearVideo" class="small-button" type="button">영상 없이 체험</button></div>
+        <p class="privacy">내 동영상은 브라우저 안에서만 재생됩니다. 파일이나 채팅 기록을 서버에 업로드하지 않습니다.</p>
+      </section>
+      <section class="card controls" aria-labelledby="controlsHeading">
+        <h2 id="controlsHeading">지금 어떤 반응이 필요해요?</h2>
+        <div class="fields">
+          <div><label for="preset">상황</label><select id="preset"><option value="reaction">일반 반응</option><option value="mistake">실수</option><option value="success">성공</option><option value="surprise">놀람</option></select></div>
+          <div><label for="tone">말투</label><select id="tone"><option value="playful">장난스럽게</option><option value="warm">따뜻하게</option><option value="hype">신나게</option></select></div>
+        </div>
+        <p class="demo-help">상황과 말투를 바꿔서 눌러보세요. 각 조합에 준비된 예시 문장을 순서대로 보여줍니다.</p>
+        <button id="trigger" class="trigger" type="button"><span id="triggerLabel">드립 만들기</span><kbd aria-hidden="true">SPACE</kbd></button>
+        <p class="trigger-hint">누를 때만 채팅 추가 · 이 페이지의 빈 곳을 클릭한 뒤 Space로도 체험</p>
+        <div id="status" class="status" role="status" aria-live="polite">준비됐어요. 영상을 재생하거나 바로 버튼을 눌러보세요.</div>
+      </section>
+    </div>
+    <div class="right">
+      <section class="card chat" aria-labelledby="chatHeading">
+        <div class="section-head"><h2 id="chatHeading">채팅 미리보기</h2><span id="commentCount" class="note">0개 표시</span></div>
+        <div id="chatLog" class="chat-log" role="log" aria-live="polite" aria-relevant="additions">
+          <div id="emptyChat" class="empty-chat"><div class="mark" aria-hidden="true">✦</div><p><strong>아직은 조용해요.</strong></p><p>상황을 고르고 드립 만들기를 눌러보세요.</p></div>
+        </div>
+      </section>
+      <section class="card metrics" aria-labelledby="metricsHeading">
+        <h2 id="metricsHeading">마지막 버튼의 반응 시간</h2>
+        <div class="metric-grid">
+          <div><div class="metric-label">버튼 → 채팅 추가</div><div class="metric-value"><b id="buttonLatency">—</b><span>ms</span></div></div>
+          <div><div class="metric-label">데모에 설정한 대기</div><div class="metric-value"><b>650</b><span>ms</span></div></div>
+        </div>
+        <div class="metric-foot"><strong>설정한 대기 650 ms + 화면 처리 시간이며, AI 속도가 아닙니다.</strong><br>버튼부터 화면 요소에 문장을 추가할 때까지 브라우저에서 측정합니다. 실제 픽셀 표시나 방송 플랫폼 전송까지의 시간은 아닙니다.</div>
+        <div class="action-row"><button id="export" class="export" type="button" disabled>체험 기록 내려받기 ↗</button><button id="reset" class="small-button" type="button" disabled>채팅 비우기</button></div>
+      </section>
+    </div>
+  </div>
+  <footer><span>수동 트리거 체험 · 자동 영상 분석 없음</span><span class="model">기록은 현재 탭에만 유지됩니다. 새로고침하면 초기화돼요.</span></footer>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const video = $('video');
+const DELAY_MS = 650;
+const MAX_AGE_MS = 8000;
+const presetNames = {reaction:'일반 반응',mistake:'실수',success:'성공',surprise:'놀람'};
+const toneNames = {playful:'장난스럽게',warm:'따뜻하게',hype:'신나게'};
+const lines = {
+  reaction: {
+    playful:['채팅창 예열 완료, 분위기만 더하면 됨 ㅋㅋ','지금부터 제 리액션도 출석 체크합니다 ㅋㅋ','조용한 채팅창에 한 줄 살짝 얹고 갑니다 ㅋㅋ'],
+    warm:['편하게 가요, 천천히 함께 즐기면 되죠.','잠깐 쉬어가도 괜찮아요. 오늘도 반가워요.','작은 순간도 함께 나누면 더 즐겁죠.'],
+    hype:['채팅창 시동 걸었습니다! 같이 달려요!','분위기 한 칸 올리고 갑니다!','자, 다음 순간도 신나게 가보자!']
+  },
+  mistake: {
+    playful:['실수도 분량으로 바꾸는 알뜰 방송 ㅋㅋ','완벽했으면 편집점이 없었지 ㅋㅋ','경험치가 예상 밖의 경로로 쌓이네 ㅋㅋ'],
+    warm:['괜찮아요, 한 번 더 해보면 되죠.','실수해도 괜찮아요. 다음 시도 응원할게요.','여기서 잠깐 숨 고르고 다시 가요.'],
+    hype:['좋아, 이번 건 연습! 다음 판 제대로 가자!','실수는 경험치! 다시 도전 갑니다!','분위기 다시 올리고 한 번 더!']
+  },
+  success: {
+    playful:['성공했으니 자신감 한 스푼 추가요 ㅋㅋ','잘한 건 크게 자랑해야 방송 분량이 됩니다 ㅋㅋ','오늘의 뿌듯함, 방금 적립됐습니다 ㅋㅋ'],
+    warm:['잘했어요. 차근차근 해낸 순간이네요.','성공한 순간, 기분 좋게 누려봐요.','정말 수고했어요. 스스로 칭찬해도 돼요.'],
+    hype:['성공이다! 박수 크게 한 번 갑시다!','해냈다! 이 기세 그대로 가자!','지금은 마음껏 기뻐해도 되는 시간!']
+  },
+  surprise: {
+    playful:['잠깐만 마음의 준비 버튼은 어디 있죠 ㅋㅋ','예상이라는 친구가 잠시 자리를 비웠네 ㅋㅋ','놀란 마음 정리할 시간 좀 주세요 ㅋㅋ'],
+    warm:['예상 밖의 순간이네요. 잠깐 숨 돌려요.','놀랐죠? 천천히 정리하면서 가도 괜찮아요.','뜻밖의 순간도 함께 웃으며 넘겨봐요.'],
+    hype:['잠깐만, 이건 반응하고 가야죠!','예상 밖이라 더 신나는데요!','와, 이 순간은 그냥 지나갈 수 없지!']
+  }
+};
+const state = {busy:false,version:0,videoUrl:null,videoSession:'sample-1',sampleSerial:1,displayed:0,sequence:0,records:[],counters:{}};
+function status(message,kind='ready') { $('status').textContent=message; $('status').dataset.kind=kind; }
+function refresh() {
+  $('trigger').disabled=state.busy;
+  $('triggerLabel').textContent=state.busy?'예시 채팅 준비 중…':'드립 만들기';
+  $('reset').disabled=state.busy || state.records.length===0;
+  $('export').disabled=state.records.length===0;
+}
+function videoTime() { return state.videoSession && Number.isFinite(video.currentTime) ? video.currentTime : null; }
+function invalidateVideo() {
+  state.version+=1;
+  video.pause();
+  if(state.videoUrl) { URL.revokeObjectURL(state.videoUrl); state.videoUrl=null; }
+}
+function showSample() {
+  invalidateVideo();
+  state.sampleSerial+=1;
+  state.videoSession=`sample-${state.sampleSerial}`;
+  video.src='./sample.mp4'; video.hidden=false; $('emptyVideo').hidden=true; video.load();
+  $('videoFile').value='';
+  $('sourceLabel').textContent='합성 테스트 영상 · 실제 방송 아님 · 18초';
+  status('예시 영상을 준비했어요. 원하는 순간에 버튼을 눌러보세요.');
+}
+function addComment(record) {
+  $('emptyChat').hidden=true;
+  const item=document.createElement('article'); item.className='message'; item.dataset.requestId=record.request_id;
+  const meta=document.createElement('div'); meta.className='message-meta';
+  const name=document.createElement('span'); name.className='bot-name'; name.textContent='DEMO · 예시';
+  const tag=document.createElement('span'); tag.className='tag'; tag.textContent=`${presetNames[record.preset]} · ${toneNames[record.tone]}`;
+  const stamp=document.createElement('span'); const at=videoTime(); stamp.textContent=at===null?'영상 없이 체험':`영상 ${at.toFixed(2)}초`;
+  meta.append(name,tag,stamp);
+  const bubble=document.createElement('div'); bubble.className='bubble'; bubble.textContent=record.comment;
+  const timing=document.createElement('p'); timing.className='message-timing';
+  item.append(meta,bubble,timing); $('chatLog').appendChild(item);
+  const inserted=performance.now();
+  record.button_to_dom_ms=inserted-record.clicked_performance_ms;
+  record.displayed_video_s=videoTime(); record.status='displayed';
+  timing.textContent=`버튼 → 채팅 추가 ${Math.round(record.button_to_dom_ms)} ms · 모의 대기 포함`;
+  state.displayed+=1; $('commentCount').textContent=`${state.displayed}개 표시`;
+  $('buttonLatency').textContent=Math.round(record.button_to_dom_ms).toLocaleString('ko-KR');
+  $('chatLog').scrollTop=$('chatLog').scrollHeight;
+}
+async function generate() {
+  if(state.busy) return;
+  const clicked=performance.now(); const version=state.version;
+  const preset=$('preset').value, tone=$('tone').value;
+  const record={request_id:`demo-${++state.sequence}`,is_mock:true,ai_called:false,preset,tone,
+    artificial_delay_ms:DELAY_MS,clicked_performance_ms:clicked,clicked_video_s:videoTime(),
+    video_session_id:state.videoSession,button_to_dom_ms:null,displayed_video_s:null,status:'pending',comment:''};
+  state.busy=true; refresh();
+  status('준비된 예시 문장을 650 ms 뒤에 표시해요. 실제 AI 호출은 없습니다.','working');
+  await new Promise(resolve=>setTimeout(resolve,DELAY_MS));
+  let reason='';
+  if(version!==state.version) reason='context_changed';
+  else if(document.hidden) reason='page_hidden';
+  else if(performance.now()-clicked>MAX_AGE_MS) reason='stale';
+  if(reason) {
+    record.status='discarded'; record.discard_reason=reason;
+    status(reason==='context_changed'?'영상이나 탭 상태가 바뀌어 이전 순간의 채팅은 표시하지 않았어요.':'잠시 자리를 비운 사이 응답이 늦어져 표시하지 않았어요.');
+  } else {
+    const key=`${preset}:${tone}`; const count=state.counters[key]||0;
+    record.comment=lines[preset][tone][count%lines[preset][tone].length];
+    state.counters[key]=count+1;
+    addComment(record);
+    status(`예시 채팅을 표시했어요. 약 ${Math.round(record.button_to_dom_ms)} ms · 모의 대기 650 ms 포함`);
+  }
+  state.records.push(record); state.busy=false; refresh();
+}
+$('trigger').addEventListener('click',generate);
+document.addEventListener('keydown',event=>{
+  if(event.code!=='Space'||event.repeat||event.altKey||event.ctrlKey||event.metaKey) return;
+  const target=event.target;
+  if(target instanceof Element&&(target.closest('input,textarea,select,video,button,a,[contenteditable="true"]')||target.isContentEditable)) return;
+  event.preventDefault(); generate();
+});
+$('videoFile').addEventListener('change',event=>{
+  const file=event.target.files&&event.target.files[0]; if(!file) return;
+  invalidateVideo();
+  state.videoUrl=URL.createObjectURL(file); state.videoSession=`local-${Date.now()}-${state.version}`;
+  video.src=state.videoUrl; video.hidden=false; $('emptyVideo').hidden=true; video.load();
+  $('sourceLabel').textContent=`내 동영상 · ${file.name}`;
+  status('내 동영상을 준비했어요. 파일은 이 브라우저에서만 재생됩니다.');
+});
+$('loadSample').addEventListener('click',showSample);
+$('clearVideo').addEventListener('click',()=>{
+  invalidateVideo(); state.videoSession=null; video.removeAttribute('src'); video.load();
+  video.hidden=true; $('emptyVideo').hidden=false; $('videoFile').value='';
+  $('sourceLabel').textContent='영상 없이 버튼만 체험 중'; status('상황을 고르고 바로 버튼을 눌러보세요.');
+});
+video.addEventListener('seeking',()=>{ state.version+=1; });
+video.addEventListener('error',()=>{
+  if(!state.videoSession) return;
+  state.version+=1;
+  status('이 영상은 재생하지 못했어요. 다른 MP4를 고르거나 영상 없이 버튼을 체험해보세요.','error');
+});
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) state.version+=1; });
+$('reset').addEventListener('click',()=>{
+  if(state.busy) return;
+  $('chatLog').querySelectorAll('.message').forEach(node=>node.remove());
+  $('emptyChat').hidden=false; state.displayed=0; state.records=[]; state.counters={};
+  $('commentCount').textContent='0개 표시'; $('buttonLatency').textContent='—';
+  status('채팅과 체험 기록을 비웠어요. 다시 눌러보세요.'); refresh();
+});
+$('export').addEventListener('click',()=>{
+  if(!state.records.length) return;
+  const records=state.records.map(({clicked_performance_ms,...record})=>record);
+  const blob=new Blob([records.map(record=>JSON.stringify(record)).join('\n')+'\n'],{type:'application/x-ndjson;charset=utf-8'});
+  const url=URL.createObjectURL(blob); const link=document.createElement('a');
+  link.href=url; link.download='manual_chat_demo.jsonl'; document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+window.addEventListener('beforeunload',()=>{if(state.videoUrl) URL.revokeObjectURL(state.videoUrl);});
+refresh();
+</script>
+</body>
+</html>

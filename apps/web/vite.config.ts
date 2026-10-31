@@ -35,6 +35,16 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(root, "src"),
       },
     },
+    // MPA: 랜딩(/), React 데모(/demo/), 기존 정적 Mock(/legacy-demo/)
+    build: {
+      rollupOptions: {
+        input: {
+          landing: path.resolve(root, "index.html"),
+          demo: path.resolve(root, "demo/index.html"),
+          legacyDemo: path.resolve(root, "legacy-demo/index.html"),
+        },
+      },
+    },
     server: {
       host: "127.0.0.1",
       port: 5173,

@@ -8,6 +8,7 @@ import { WindowControls } from "@/components/window/WindowControls";
 import { Logo } from "@/components/shared/Logo";
 import { ChatGenerateOrb } from "@/components/main/ChatGenerateOrb";
 import { MemberSlider } from "@/components/main/MemberSlider";
+import { UpgradeCta } from "@/components/main/UpgradeCta";
 
 export function MainScreen() {
   const generate = useSessionStore((s) => s.generate);
@@ -71,8 +72,13 @@ export function MainScreen() {
       </div>
 
       {/* 멤버 슬라이더 */}
-      <div className="px-6 pb-7 pt-4">
+      <div className="px-6 pt-4">
         <MemberSlider />
+      </div>
+
+      {/* 업그레이드 CTA */}
+      <div className="px-6 pb-7 pt-4">
+        <UpgradeCta />
       </div>
     </AppWindow>
   );

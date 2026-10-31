@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useSessionStore } from "@/store/sessionStore";
 import { useUiStore } from "@/store/uiStore";
 import { useCooldownTick } from "@/hooks/useCooldownTick";
+import { formatHotkey } from "@/lib/format";
 
 interface ChatGenerateOrbProps {
   onGenerate: () => void;
@@ -22,7 +23,8 @@ export function ChatGenerateOrb({ onGenerate }: ChatGenerateOrbProps) {
   const cooling = remaining > 0;
   const disabled = !config || inFlight || cooling;
 
-  const hotkeyLabel = hotkey;
+  // 저장값(단일 소스)을 공용 포매터로 표시. 하드코딩 매핑 제거.
+  const hotkeyLabel = formatHotkey(hotkey);
 
   return (
     <motion.button
@@ -55,14 +57,15 @@ export function ChatGenerateOrb({ onGenerate }: ChatGenerateOrbProps) {
           <Loader2 className="h-[46px] w-[46px] animate-spin text-white" />
         ) : (
           <img
-            src="/tiki-face.svg"
+            src="/tiki-character.svg"
             alt=""
             aria-hidden="true"
-            className="h-[52px] w-auto drop-shadow-sm"
+            className="h-[52px] w-auto object-contain drop-shadow-sm"
             draggable={false}
           />
         )}
         <span className="mt-1 flex items-center gap-1.5 text-[19px] font-bold leading-none text-white">
+          <span className="text-[15px]">⇧</span>
           {inFlight ? "생성 중…" : cooling ? `${(remaining / 1000).toFixed(1)}초` : hotkeyLabel}
         </span>
         <span className="text-[12px] font-medium text-white/85">

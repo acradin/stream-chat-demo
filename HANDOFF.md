@@ -2,6 +2,10 @@
 
 ## 최신 변경: 폴더 분리와 스크린샷 오버레이
 
+- Windows 설치본은 `build_desktop.cmd`로 빌드합니다. `apps/desktop/packaging/`에 PyInstaller·Inno Setup 설정이 있고 결과는 `dist/`입니다. 설치본은 사용자 폴더에 설정을 저장하며, 첫 실행의 서비스 연결 창에서 기존 데스크톱 `.env`를 가져올 수 있습니다. 백엔드·AI 키는 포함하지 않습니다. [INSTALLER.md](INSTALLER.md) 참조.
+- 페르소나의 단일 정의는 `backend/personas.py`입니다. 4종의 말투·예문과 공통 자연스러운 채팅 지침을 OpenAI/Gemini 양쪽에 적용합니다. 데스크톱에 선택한 성격 설명을 추가했습니다.
+- 치지직 공식 API의 인증·토큰 갱신·계정 채널 확인·채팅 한 건 전송은 `backend/chzzk.py`, 운영자 CLI는 `backend/chzzk_cli.py`입니다. [CHZZK.md](CHZZK.md) 참조. 오버레이 자동 게시는 아직 연결하지 않았으며, 실제 치지직 전송은 앱 등록과 방송 계정 승인이 필요합니다.
+
 - 데스크톱은 `apps/desktop/`입니다. `python -m apps.desktop` 또는 `start_desktop.cmd`로 실행합니다. 버튼·전역 단축키로 주 모니터를 촬영하고 **OpenAI `gpt-6-astra`**로 생성합니다.
 - 웹은 `apps/web/`입니다. 기존 텍스트 Gemini/Mock 서버는 `python -m apps.web`, 정적 UI는 `apps/web/demo/`입니다. 웹에 스크린샷 업로드 API를 새로 노출하지 않았습니다.
 - 공통 생성·검증 코드는 `backend/`입니다. `server.py`는 인증·계정별 API, `chat_service.py`는 생성·서버 집계, `screenshot_provider.py`는 OpenAI 이미지 요청을 담당합니다. `OPENAI_API_KEY`와 `OPENAI_MODEL`은 `backend/.env` 또는 서버 환경변수에만 설정합니다. 앱은 별도의 `apps/desktop/.env`에서 서비스 연결 정보만 읽습니다. 사용자 화면에는 AI 키·모델·공급자 토큰 수를 표시하지 않습니다.
@@ -140,3 +144,13 @@ python -m unittest discover -s tests -v
 | 공통 | 페르소나·입력 계약 유지, 실제 모델 품질·지연 평가, 방송 플랫폼 전송 대상 결정 | 웹과 데스크톱의 결과가 같은 계약을 따르고 생성 지연과 전송 지연을 구분 |
 
 데스크톱 개발의 첫 단계에서는 현재 수동 생성 흐름을 제품 UI에 연결하면 됩니다. 화면 캡처나 자동 영상 판단을 다시 도입할 필요는 없습니다. 제품용 패키징과 외부 배포는 이 인수인계 범위에서 진행하지 않았습니다.
+# 2026-10-31 데스크톱 모드 통합
+
+현재 사용자 진입점은 설치형 네이티브 오버레이다. `start_desktop.cmd`는 개발 PC의 백엔드를 필요할 때 숨겨 시작하고 앱을 연다. 브라우저 localhost 안내를 주 사용법으로 제시하지 않는다. 설치본은 `dist/StreamChat-Setup-0.2.0-x64.exe`; 두 모드 선택·설치·실행 안내는 `DESKTOP.md`, `INSTALLER.md`에 있다.
+
+- 버튼 캡처: 주 모니터 1장 → 기존 GPT-6 서비스.
+- 실시간 화면: 명시적으로 선택한 창을 초당 1장 → 인증된 `/api/chat/realtime` → OpenAI Realtime. 기본 5초 분석 / 60초 종료, 최대 120초. 음성 없음, 인원별 페르소나 순환, 중지·재시작·버튼 모드 복귀 지원.
+- API 키는 `backend/.env` 전용. 데스크톱 모델 지정·키 입력 없음. 패키징은 서버/provider와 운영자 실행기를 제외한다.
+- 공통 provider는 `backend/realtime_provider.py`. 함수 호출 결과만 파싱한다. 실험 폴더의 provider는 재사용 어댑터이며 비교 코드는 그대로 남긴다.
+- 실제 비용 실험과 출력 오류 수정 결과는 `experiments/realtime_video/EXPERIMENT_RESULTS.md` 참고. Mini·프레임 축소는 누락이 있어 기본으로 강제하지 않았다.
+- 로그인·치지직 실전 발송·서버 배포·음성 추가는 보류. 사용자 직접 UI 테스트 예정이며 실제 개인 화면을 자동으로 촬영하지 않았다.

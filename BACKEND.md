@@ -1,8 +1,12 @@
 # 운영자 백엔드 설정
 
+치지직 개발자 앱 인증과 채팅 한 건 전송은 [CHZZK.md](CHZZK.md)에 있습니다. 해당 자격 증명도 `backend/.env`에만 설정합니다.
+
 운영자의 **`OPENAI_API_KEY`는 `backend/.env`에 넣습니다.** `python -m backend.server`가 시작할 때 이 파일을 자동으로 읽습니다. 데스크톱 앱·사용자 설정·배포 클라이언트에 AI 키를 넣지 않습니다. 호스팅 환경에서는 해당 서비스의 환경변수/시크릿 설정도 사용할 수 있습니다.
 
 기본 모델은 `gpt-6-astra`이고 운영자가 서버의 `OPENAI_MODEL`로 변경할 수 있습니다. 사용자는 모델이나 AI 키를 전송하지 않습니다. 키는 [OpenAI API 키 페이지](https://platform.openai.com/api-keys)에서 발급합니다. [공식 키 설정 안내](https://developers.openai.com/api/docs/quickstart), [GPT-6 Astra 문서](https://developers.openai.com/api/docs/models/gpt-6-astra)도 참고할 수 있습니다.
+
+데스크톱 실시간 화면 모드는 별도의 `REALTIME_MODEL`을 사용하며 기본은 `gpt-realtime-2.1`입니다. 키는 같은 `OPENAI_API_KEY`입니다. 모델 설정은 운영자의 `backend/.env`에만 두며 설치본에는 포함하지 않습니다. `experiments/realtime_video/.env`는 개발 실험에만 적용되고 데스크톱 서비스에는 적용되지 않습니다.
 
 ## 로컬 개발 서버
 
@@ -16,6 +20,8 @@ OPENAI_MODEL=gpt-6-astra
 ```
 
 서버를 실행합니다. 키를 수정한 뒤에는 서버를 다시 시작합니다.
+
+현재 프로젝트에서는 `start_desktop.cmd`를 더블클릭하면 로컬 서버가 없을 때 백그라운드에서 시작하고 인증 확인 후 오버레이를 엽니다. 기존 서버가 있으면 그대로 사용합니다. 앱을 닫아도 로컬 백엔드는 유지됩니다. 아래 명령은 서버를 직접 관리할 때 사용합니다.
 
 ```powershell
 .\.venv\Scripts\python.exe -m backend.server
@@ -47,20 +53,25 @@ OPENAI_MODEL=gpt-6-astra
 
 | 사용자에게 표시하는 항목 | 집계 기준 |
 |---|---|
-| 이번 달 생성 요청 | 검증·인증·중복 검사를 통과해 시작된 생성 배치 1회 |
+| 이번 달 생성 요청 | 버튼 생성 배치 1회 또는 실시간 AI 분석 1회 |
 | 이번 달 생성된 채팅 | 이번 달에 성공한 채팅 1줄당 1개 |
 | 누적 생성된 채팅 | 해당 계정의 전체 성공 채팅 수 |
 
 한국 시간 월별 집계입니다. 인원 3명 중 2명 성공이면 요청 1회, 채팅 2개입니다. 실패·중단된 채팅은 생성된 채팅 수에 포함하지 않습니다. 월 경계에 걸친 요청은 시작한 달에 요청 수를, 결과가 완료된 달에 채팅 수를 기록합니다. Mock 기록은 실제 생성 기록과 분리됩니다. 기존 토큰 카운터만 있는 기록에서는 과거 월별 요청 수를 추정하지 않습니다.
 
+실시간 모드의 WAIT·오래된 반응·중복은 요청 수에만 포함하고 생성 채팅으로 세지 않습니다. 내부 `silent` 카운터로 정상적인 무응답을 실패와 구분합니다. 기존 기록에서 이 필드가 없으면 0으로 읽습니다. 실시간 제공자 토큰은 현재 정밀 계측하지 않아 운영자용 `unmetered`에 표시하며, 사용자 화면에는 노출하지 않습니다.
+
 `runs/service/<계정 ID의 SHA-256>/usage.json`에 저장합니다. 이 파일은 운영자 전용이며 공급자 토큰 통계도 내부 진단용으로 남깁니다. 사용자 API에는 서비스 사용량만 반환합니다. 이미지·API 키·채팅 문장은 이 파일에 저장하지 않습니다. 한 상태 디렉터리는 서버 프로세스 하나가 사용합니다. 다중 서버 배포 전에는 트랜잭션을 지원하는 공유 데이터베이스로 교체해야 합니다.
 
 ## 서비스 API
 
-두 경로 모두 `Authorization: Bearer <서비스 계정 토큰>`이 필요합니다.
+모든 경로는 `Authorization: Bearer <서비스 계정 토큰>`이 필요합니다.
 
 - `GET /api/usage`: `period`, `timezone`, `is_demo`, `generation_requests`, `generated_chats`, `total_generated_chats` 반환.
 - `POST /api/chat/generate`: `personas` (1~5개 persona ID), `context` (최대 1,000자), `screenshot` (최대 5 MB JPEG의 Base64)만 받습니다. 결과는 `status`, `lines`, `usage`를 포함합니다. `model`, `api_key`, `account` 같은 필드는 거절합니다.
+- `GET /api/chat/realtime`: 인증된 WebSocket. 시작 메시지는 `type: start`, `personas`, `context`, `interval` (3/5/10), `duration` (30/60/120)입니다. 준비 응답 뒤 `type: frame`, 증가하는 `sequence`, 1280px 이하 JPEG의 Base64 `jpeg`를 초당 1장 보냅니다. 서버는 `ready`, `frame`, `decision`, `stopped`, `error`를 반환합니다. 중지는 `{"type":"stop"}` 또는 연결 종료입니다. 음성·모델·키 필드는 거절합니다.
+
+수동 생성과 실시간 세션은 계정별 잠금을 공유합니다. 실시간에서 인원별 페르소나가 순환하며 최근 6장을 판단합니다. 실제 채팅 이후 8초 동안은 추가 분석 호출을 생략하고, 오래되거나 중복된 반응은 표시하지 않습니다. 최대 120초 뒤 종료하며 중단 시 진행 중 작업·제공자 연결을 정리합니다.
 
 모델 오류는 사용자용 메시지로 바꿔 반환하고, 공급자 상세 오류·토큰·비용은 내보내지 않습니다. 자동 재시도는 없습니다. 생성에 성공했으나 연결이 끊겨 결과를 받지 못하면 서버 사용량에는 남을 수 있으므로 사용량을 다시 조회합니다.
 

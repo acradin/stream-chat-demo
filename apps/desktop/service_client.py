@@ -7,7 +7,6 @@ import base64
 import copy
 import json
 import os
-from pathlib import Path
 import re
 import threading
 from urllib.parse import urlsplit
@@ -15,9 +14,10 @@ from urllib.parse import urlsplit
 import aiohttp
 
 from backend.env import DESKTOP_KEYS, load_env_file
+from apps.desktop.paths import connection_file
 
 
-DESKTOP_ENV = Path(__file__).resolve().parent / ".env"
+DESKTOP_ENV = connection_file()
 
 
 class ServiceClient:
@@ -34,6 +34,10 @@ class ServiceClient:
             raise ValueError("서비스 인증 설정을 확인해주세요.")
         self._usage = None
         self.stop_requested = threading.Event()
+
+    @property
+    def configured(self):
+        return bool(self._token)
 
     def usage(self):
         return copy.deepcopy(self._usage)
@@ -83,6 +87,94 @@ class ServiceClient:
     async def refresh_usage(self):
         self._set_usage(await self._request("GET", "/api/usage", timeout=5))
         return self.usage()
+
+    async def realtime(self, personas, context, *, capture, stop_event, on_event, interval=5, duration=60):
+        """Stream selected-window JPEGs to our authenticated service until stopped."""
+        if not self.configured:
+            raise ValueError("설정에서 서비스 연결을 먼저 등록해주세요.")
+        async def reject_redirect(session, trace_context, params):
+            raise ValueError("서비스 주소가 변경되었습니다. 연결 설정을 확인해주세요.")
+        trace = aiohttp.TraceConfig()
+        trace.on_request_redirect.append(reject_redirect)
+
+        async def exchange():
+            timeout = aiohttp.ClientTimeout(total=None, sock_connect=5, sock_read=20)
+            async with aiohttp.ClientSession(timeout=timeout, trace_configs=[trace]) as session:
+                async with session.ws_connect(self.base_url + "/api/chat/realtime",
+                        headers={"Authorization": "Bearer " + self._token}, max_msg_size=100000,
+                        heartbeat=5) as socket:
+                    await socket.send_json({"type": "start", "personas": personas, "context": context,
+                                            "interval": interval, "duration": duration})
+                    ready = await socket.receive_json(timeout=20)
+                    if ready != {"type": "ready"}:
+                        raise ValueError("실시간 모드를 시작하지 못했습니다. 서비스 연결을 확인해주세요.")
+                    on_event(ready)
+
+                    async def send_frames():
+                        sequence = 0
+                        while not stop_event.is_set() and not self.stop_requested.is_set():
+                            jpeg = await asyncio.to_thread(capture)
+                            if stop_event.is_set() or self.stop_requested.is_set():
+                                return
+                            if not isinstance(jpeg, bytes) or len(jpeg) > 525000:
+                                raise ValueError("캡처한 창 데이터가 너무 큽니다.")
+                            sequence += 1
+                            await socket.send_json({"type": "frame", "sequence": sequence,
+                                                    "jpeg": base64.b64encode(jpeg).decode("ascii")})
+                            await asyncio.sleep(1)
+
+                    async def receive():
+                        async for message in socket:
+                            if message.type != aiohttp.WSMsgType.TEXT:
+                                break
+                            event = json.loads(message.data)
+                            if not isinstance(event, dict):
+                                raise ValueError("실시간 서비스 응답을 확인할 수 없습니다.")
+                            kind = event.get("type")
+                            if kind == "error":
+                                raise ValueError("실시간 연결이 종료되었습니다. 서비스와 선택한 창을 확인해주세요.")
+                            if kind == "decision":
+                                participant = event.get("participant")
+                                if (type(participant) is not int or not 1 <= participant <= len(personas)
+                                        or event.get("persona") != personas[participant - 1]
+                                        or event.get("result") not in ("chat", "wait", "stale", "cooldown", "duplicate")
+                                        or not isinstance(event.get("comment"), str)
+                                        or len(event["comment"]) > 100
+                                        or (event["result"] == "chat" and not event["comment"].strip())):
+                                    raise ValueError("실시간 채팅 응답 형식이 올바르지 않습니다.")
+                                self._set_usage(event.get("usage"))
+                            elif kind == "stopped":
+                                self._set_usage(event.get("usage"))
+                                on_event(event)
+                                return
+                            elif kind != "frame":
+                                raise ValueError("실시간 서비스 응답을 확인할 수 없습니다.")
+                            on_event(event)
+                        raise ValueError("실시간 연결이 끊어졌습니다. 시작 버튼으로 다시 연결해주세요.")
+
+                    tasks = [asyncio.create_task(send_frames()), asyncio.create_task(receive())]
+                    try:
+                        done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                        for task in done:
+                            task.result()
+                    finally:
+                        for task in tasks:
+                            task.cancel()
+                        await asyncio.gather(*tasks, return_exceptions=True)
+
+        task = asyncio.create_task(exchange())
+        try:
+            while not task.done():
+                await asyncio.wait({task}, timeout=.1)
+                if stop_event.is_set() or self.stop_requested.is_set():
+                    return
+            await task
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            raise ValueError("실시간 서비스에 연결할 수 없습니다. 서비스 연결 설정을 확인해주세요.") from None
+        finally:
+            if not task.done():
+                task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
 
     async def generate(self, personas, context, *, screenshot, on_line=None):
         if self.stop_requested.is_set():

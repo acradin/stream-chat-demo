@@ -23,6 +23,8 @@ htmlcov/
 # Generated runs, logs and transfer bundles
 .omx/
 runs/
+build/
+dist/
 media_cache/
 *.log
 *.zip

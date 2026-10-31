@@ -11,7 +11,8 @@ import time
 
 import aiohttp
 
-from backend.manual_provider import PERSONAS, MockManualProvider, validate_context
+from backend.manual_provider import MockManualProvider, validate_context
+from backend.personas import persona_instructions
 from backend.providers import InvalidResponseError, ProviderError
 
 
@@ -91,11 +92,10 @@ class OpenAIScreenshotProvider:
     def payload(self, context: dict, screenshot: bytes) -> dict:
         cleaned = validate_context(context)
         validate_screenshot(screenshot)
-        persona = PERSONAS[cleaned["persona"]]
         return {
             "model": self.model, "store": False, "max_output_tokens": 2048,
             "reasoning": {"effort": "low"},
-            "instructions": SYSTEM_PROMPT + "\nPersona: " + persona["name"] + ". " + persona["instruction"],
+            "instructions": SYSTEM_PROMPT + "\n\n" + persona_instructions(cleaned["persona"]),
             "input": [{"role": "user", "content": [
                 {"type": "input_text", "text": json.dumps(cleaned, ensure_ascii=False)},
                 {"type": "input_image", "detail": "high",

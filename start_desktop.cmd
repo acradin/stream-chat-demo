@@ -5,4 +5,4 @@ if not exist ".venv\Scripts\pythonw.exe" (
   pause
   exit /b 1
 )
-start "" ".venv\Scripts\pythonw.exe" -m apps.desktop
+start "" ".venv\Scripts\pythonw.exe" -B -m backend.desktop_demo

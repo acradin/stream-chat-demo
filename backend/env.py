@@ -6,12 +6,13 @@ import re
 
 
 BACKEND_ENV = Path(__file__).resolve().parent / ".env"
-BACKEND_KEYS = frozenset({"OPENAI_API_KEY", "OPENAI_MODEL", "CHAT_SERVICE_TOKEN", "CHAT_SERVICE_ACCOUNTS"})
+BACKEND_KEYS = frozenset({"OPENAI_API_KEY", "OPENAI_MODEL", "REALTIME_MODEL", "CHAT_SERVICE_TOKEN", "CHAT_SERVICE_ACCOUNTS",
+                          "CHZZK_CLIENT_ID", "CHZZK_CLIENT_SECRET", "CHZZK_CHANNEL_ID", "CHZZK_REDIRECT_URI"})
 DESKTOP_KEYS = frozenset({"CHAT_SERVICE_URL", "CHAT_SERVICE_TOKEN"})
 
 
-def load_env_file(path: Path, allowed_keys: frozenset[str]) -> None:
-    """Load only approved names, preserving existing process environment values.
+def read_env_file(path: Path, allowed_keys: frozenset[str]) -> dict[str, str]:
+    """Read approved names without changing the process environment.
 
     Supports UTF-8/BOM, KEY=value, optional export, single/double quotes and
     comments. Values are literal: no multiline, escape or variable expansion.
@@ -20,7 +21,7 @@ def load_env_file(path: Path, allowed_keys: frozenset[str]) -> None:
     try:
         content = path.read_text(encoding="utf-8-sig")
     except FileNotFoundError:
-        return
+        return {}
     except (OSError, UnicodeError):
         raise ValueError(f"{path.name} 파일을 읽을 수 없습니다. UTF-8 형식과 파일 권한을 확인해주세요.") from None
     values = {}
@@ -47,5 +48,10 @@ def load_env_file(path: Path, allowed_keys: frozenset[str]) -> None:
         if "\x00" in value:
             raise ValueError(f"{path.name} {number}번째 줄에 허용되지 않는 문자가 있습니다.")
         values[key] = value
-    for key, value in values.items():
+    return values
+
+
+def load_env_file(path: Path, allowed_keys: frozenset[str]) -> None:
+    """Load approved names, preserving existing process environment values."""
+    for key, value in read_env_file(path, allowed_keys).items():
         os.environ.setdefault(key, value)

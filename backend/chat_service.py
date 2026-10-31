@@ -21,7 +21,7 @@ from backend.screenshot_provider import (DEFAULT_MODEL, OpenAIScreenshotProvider
 MAX_PARTICIPANTS = 5
 SERVICE_FIELDS = ("generation_requests", "generated_chats")
 TOKEN_FIELDS = ("input_tokens", "output_tokens", "total_tokens")
-COUNTERS = ("attempts", "succeeded", "failed", "unmetered", *TOKEN_FIELDS)
+COUNTERS = ("attempts", "succeeded", "failed", "silent", "unmetered", *TOKEN_FIELDS)
 
 
 def make_provider(name: str, model: str, api_key: str | None):
@@ -47,6 +47,10 @@ class DesktopService:
         self._usage["service_months"] = {}
         if self.usage_path.exists():
             data = json.loads(self.usage_path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                for name in ("openai", "mock"):
+                    if isinstance(data.get(name), dict):
+                        data[name].setdefault("silent", 0)
             if (not isinstance(data, dict) or data.get("schema_version") != 1
                     or any(not isinstance(data.get(name), dict)
                            or any(type(data[name].get(key)) is not int or data[name][key] < 0
@@ -55,7 +59,7 @@ class DesktopService:
             for name in ("openai", "mock"):
                 self._usage[name] = {key: data[name][key] for key in COUNTERS}
                 # A crash can leave an attempted call without a terminal result.
-                pending = data[name]["attempts"] - data[name]["succeeded"] - data[name]["failed"]
+                pending = data[name]["attempts"] - sum(data[name][key] for key in ("succeeded", "failed", "silent"))
                 if pending < 0:
                     raise ValueError("usage.json 호출 수가 일치하지 않습니다.")
                 self._usage[name]["failed"] += pending
@@ -97,6 +101,21 @@ class DesktopService:
                 candidate[name][key] += value
             atomic_json(self.usage_path, candidate)
             self._usage = candidate
+
+    def begin_realtime(self):
+        """Share the account's generation lock with manual screenshot requests."""
+        return self._batch_lock.acquire(blocking=False)
+
+    def end_realtime(self):
+        self._batch_lock.release()
+
+    def realtime_attempt(self, name):
+        self._record(name, generation_requests=1, attempts=1)
+
+    def realtime_result(self, name, *, chat=False, failed=False):
+        # WAIT/filtered responses consume a request but are not generated chats.
+        self._record(name, **{"failed" if failed else "succeeded" if chat else "silent": 1},
+                     unmetered=int(name == "openai"))
 
     async def generate(self, personas: list[str], context: str, *, screenshot: bytes, provider_name: str,
                        model: str = DEFAULT_MODEL, api_key: str | None = None, on_line=None) -> dict:

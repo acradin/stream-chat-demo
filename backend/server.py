@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import base64
 import binascii
 import hashlib
@@ -17,6 +18,8 @@ from aiohttp import web
 from backend.chat_service import DesktopService
 from backend.env import BACKEND_ENV, BACKEND_KEYS, load_env_file
 from backend.screenshot_provider import DEFAULT_MODEL, OpenAIScreenshotProvider, validate_model
+from backend.realtime_provider import MockProvider, RealtimeProvider, credentials
+from backend.realtime_service import RealtimeSession, validate_start
 
 
 def validate_accounts(accounts):
@@ -33,13 +36,15 @@ def validate_accounts(accounts):
     return dict(accounts)
 
 
-def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL, service_factory=DesktopService):
+def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
+               service_factory=DesktopService, realtime_factory=None):
     accounts = validate_accounts(accounts)
     if provider not in ("openai", "mock"):
         raise ValueError("잘못된 서버 생성 모드입니다.")
     model = validate_model(model)
     services = {account: service_factory(Path(state_dir) / hashlib.sha256(account.encode()).hexdigest())
                 for account in accounts}
+    active = set()
     # RequestKey was added after aiohttp 3.9, our supported minimum.
     account_key = web.RequestKey("service_account", str) if hasattr(web, "RequestKey") else "service_account"
 
@@ -85,9 +90,42 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL, s
                 line["error"] = "채팅을 생성하지 못했습니다. 잠시 후 다시 시도해주세요."
         return web.json_response({**result, "usage": service.service_usage(provider)})
 
+    async def realtime(request):
+        service = services[request[account_key]]
+        if not service.begin_realtime():
+            raise web.HTTPConflict()
+        socket = web.WebSocketResponse(max_msg_size=750000, heartbeat=5, receive_timeout=10)
+        try:
+            await socket.prepare(request)
+            active.add(socket)
+            settings = validate_start(await socket.receive_json(timeout=5))
+            engine = (realtime_factory() if realtime_factory else MockProvider() if provider == "mock"
+                      else RealtimeProvider(*credentials()))
+            await RealtimeSession(socket, engine, settings, service, provider).run()
+            if not socket.closed:
+                await socket.send_json({"type": "stopped", "usage": service.service_usage(provider)})
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            # No provider errors, keys, model names or billing cross this boundary.
+            if socket.prepared and not socket.closed:
+                await socket.send_json({"type": "error", "message": "실시간 연결을 종료했습니다. 서비스 연결과 선택한 화면을 확인해주세요."})
+        finally:
+            active.discard(socket)
+            try:
+                await socket.close()
+            finally:
+                service.end_realtime()
+        return socket
+
+    async def shutdown(app):
+        await asyncio.gather(*(socket.close(code=1001, message=b"Service shutdown") for socket in list(active)))
+
     app = web.Application(middlewares=[authenticate], client_max_size=7_000_000)
     app.router.add_get("/api/usage", usage)
     app.router.add_post("/api/chat/generate", generate)
+    app.router.add_get("/api/chat/realtime", realtime)
+    app.on_shutdown.append(shutdown)
     return app
 
 

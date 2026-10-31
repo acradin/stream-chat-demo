@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면 실시간 AI 실험</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main>
+<header><span class="tag">별도 실험 · 화면만</span><h1>방송을 보면서, 한마디.</h1>
+<p>방송 창이나 탭을 선택하면 AI가 화면의 변화를 보고 반응합니다. 음성은 수집하지 않습니다.</p></header>
+<p id="mode" class="notice">실험 설정을 불러오는 중…</p>
+<section class="controls">
+<label>페르소나<select id="persona"></select></label>
+<label>판단 간격<select id="interval"><option value="3">3초</option><option value="5" selected>5초</option><option value="10">10초</option></select></label>
+<label>실험 시간<select id="duration"><option value="30">30초</option><option value="60">1분</option><option value="120" selected>2분</option></select></label>
+<label class="wide">상황 설명 <span>(선택)</span><textarea id="context" maxlength="1000" rows="2" placeholder="예: 공포 게임 첫 플레이, 편하게 장난치는 방송"></textarea></label>
+<div class="wide actions"><button id="start" disabled>방송 화면 선택하고 시작</button><button id="stop" disabled>중지</button><span id="status" role="status">준비 중</span></div>
+</section>
+<div class="panels"><section><h2>공유 중인 화면</h2><video id="preview" autoplay muted playsinline></video><p class="note">초당 최대 1장 · 긴 변 1280px · 선택한 화면이 AI 서버로 전송됩니다.</p></section>
+<section><h2>AI 채팅 <span id="count">0개</span></h2><ol id="chats" aria-live="polite"></ol><p id="decision">반응할 장면을 기다립니다.</p></section></div>
+<footer><span id="frames">전송 0장</span><span id="latency">판단 시간 —</span><span id="elapsed">0초</span><p>채팅은 이 실험 화면에만 표시됩니다. 화면 파일·채팅 기록을 저장하거나 치지직에 전송하지 않습니다.</p></footer>
+</main></body></html>

@@ -14,31 +14,9 @@ import time
 from typing import Any
 
 from backend.providers import GeminiProvider, InvalidResponseError, _finite_nonnegative
+from backend.personas import DEFAULT_PERSONA, PERSONAS, persona_instructions
 
 
-PERSONAS = {
-    "witty_friend": {
-        "name": "장난꾸러기 친구",
-        "description": "가볍게 장난치며 친근한 한마디를 건네요.",
-        "instruction": "Sound like a friendly, quick-witted companion. Use light wordplay and gentle teasing about the supplied topic, never insults. Occasional ㅋㅋ is welcome.",
-    },
-    "warm_supporter": {
-        "name": "다정한 응원단",
-        "description": "편안하고 다정하게 방송에 힘을 보태요.",
-        "instruction": "Be warm, reassuring, and encouraging. Use natural, gentle Korean without assuming a success, mistake, distress, or a need for consolation.",
-    },
-    "hype_commentator": {
-        "name": "과몰입 해설러",
-        "description": "작은 주제도 신나게 풀어내는 열정적인 해설러예요.",
-        "instruction": "Use an energetic commentator's voice and playful anticipation. Get excited about the supplied topic, but never narrate an unreported action, result, score, or on-screen moment.",
-    },
-    "dry_comic": {
-        "name": "덤덤한 드립러",
-        "description": "짧고 담백한 말에 은근한 웃음을 담아요.",
-        "instruction": "Use short, understated deadpan humor with a dry twist. Stay kind and unhurried; avoid excessive exclamation marks or laughing markers.",
-    },
-}
-DEFAULT_PERSONA = "witty_friend"
 _CONTEXT_FIELDS = {"request_id", "persona", "channel_context", "recent_comments"}
 _COMMENT_SCHEMA = {
     "type": "object",
@@ -127,11 +105,9 @@ class GeminiManualProvider:
 
     async def generate(self, context: dict) -> dict:
         cleaned = validate_context(context)
-        persona = PERSONAS[cleaned["persona"]]
         # Only the allowlisted definition becomes an instruction. Broadcaster
         # text remains data in the user part, including any instruction-like text.
-        system_prompt = (_SYSTEM_PROMPT + "\n\nSelected persona: " + persona["name"]
-                         + ". " + persona["instruction"])
+        system_prompt = _SYSTEM_PROMPT + "\n\n" + persona_instructions(cleaned["persona"])
         payload = self._client._make_payload(
             system_prompt,
             [{"text": json.dumps(cleaned, ensure_ascii=False)}],

@@ -137,6 +137,8 @@ def create_app(*, provider="mock", factory=None):
 
     async def asset(request):
         name = request.match_info.get("name", "index.html")
+        if name == "favicon.svg":
+            return web.FileResponse(DIRECTORY.parents[1] / "apps" / "assets" / "app.svg")
         if name not in ("index.html", "app.js", "style.css"):
             raise web.HTTPNotFound()
         return web.FileResponse(DIRECTORY / name)

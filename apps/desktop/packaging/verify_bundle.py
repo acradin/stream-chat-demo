@@ -14,7 +14,7 @@ def verify(bundle: Path, analysis: Path):
             raise ValueError("A private configuration file was included")
     forbidden_modules = {"backend.server", "backend.chat_service", "backend.screenshot_provider",
                          "backend.manual_provider", "backend.providers", "backend.chzzk", "backend.chzzk_cli",
-                         "backend.realtime_provider", "backend.realtime_service", "backend.desktop_demo"}
+                         "backend.realtime_provider", "backend.realtime_service", "backend.desktop_demo", "backend.chat_delivery"}
     def visit(value):
         # Analysis also stores the list of excluded module names. Only inspect
         # collected TOC entries: (module_name, source_path, collection_type).

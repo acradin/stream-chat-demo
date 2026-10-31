@@ -2,7 +2,7 @@
 # and removes only that test installation. No visible UI or screenshots.
 $ErrorActionPreference = 'Stop'
 $workspace = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\..'))
-$installer = Join-Path $workspace 'dist\StreamChat-Setup-0.2.0-x64.exe'
+$installer = Join-Path $workspace 'dist\StreamChat-Setup-0.4.0-x64.exe'
 $registryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{E2A673FA-FCFD-4696-8E08-125D5E91F5AF}_is1'
 if (Test-Path -LiteralPath $registryPath) { throw 'An existing Stream Chat installation is present; leave it untouched.' }
 if (-not (Test-Path -LiteralPath $installer)) { throw 'Build the installer first.' }

@@ -16,6 +16,7 @@ from urllib.parse import urlencode, urlsplit
 import aiohttp
 
 from backend.env import BACKEND_ENV, BACKEND_KEYS, load_env_file
+from backend.chzzk_target import parse_channel_id
 
 
 API_ROOT = "https://openapi.chzzk.naver.com"
@@ -36,9 +37,10 @@ def credential(value, name):
 
 
 def channel_id(value):
-    if not isinstance(value, str) or not re.fullmatch(r"[a-fA-F0-9]{32}", value):
-        raise ChzzkError("CHZZK_CHANNEL_ID에는 방송 채널 URL 끝의 32자리 ID를 넣어주세요.")
-    return value.lower()
+    try:
+        return parse_channel_id(value)
+    except ValueError:
+        raise ChzzkError("CHZZK_CHANNEL_ID에 치지직 방송 링크 또는 32자리 ID를 넣어주세요.") from None
 
 
 @dataclass(frozen=True, repr=False)
@@ -57,10 +59,12 @@ class ChzzkConfig:
             port = parts.port
         except ValueError:
             raise ChzzkError("치지직 리디렉션 주소와 포트를 확인해주세요.") from None
-        if (parts.scheme != "http" or parts.hostname not in ("localhost", "127.0.0.1")
+        local = parts.scheme == "http" and parts.hostname in ("localhost", "127.0.0.1") and port
+        public = parts.scheme == "https" and parts.hostname and parts.hostname not in ("localhost", "127.0.0.1", "::1")
+        if (not (local or public)
                 or parts.username or parts.password or parts.query or parts.fragment
-                or not port or not parts.path or parts.path == "/"):
-            raise ChzzkError("치지직 리디렉션 주소는 명시한 포트와 경로가 있는 로컬 HTTP 주소여야 합니다.")
+                or not parts.path or parts.path == "/"):
+            raise ChzzkError("치지직 리디렉션 주소는 HTTPS이거나 포트가 지정된 로컬 HTTP 주소여야 합니다.")
 
     @classmethod
     def from_env(cls):

@@ -1,0 +1,4 @@
+# Versions used by the verified local backend. Ubuntu 24.04 runs Python 3.12.
+aiohttp==3.14.5
+numpy==2.5.4
+Pillow==12.3.0

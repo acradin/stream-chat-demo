@@ -26,7 +26,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Bundle verification failed.' }
     & $Compiler '/Qp' ('/DBundleDir=' + $bundle) ('/DOutputDirectory=' + $outputDirectory) (Join-Path $PSScriptRoot 'setup.iss')
     if ($LASTEXITCODE -ne 0) { throw 'Windows installer build failed.' }
-    $installer = Join-Path $outputDirectory 'StreamChat-Setup-0.2.0-x64.exe'
+    $installer = Join-Path $outputDirectory 'StreamChat-Setup-0.4.0-x64.exe'
     $hash = Get-FileHash -LiteralPath $installer -Algorithm SHA256
     [IO.File]::WriteAllText(($installer + '.sha256'), ($hash.Hash.ToLowerInvariant() + '  ' + [IO.Path]::GetFileName($installer) + "`n"))
     Write-Output "Installer ready: $installer"

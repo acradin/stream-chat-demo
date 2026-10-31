@@ -1,0 +1,27 @@
+[Unit]
+Description=Stream Chat backend
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=stream-chat
+Group=stream-chat
+WorkingDirectory=/opt/stream-chat/current
+ExecStart=/opt/stream-chat/current/.venv/bin/python -B -m deploy.aws.run_server
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONUTF8=1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=60
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/stream-chat
+
+[Install]
+WantedBy=multi-user.target

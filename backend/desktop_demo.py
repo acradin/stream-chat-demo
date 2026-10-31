@@ -11,8 +11,13 @@ import tkinter as tk
 from tkinter import messagebox
 from urllib.parse import urlsplit
 
+# Taskbar shortcuts use an absolute script path, independent of their working directory.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from backend.env import BACKEND_KEYS, DESKTOP_KEYS, read_env_file
 from apps.desktop.service_client import ServiceClient
+from apps.desktop.branding import apply_window_icon, set_app_identity
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -51,6 +56,7 @@ def ensure_service(client):
 
 
 def main():
+    set_app_identity()
     try:
         connection = read_env_file(ROOT / "apps/desktop/.env", DESKTOP_KEYS)
         for key in DESKTOP_KEYS:
@@ -69,6 +75,7 @@ def main():
     except (OSError, ValueError):
         root = tk.Tk()
         root.withdraw()
+        apply_window_icon(root)
         messagebox.showerror("Stream Chat 시작 확인", "서비스 연결을 준비하지 못했습니다.\nbackend/.env와 apps/desktop/.env 설정을 확인해주세요.\n자세한 실행 방법은 DESKTOP.md에 있습니다.", parent=root)
         root.destroy()
         return 1

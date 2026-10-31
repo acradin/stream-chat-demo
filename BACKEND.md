@@ -65,11 +65,17 @@ OPENAI_MODEL=gpt-6-astra
 
 ## 서비스 API
 
-모든 경로는 `Authorization: Bearer <서비스 계정 토큰>`이 필요합니다.
+`/api/` 경로는 `Authorization: Bearer <서비스 계정 토큰>`이 필요합니다. 공개 `GET /healthz`는 상태만 반환합니다. `CHAT_PUBLIC_URL`을 설정하면 공개 `GET /oauth/chzzk/callback`이 일회용 승인 state를 검증합니다.
 
 - `GET /api/usage`: `period`, `timezone`, `is_demo`, `generation_requests`, `generated_chats`, `total_generated_chats` 반환.
-- `POST /api/chat/generate`: `personas` (1~5개 persona ID), `context` (최대 1,000자), `screenshot` (최대 5 MB JPEG의 Base64)만 받습니다. 결과는 `status`, `lines`, `usage`를 포함합니다. `model`, `api_key`, `account` 같은 필드는 거절합니다.
-- `GET /api/chat/realtime`: 인증된 WebSocket. 시작 메시지는 `type: start`, `personas`, `context`, `interval` (3/5/10), `duration` (30/60/120)입니다. 준비 응답 뒤 `type: frame`, 증가하는 `sequence`, 1280px 이하 JPEG의 Base64 `jpeg`를 초당 1장 보냅니다. 서버는 `ready`, `frame`, `decision`, `stopped`, `error`를 반환합니다. 중지는 `{"type":"stop"}` 또는 연결 종료입니다. 음성·모델·키 필드는 거절합니다.
+- `GET /api/chzzk/status`: `connected`, `channelId`, `channelName`, `message`를 반환합니다. 채팅은 전송하지 않으며, 인증 토큰은 반환하지 않습니다.
+- `POST /api/chzzk/authorize`: 공개 주소를 설정한 서버에서 `{"channel_url":"방송 URL 또는 ID"}`를 받아 10분간 유효한 승인 URL을 발급합니다. `CHZZK_SERVICE_ACCOUNT`에만 허용하며 새 승인이 완료되면 그 계정의 연결 방송을 변경합니다. [원격 승인 안내](CHZZK.md#다른-pc에서-승인받기-배포-후)
+- `POST /api/chat/generate`: `personas` (1~5개 persona ID), `context` (최대 1,000자), `screenshot` (최대 5 MB JPEG의 Base64)을 받습니다. 선택적 `destination`은 `app`(기본값) 또는 `chzzk`이며, `chzzk`이면 `channel_id`가 필요합니다. 결과는 `status`, `lines`, `usage`를 포함합니다. 전송한 줄에는 `delivery`가 추가됩니다. `model`, `api_key`, `account` 같은 필드는 거절합니다.
+- `GET /api/chat/realtime`: 인증된 WebSocket. 시작 메시지는 `type: start`, `personas`, `context`, `interval` (3/5/10), `duration` (30/60/120)이며 선택적 `destination`, `channel_id`의 의미는 버튼 생성과 같습니다. 준비 응답 뒤 `type: frame`, 증가하는 `sequence`, 1280px 이하 JPEG의 Base64 `jpeg`를 초당 1장 보냅니다. 서버는 `ready`, `frame`, `decision`, `stopped`, `error`를 반환합니다. 치지직 모드에서는 로컬 채팅용 `decision` 뒤에 `delivery` 이벤트(`participant`, `persona`, `delivery`)도 반환합니다. 중지는 `{"type":"stop"}` 또는 연결 종료입니다. 음성·모델·키 필드는 거절합니다.
+
+`delivery`는 `status` (`sent` / `failed` / `skipped`), 사용자용 `message`, 성공 시 `messageId`를 포함합니다. 전송 실패는 생성 성공·서비스 사용량을 취소하지 않습니다. 응답을 잃은 메시지를 중복 게시하지 않도록 자동 재전송하지 않으며, 첫 실패 이후 현재 배치·실시간 세션의 추가 전송을 생략합니다. 앱 표시는 유지됩니다.
+
+치지직 전송은 운영자가 인증해 둔 방송과 `channel_id`가 일치해야 합니다. 방송 URL도 받을 수 있지만 URL 입력만으로 다른 방송의 권한을 얻지는 않습니다. 연결은 `CHZZK_SERVICE_ACCOUNT`(기본 `development`) 한 서비스 계정에만 허용합니다. `destination` 생략 또는 `app` 선택 시 치지직 API를 호출하지 않으며, Mock 서버에서는 실제 전송을 차단합니다. 자격 증명과 OAuth 설정은 [CHZZK.md](CHZZK.md)를 참조하세요.
 
 수동 생성과 실시간 세션은 계정별 잠금을 공유합니다. 실시간에서 인원별 페르소나가 순환하며 최근 6장을 판단합니다. 실제 채팅 이후 8초 동안은 추가 분석 호출을 생략하고, 오래되거나 중복된 반응은 표시하지 않습니다. 최대 120초 뒤 종료하며 중단 시 진행 중 작업·제공자 연결을 정리합니다.
 

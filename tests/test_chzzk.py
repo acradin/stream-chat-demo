@@ -138,10 +138,14 @@ class ChzzkTests(unittest.IsolatedAsyncioTestCase):
         client.authorize.assert_awaited_once_with("secret-code", "expected-state")
         self.assertEqual(future.result(), {"channelId": CHANNEL})
 
-    def test_authorization_url_has_no_client_secret_and_redirect_stays_local(self):
+    def test_authorization_url_has_no_client_secret_and_redirect_requires_https_or_loopback(self):
         url = self.config.authorization_url("test-state")
         self.assertEqual(urlsplit(url).netloc, "chzzk.naver.com")
         self.assertEqual(parse_qs(urlsplit(url).query)["redirectUri"], [self.config.redirect_uri])
         self.assertNotIn("private-client-secret", url)
-        with self.assertRaises(ChzzkError):
-            ChzzkConfig("id", "secret", CHANNEL, "https://example.com/callback")
+        self.assertEqual(ChzzkConfig("id", "secret", CHANNEL, "https://example.com/callback").redirect_uri,
+                         "https://example.com/callback")
+        for redirect in ("http://example.com/callback", "https://example.com/", "https://user@example.com/callback",
+                         "https://example.com/callback?code=bad", "http://localhost/callback"):
+            with self.assertRaises(ChzzkError):
+                ChzzkConfig("id", "secret", CHANNEL, redirect)

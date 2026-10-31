@@ -5,7 +5,7 @@
   #error OutputDirectory must be supplied by the build script.
 #endif
 #ifndef AppVersion
-  #define AppVersion "0.2.0"
+  #define AppVersion "0.4.0"
 #endif
 
 [Setup]
@@ -23,6 +23,8 @@ MinVersion=10.0
 OutputDir={#OutputDirectory}
 OutputBaseFilename=StreamChat-Setup-{#AppVersion}-x64
 UninstallDisplayIcon={app}\StreamChat.exe
+SetupIconFile=..\..\assets\app.ico
+WizardSmallImageFile=..\..\assets\app-256.png
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -41,8 +43,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#BundleDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Stream Chat"; Filename: "{app}\StreamChat.exe"; WorkingDir: "{app}"
-Name: "{autodesktop}\Stream Chat"; Filename: "{app}\StreamChat.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{group}\Stream Chat"; Filename: "{app}\StreamChat.exe"; WorkingDir: "{app}"; IconFilename: "{app}\StreamChat.exe"; IconIndex: 0; AppUserModelID: "StreamChat.Desktop"
+Name: "{autodesktop}\Stream Chat"; Filename: "{app}\StreamChat.exe"; WorkingDir: "{app}"; IconFilename: "{app}\StreamChat.exe"; IconIndex: 0; AppUserModelID: "StreamChat.Desktop"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\StreamChat.exe"; Description: "{cm:LaunchProgram,Stream Chat}"; Flags: nowait postinstall skipifsilent

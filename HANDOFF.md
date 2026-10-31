@@ -1,10 +1,34 @@
 # 개발 인수인계: 웹사이트와 데스크톱 앱
 
+## 2026-11-01 데스크톱 Figma 적용 / 웹 병합 / AWS 상태
+
+- Figma MCP 연결·편집 확인 완료. Screen/Main과 Settings 내부 Fill + Shadow의 검정 NORMAL Fill을 20%로 맞췄으며 별도 Glass SCREEN Fill도 20%입니다.
+- 사용자 지정 적용 대상은 **데스크톱 앱**입니다. `apps/desktop/figma_ui.py`가 메인 원형 생성 버튼, 인원 슬라이더, 설정 화면을 제공합니다. 기능 제어는 `overlay.py`, 배경 레이어는 `panel.py`, 원본 자산은 `apps/assets/figma/`입니다. Tk의 실제 배경 굴절/그림자 제약은 자산 README에 명시했습니다.
+- `start_desktop.cmd`로 새 UI를 실행합니다. 메인 톱니 → 설정, 사용 방식 → 캡처/실시간·출력 위치·페르소나·연결, 채팅 보기 → 생성 결과. 기본 단축키는 기존 Ctrl+Alt+Space이며 저장된 사용자 조합을 유지합니다.
+- 팀원의 `origin/feat/demo-frontend`를 실제 merge commit `6b90e8e`로 병합하고 `frontend/` 대신 `apps/web/`로 옮겼습니다. 이번 Figma 포팅은 웹 스타일을 수정하지 않습니다.
+- AWS는 배포 준비와 비밀 없는 로컬 패키지 생성까지만 완료했습니다. 기본 리전은 사용자가 선택한 북미 `us-east-1`. CLI 로그인·도메인 선택/DNS·실제 리소스 생성·TLS 검증은 아직 진행하지 않았습니다. 기존 .env 값은 유지했습니다.
+
+## 2026-10-31 AWS 배포 준비 / 세션 재시작 메모
+
+- 사용자는 새 AWS 계정에서 배포하기로 결정했고, 현재 요청 범위는 배포 준비입니다. 리소스 생성·키 업로드·실제 채팅 전송은 하지 않았습니다.
+- `deploy/aws/`, `prepare_aws.cmd`, `AWS.md`: EC2 단일 서버 + Caddy HTTPS + SSM 관리 + 암호화된 EBS/SSM 설정. `package`는 로컬 전용, `deploy`는 명시적 계정 ID와 도메인이 필요합니다. 기존 .env와 데스크톱 연결 주소는 수정하지 않았습니다.
+- 원격 승인: `backend/chzzk_remote.py`, `POST /api/chzzk/authorize`, 공개 HTTPS 콜백. 승인 state는 단일 프로세스 메모리, 토큰은 서비스 계정별 디스크에 저장합니다. Cloud Run/Vercel용 분산 저장 구조가 아닙니다.
+- 당시에는 Figma 도구가 없었으나 2026-11-01 연결·편집·디자인 조회까지 확인했습니다. 위 최신 상태를 따릅니다.
+- AWS 실제 실행 전 계정/도메인/CLI 로그인, CloudFormation·Linux 설치·TLS 검증이 남아 있습니다. 배포 도구 검증 결과는 VALIDATION.md에 기록합니다.
+
 ## 최신 변경: 폴더 분리와 스크린샷 오버레이
+
+- 0.3.2 타이틀바 수정: Tkinter `iconbitmap`의 `bitmap`/`default`를 한 호출에 같이 넣지 않습니다. 기본 아이콘과 현재 창 아이콘을 각각 지정하며, 소스·설치본 검사에서 `WM_GETICON`으로 실제 작은/큰 아이콘 등록을 확인합니다.
+
+- 0.3.2: `branding.py`가 Tk 창 아이콘 외에 Windows 창의 AppUserModelID·재실행 아이콘/이름/명령도 지정합니다. 소스 실행의 고정 바로가기는 절대 경로 `backend/desktop_demo.py`로 다시 실행됩니다. 설정 진입은 탭 하나로 통합했고 방송 링크 입력을 항상 표시합니다. `hotkey.py`는 사용자 지정 조합을 정규화하며, 새 조합 등록 성공 후 기존 조합을 해제하여 충돌 시 기존 설정을 보존합니다.
+
+- 데스크톱 출력은 `app`(기본 시연) / `chzzk`로 전환합니다. 방송 URL 추출은 `backend/chzzk_target.py`, 서버 전송은 `backend/chat_delivery.py`에 있습니다. `/api/chzzk/status`로 연결 채널을 확인하고 생성·실시간 시작 요청에 선택적 `destination`, `channel_id`를 전달합니다. 기존 요청은 앱 표시로 동작합니다. 전송 오류는 생성 결과와 분리하며 자동 재전송하지 않습니다. 치지직 연결은 `CHZZK_SERVICE_ACCOUNT`(기본 `development`) 하나에만 허용하고 토큰은 계속 서버에 둡니다.
+
+- 앱 브랜드 원본은 `apps/assets/logo.svg`이며 전달받은 SVG를 수정 없이 보관합니다. 같은 폴더의 ICO·PNG·파비콘을 데스크톱과 웹에서 사용하고, 설치본 0.3.2에도 원본과 런타임 이미지를 포함합니다. 재생성: `apps/desktop/packaging/make_icons.ps1`. 개인 다운로드 경로를 참조하지 않습니다.
 
 - Windows 설치본은 `build_desktop.cmd`로 빌드합니다. `apps/desktop/packaging/`에 PyInstaller·Inno Setup 설정이 있고 결과는 `dist/`입니다. 설치본은 사용자 폴더에 설정을 저장하며, 첫 실행의 서비스 연결 창에서 기존 데스크톱 `.env`를 가져올 수 있습니다. 백엔드·AI 키는 포함하지 않습니다. [INSTALLER.md](INSTALLER.md) 참조.
 - 페르소나의 단일 정의는 `backend/personas.py`입니다. 4종의 말투·예문과 공통 자연스러운 채팅 지침을 OpenAI/Gemini 양쪽에 적용합니다. 데스크톱에 선택한 성격 설명을 추가했습니다.
-- 치지직 공식 API의 인증·토큰 갱신·계정 채널 확인·채팅 한 건 전송은 `backend/chzzk.py`, 운영자 CLI는 `backend/chzzk_cli.py`입니다. [CHZZK.md](CHZZK.md) 참조. 오버레이 자동 게시는 아직 연결하지 않았으며, 실제 치지직 전송은 앱 등록과 방송 계정 승인이 필요합니다.
+- 치지직 공식 API의 인증·토큰 갱신·계정 채널 확인·채팅 한 건 전송은 `backend/chzzk.py`, 운영자 CLI는 `backend/chzzk_cli.py`입니다. [CHZZK.md](CHZZK.md) 참조. 오버레이의 버튼 생성과 실시간 반응을 연결했으며, 실제 치지직 전송에는 앱 등록과 방송 계정 승인이 필요합니다. 기존 계정의 CLI 전송은 사용자가 방송 채팅창에서도 확인했습니다. 별도 봇 계정 소유 앱의 발신자 표시는 아직 실험하지 않았습니다.
 
 - 데스크톱은 `apps/desktop/`입니다. `python -m apps.desktop` 또는 `start_desktop.cmd`로 실행합니다. 버튼·전역 단축키로 주 모니터를 촬영하고 **OpenAI `gpt-6-astra`**로 생성합니다.
 - 웹은 `apps/web/`입니다. 기존 텍스트 Gemini/Mock 서버는 `python -m apps.web`, 정적 UI는 `apps/web/demo/`입니다. 웹에 스크린샷 업로드 API를 새로 노출하지 않았습니다.

@@ -15,6 +15,7 @@ import aiohttp
 
 from backend.env import DESKTOP_KEYS, load_env_file
 from apps.desktop.paths import connection_file
+from backend.chzzk_target import parse_channel_id
 
 
 DESKTOP_ENV = connection_file()
@@ -88,10 +89,35 @@ class ServiceClient:
         self._set_usage(await self._request("GET", "/api/usage", timeout=5))
         return self.usage()
 
-    async def realtime(self, personas, context, *, capture, stop_event, on_event, interval=5, duration=60):
+    async def chzzk_status(self):
+        value = await self._request("GET", "/api/chzzk/status", timeout=30)
+        if (not isinstance(value, dict) or type(value.get("connected")) is not bool
+                or any(not isinstance(value.get(key), str) for key in ("channelId", "channelName", "message"))):
+            raise ValueError("치지직 연결 상태를 확인할 수 없습니다.")
+        if value["connected"]:
+            parse_channel_id(value["channelId"])
+        return value
+
+    @staticmethod
+    def _destination(destination, channel_id):
+        if destination not in ("app", "chzzk"):
+            raise ValueError("채팅 표시 위치를 확인해주세요.")
+        return ({"destination": "chzzk", "channel_id": parse_channel_id(channel_id)}
+                if destination == "chzzk" else {})
+
+    @staticmethod
+    def _validate_delivery(value):
+        if (not isinstance(value, dict) or value.get("status") not in ("sent", "failed", "skipped")
+                or not isinstance(value.get("message"), str) or len(value["message"]) > 300
+                or not isinstance(value.get("messageId"), str) or len(value["messageId"]) > 300):
+            raise ValueError("치지직 전송 결과를 확인할 수 없습니다.")
+
+    async def realtime(self, personas, context, *, capture, stop_event, on_event, interval=5, duration=60,
+                       destination="app", channel_id=""):
         """Stream selected-window JPEGs to our authenticated service until stopped."""
         if not self.configured:
             raise ValueError("설정에서 서비스 연결을 먼저 등록해주세요.")
+        output = self._destination(destination, channel_id)
         async def reject_redirect(session, trace_context, params):
             raise ValueError("서비스 주소가 변경되었습니다. 연결 설정을 확인해주세요.")
         trace = aiohttp.TraceConfig()
@@ -104,7 +130,7 @@ class ServiceClient:
                         headers={"Authorization": "Bearer " + self._token}, max_msg_size=100000,
                         heartbeat=5) as socket:
                     await socket.send_json({"type": "start", "personas": personas, "context": context,
-                                            "interval": interval, "duration": duration})
+                                            "interval": interval, "duration": duration, **output})
                     ready = await socket.receive_json(timeout=20)
                     if ready != {"type": "ready"}:
                         raise ValueError("실시간 모드를 시작하지 못했습니다. 서비스 연결을 확인해주세요.")
@@ -143,6 +169,12 @@ class ServiceClient:
                                         or (event["result"] == "chat" and not event["comment"].strip())):
                                     raise ValueError("실시간 채팅 응답 형식이 올바르지 않습니다.")
                                 self._set_usage(event.get("usage"))
+                            elif kind == "delivery":
+                                if (destination != "chzzk" or type(event.get("participant")) is not int
+                                        or not 1 <= event["participant"] <= len(personas)
+                                        or event.get("persona") != personas[event["participant"] - 1]):
+                                    raise ValueError("치지직 전송 결과를 확인할 수 없습니다.")
+                                self._validate_delivery(event.get("delivery"))
                             elif kind == "stopped":
                                 self._set_usage(event.get("usage"))
                                 on_event(event)
@@ -176,12 +208,13 @@ class ServiceClient:
                 task.cancel()
             await asyncio.gather(task, return_exceptions=True)
 
-    async def generate(self, personas, context, *, screenshot, on_line=None):
+    async def generate(self, personas, context, *, screenshot, on_line=None, destination="app", channel_id=""):
         if self.stop_requested.is_set():
             return {"status": "stopped", "lines": []}
         task = asyncio.create_task(self._request("POST", "/api/chat/generate", {
             "personas": personas, "context": context,
-            "screenshot": base64.b64encode(screenshot).decode("ascii")}))
+            "screenshot": base64.b64encode(screenshot).decode("ascii"),
+            **self._destination(destination, channel_id)}, timeout=300 if destination == "chzzk" else 165))
         try:
             while not task.done():
                 await asyncio.wait({task}, timeout=.1)
@@ -201,6 +234,8 @@ class ServiceClient:
                     or not isinstance(line.get("comment"), str) or not isinstance(line.get("error"), str)
                     or (line["status"] == "ready" and not 1 <= len(line["comment"]) <= 100)):
                 raise ValueError("채팅 응답 형식이 올바르지 않습니다.")
+            if "delivery" in line:
+                self._validate_delivery(line["delivery"])
         self._set_usage(result.get("usage"))
         if on_line:
             for line in result["lines"]:

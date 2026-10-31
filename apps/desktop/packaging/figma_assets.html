@@ -1,0 +1,14 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Local Figma asset rasterization</title>
+<style>
+  html, body { margin: 0; background: transparent; }
+  .face { position: absolute; left: 0; top: 0; }
+  .gear { position: absolute; left: 100px; top: 0; }
+  .persona { position: absolute; left: 140px; top: 0; width: 51px; height: 48px;
+    mask: url('../../assets/figma/persona-mask.svg') 1px -2px / 50px 50px no-repeat; }
+  .persona img { position: absolute; width: 162.67%; height: 169.44%; left: -32%; top: -36.11%; }
+</style>
+<img class="face" src="../../assets/figma/orb-face.svg" alt="">
+<img class="gear" src="../../assets/figma/settings.svg" alt="">
+<div class="persona"><img src="../../assets/figma/persona-source.png" alt=""></div>

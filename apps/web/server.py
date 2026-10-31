@@ -288,6 +288,8 @@ def create_app(provider, run_dir: str | Path, *, cooldown_s: float = 1,
         return web.Response(text=Path(__file__).with_name("manual_panel.html").read_text(encoding="utf-8"), content_type="text/html")
     async def config(request):
         return web.json_response(session.config())
+    async def favicon(request):
+        return web.FileResponse(Path(__file__).resolve().parents[1] / "assets" / "app.svg")
     async def trigger(request):
         if request.content_type != "application/json":
             raise ValueError("JSON required")
@@ -301,7 +303,7 @@ def create_app(provider, run_dir: str | Path, *, cooldown_s: float = 1,
                             headers={"Content-Disposition": 'attachment; filename="manual_events.jsonl"'})
     async def cleanup(application):
         await provider.close()
-    app.add_routes([web.get("/", index), web.get("/api/config", config), web.post("/api/trigger", trigger),
+    app.add_routes([web.get("/", index), web.get("/favicon.svg", favicon), web.get("/api/config", config), web.post("/api/trigger", trigger),
                     web.post("/api/display", display), web.get("/api/export", export)])
     app.on_cleanup.append(cleanup)
     return app

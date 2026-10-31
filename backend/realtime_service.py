@@ -8,11 +8,13 @@ import aiohttp
 
 from backend.personas import PERSONAS
 from backend.realtime_provider import RealtimeError, decode_frame
+from backend.chzzk_target import parse_channel_id
 
 
 def validate_start(value):
     if (not isinstance(value, dict)
-            or set(value) != {"type", "personas", "context", "interval", "duration"}
+            or not {"type", "personas", "context", "interval", "duration"} <= set(value)
+            or set(value) - {"type", "personas", "context", "interval", "duration", "destination", "channel_id"}
             or value["type"] != "start"
             or not isinstance(value["personas"], list) or not 1 <= len(value["personas"]) <= 5
             or any(not isinstance(p, str) or p not in PERSONAS for p in value["personas"])
@@ -20,16 +22,22 @@ def validate_start(value):
             or type(value["interval"]) is not int or value["interval"] not in (3, 5, 10)
             or type(value["duration"]) is not int or value["duration"] not in (30, 60, 120)):
         raise ValueError("Invalid realtime settings")
+    if value.get("destination", "app") not in ("app", "chzzk"):
+        raise ValueError("Invalid destination")
+    if value.get("destination") == "chzzk":
+        parse_channel_id(value.get("channel_id"))
     return value
 
 
 class RealtimeSession:
-    def __init__(self, socket, provider, settings, service, provider_name):
+    def __init__(self, socket, provider, settings, service, provider_name, *, delivery=None):
         self.socket, self.provider, self.settings = socket, provider, settings
         self.service, self.provider_name = service, provider_name
         self.last_sequence = self.frames = self.decisions = self.chats = 0
         self.last_frame_at = self.last_reply_at = float("-inf")
         self.recent = []
+        self.delivery = delivery
+        self.delivery_failed = False
 
     async def receive(self):
         async for message in self.socket:
@@ -87,6 +95,14 @@ class RealtimeSession:
                 "comment": decision["comment"] if reason == "chat" else "", "generation_ms": elapsed,
                 "decisions": self.decisions, "chats": self.chats,
                 "usage": self.service.service_usage(self.provider_name)})
+            if reason == "chat" and self.settings.get("destination") == "chzzk":
+                if self.delivery_failed:
+                    receipt = {"status": "skipped", "message": "전송 중단 상태 · 앱에만 표시합니다.", "messageId": ""}
+                else:
+                    receipt = await self.delivery.send(decision["comment"], self.settings["channel_id"])
+                    self.delivery_failed = receipt["status"] != "sent"
+                await self.socket.send_json({"type": "delivery", "participant": index + 1,
+                                             "persona": persona, "delivery": receipt})
 
     async def run(self):
         tasks = []

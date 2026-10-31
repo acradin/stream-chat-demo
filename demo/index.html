@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<meta name="description" content="방송자가 버튼을 누르면 예시 채팅이 나타나는 수동 트리거 체험 데모. 실제 AI 연결 없이 동작을 확인하세요.">
+<meta name="description" content="페르소나와 방송 정보를 설정하고, 버튼을 눌러 채팅을 만드는 수동 트리거 체험 데모. 실제 AI 연결 없이 동작을 확인하세요.">
 <title>한 번 눌러, 한 줄 — 채팅 체험 데모</title>
 <style>
     :root { --ink:#19252d; --muted:#67747c; --line:#dfe5e8; --paper:#f3f5f3; --white:#fff; --teal:#156b60; --teal-soft:#e5f1ed; --amber:#8b5b09; --amber-soft:#fff4d9; --danger:#a83c3c; }
@@ -45,11 +45,22 @@
     .privacy { margin:0; padding:0 18px 16px; color:var(--muted); font-size:12px; }
     .controls { margin-top:20px; padding:20px; }
     .controls h2 { font-size:15px; margin:0 0 16px; }
-    .fields { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .persona-options { margin:0; padding:0; border:0; min-width:0; }
+    .persona-options legend { margin-bottom:9px; padding:0; color:#46565e; font-size:12px; font-weight:650; }
+    .persona-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .persona-card { display:flex; align-items:flex-start; gap:9px; margin:0; padding:13px 12px; border:1px solid #d7dfe1; border-radius:9px; cursor:pointer; background:#fcfdfc; }
+    .persona-card:has(input:checked) { border-color:var(--teal); background:var(--teal-soft); box-shadow:inset 0 0 0 1px var(--teal); }
+    .persona-card:focus-within { outline:3px solid #80b7e2; outline-offset:3px; }
+    .persona-card input { flex:none; margin:4px 0 0; accent-color:var(--teal); }
+    .persona-card strong { display:block; color:var(--ink); font-size:13px; font-weight:650; }
+    .persona-card small { display:block; margin-top:3px; color:#67747c; font-size:11px; font-weight:400; line-height:1.5; }
+    .context-label { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .context-label label { margin-bottom:6px; }
+    .context-count { color:var(--muted); font-size:10px; font-variant-numeric:tabular-nums; }
     label { display:block; margin-bottom:6px; color:#46565e; font-size:12px; font-weight:650; }
     label span { color:var(--muted); font-weight:400; }
     select,input[type="text"],textarea { width:100%; color:var(--ink); background:#fcfdfc; border:1px solid #d7dfe1; border-radius:8px; padding:10px 11px; }
-    textarea { min-height:67px; resize:vertical; line-height:1.5; }
+    textarea { min-height:108px; resize:vertical; line-height:1.5; }
     .field { margin-top:14px; }
     .field-hint { color:var(--muted); font-size:11px; margin:6px 0 0; }
     .trigger { width:100%; margin-top:19px; border:0; border-radius:10px; color:#fff; background:var(--teal); min-height:55px; font-size:17px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:11px; transition:background .15s,transform .15s; }
@@ -91,7 +102,7 @@
     @keyframes arrive { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
     @media (max-width:850px) { .workspace { grid-template-columns:1fr; } .shell { padding:23px 18px; } h1 { font-size:26px; } .chat-log { min-height:240px; max-height:400px; } .chat { min-height:0; } header { gap:12px; } .connection { font-size:11px; padding:8px 10px; } }
-    @media (max-width:450px) { header { flex-direction:column; } .fields { grid-template-columns:1fr; } .metric-grid { gap:8px; } footer { flex-direction:column; } .model { max-width:100%; text-align:left; } }
+    @media (max-width:450px) { header { flex-direction:column; } .persona-grid { grid-template-columns:1fr; } .metric-grid { gap:8px; } footer { flex-direction:column; } .model { max-width:100%; text-align:left; } }
   
     .sample-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:0 18px 12px; }
     .sample-actions .small-button { margin:0; }
@@ -113,11 +124,11 @@
     <div>
       <p class="eyebrow">STREAM CHAT · BUTTON DEMO</p>
       <h1>한 번 눌러, 한 줄.</h1>
-      <p class="intro">반응할 순간을 직접 골라보세요. 버튼을 누르면 예시 채팅이 나타나요.</p>
+      <p class="intro">페르소나를 골라두세요. 방송 중에는 버튼만 누르면 돼요.</p>
     </div>
     <div class="connection" data-state="ready"><span class="dot" aria-hidden="true"></span><span>바로 체험 가능</span></div>
   </header>
-  <div id="mockBanner" class="banner"><strong>체험 데모 · 예시 문장 / 실제 AI 미연결</strong><span>상황과 말투에 맞춰 준비된 문장을 보여줍니다. 영상 내용을 이해하거나 새로운 문장을 생성하지 않습니다.</span></div>
+  <div id="mockBanner" class="banner"><strong>체험 데모 · 예시 문장 / 실제 AI 미연결</strong><span>페르소나별로 준비된 문장을 보여줍니다. 영상이나 입력한 방송 정보를 이해해 새로운 문장을 생성하지는 않습니다.</span></div>
   <div class="workspace">
     <div>
       <section class="card" aria-labelledby="videoHeading">
@@ -133,15 +144,25 @@
         <p id="sourceLabel" class="source-label">합성 테스트 영상 · 실제 방송 아님 · 18초</p>
         <div class="file-row"><input id="videoFile" type="file" accept="video/*" aria-label="내 동영상 선택"></div>
         <div class="sample-actions"><button id="loadSample" class="small-button" type="button">예시 영상으로 돌아가기</button><button id="clearVideo" class="small-button" type="button">영상 없이 체험</button></div>
-        <p class="privacy">내 동영상은 브라우저 안에서만 재생됩니다. 파일이나 채팅 기록을 서버에 업로드하지 않습니다.</p>
+        <p class="privacy">내 동영상은 브라우저 안에서만 재생됩니다. 이 체험에서는 영상, 방송 정보, 채팅 기록을 서버에 업로드하지 않습니다.</p>
       </section>
       <section class="card controls" aria-labelledby="controlsHeading">
-        <h2 id="controlsHeading">지금 어떤 반응이 필요해요?</h2>
-        <div class="fields">
-          <div><label for="preset">상황</label><select id="preset"><option value="reaction">일반 반응</option><option value="mistake">실수</option><option value="success">성공</option><option value="surprise">놀람</option></select></div>
-          <div><label for="tone">말투</label><select id="tone"><option value="playful">장난스럽게</option><option value="warm">따뜻하게</option><option value="hype">신나게</option></select></div>
+        <h2 id="controlsHeading">함께할 페르소나를 골라주세요</h2>
+        <fieldset class="persona-options">
+          <legend>프리셋 페르소나</legend>
+          <div class="persona-grid">
+            <label class="persona-card" for="persona-witty"><input id="persona-witty" type="radio" name="persona" value="witty_friend" checked><span><strong>장난꾸러기 친구</strong><small>가볍게 놀리고 재치 있게 한마디</small></span></label>
+            <label class="persona-card" for="persona-warm"><input id="persona-warm" type="radio" name="persona" value="warm_supporter"><span><strong>다정한 응원단</strong><small>부담 없이 건네는 따뜻한 응원</small></span></label>
+            <label class="persona-card" for="persona-hype"><input id="persona-hype" type="radio" name="persona" value="hype_commentator"><span><strong>과몰입 해설러</strong><small>중계하듯 활기차고 힘 있게</small></span></label>
+            <label class="persona-card" for="persona-dry"><input id="persona-dry" type="radio" name="persona" value="dry_comic"><span><strong>덤덤한 드립러</strong><small>짧고 담백하게, 은근한 웃음</small></span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <div class="context-label"><label for="channel_context">방송 정보 <span>선택</span></label><span id="contextCount" class="context-count">0 / 1,000</span></div>
+          <textarea id="channel_context" maxlength="1000" rows="3" aria-describedby="contextHint contextCount" placeholder="예: 닉네임은 모모. 오늘은 처음 해보는 퍼즐 게임 방송. 잔잔한 분위기이고, 시청자 애칭은 모모단이에요."></textarea>
+          <p id="contextHint" class="field-hint">방송 주제, 닉네임, 진행 내용, 알아두면 좋은 배경을 자유롭게 적어주세요. 입력한 정보는 다음 버튼에도 유지돼요.</p>
         </div>
-        <p class="demo-help">상황과 말투를 바꿔서 눌러보세요. 각 조합에 준비된 예시 문장을 순서대로 보여줍니다.</p>
+        <p class="demo-help">이 체험에서는 방송 정보를 체험 기록에만 저장해요. 실제 AI 모드에서는 선택한 페르소나와 함께 채팅 생성에 사용합니다.</p>
         <button id="trigger" class="trigger" type="button"><span id="triggerLabel">드립 만들기</span><kbd aria-hidden="true">SPACE</kbd></button>
         <p class="trigger-hint">누를 때만 채팅 추가 · 이 페이지의 빈 곳을 클릭한 뒤 Space로도 체험</p>
         <div id="status" class="status" role="status" aria-live="polite">준비됐어요. 영상을 재생하거나 바로 버튼을 눌러보세요.</div>
@@ -151,7 +172,7 @@
       <section class="card chat" aria-labelledby="chatHeading">
         <div class="section-head"><h2 id="chatHeading">채팅 미리보기</h2><span id="commentCount" class="note">0개 표시</span></div>
         <div id="chatLog" class="chat-log" role="log" aria-live="polite" aria-relevant="additions">
-          <div id="emptyChat" class="empty-chat"><div class="mark" aria-hidden="true">✦</div><p><strong>아직은 조용해요.</strong></p><p>상황을 고르고 드립 만들기를 눌러보세요.</p></div>
+          <div id="emptyChat" class="empty-chat"><div class="mark" aria-hidden="true">✦</div><p><strong>아직은 조용해요.</strong></p><p>페르소나를 골라두고 드립 만들기를 눌러보세요.</p></div>
         </div>
       </section>
       <section class="card metrics" aria-labelledby="metricsHeading">
@@ -173,29 +194,12 @@ const $ = id => document.getElementById(id);
 const video = $('video');
 const DELAY_MS = 650;
 const MAX_AGE_MS = 8000;
-const presetNames = {reaction:'일반 반응',mistake:'실수',success:'성공',surprise:'놀람'};
-const toneNames = {playful:'장난스럽게',warm:'따뜻하게',hype:'신나게'};
+const personaNames = {witty_friend:'장난꾸러기 친구',warm_supporter:'다정한 응원단',hype_commentator:'과몰입 해설러',dry_comic:'덤덤한 드립러'};
 const lines = {
-  reaction: {
-    playful:['채팅창 예열 완료, 분위기만 더하면 됨 ㅋㅋ','지금부터 제 리액션도 출석 체크합니다 ㅋㅋ','조용한 채팅창에 한 줄 살짝 얹고 갑니다 ㅋㅋ'],
-    warm:['편하게 가요, 천천히 함께 즐기면 되죠.','잠깐 쉬어가도 괜찮아요. 오늘도 반가워요.','작은 순간도 함께 나누면 더 즐겁죠.'],
-    hype:['채팅창 시동 걸었습니다! 같이 달려요!','분위기 한 칸 올리고 갑니다!','자, 다음 순간도 신나게 가보자!']
-  },
-  mistake: {
-    playful:['실수도 분량으로 바꾸는 알뜰 방송 ㅋㅋ','완벽했으면 편집점이 없었지 ㅋㅋ','경험치가 예상 밖의 경로로 쌓이네 ㅋㅋ'],
-    warm:['괜찮아요, 한 번 더 해보면 되죠.','실수해도 괜찮아요. 다음 시도 응원할게요.','여기서 잠깐 숨 고르고 다시 가요.'],
-    hype:['좋아, 이번 건 연습! 다음 판 제대로 가자!','실수는 경험치! 다시 도전 갑니다!','분위기 다시 올리고 한 번 더!']
-  },
-  success: {
-    playful:['성공했으니 자신감 한 스푼 추가요 ㅋㅋ','잘한 건 크게 자랑해야 방송 분량이 됩니다 ㅋㅋ','오늘의 뿌듯함, 방금 적립됐습니다 ㅋㅋ'],
-    warm:['잘했어요. 차근차근 해낸 순간이네요.','성공한 순간, 기분 좋게 누려봐요.','정말 수고했어요. 스스로 칭찬해도 돼요.'],
-    hype:['성공이다! 박수 크게 한 번 갑시다!','해냈다! 이 기세 그대로 가자!','지금은 마음껏 기뻐해도 되는 시간!']
-  },
-  surprise: {
-    playful:['잠깐만 마음의 준비 버튼은 어디 있죠 ㅋㅋ','예상이라는 친구가 잠시 자리를 비웠네 ㅋㅋ','놀란 마음 정리할 시간 좀 주세요 ㅋㅋ'],
-    warm:['예상 밖의 순간이네요. 잠깐 숨 돌려요.','놀랐죠? 천천히 정리하면서 가도 괜찮아요.','뜻밖의 순간도 함께 웃으며 넘겨봐요.'],
-    hype:['잠깐만, 이건 반응하고 가야죠!','예상 밖이라 더 신나는데요!','와, 이 순간은 그냥 지나갈 수 없지!']
-  }
+  witty_friend:['드립은 가볍게, 존재감은 묵직하게 갑니다 ㅋㅋ','채팅 한 줄에 웃음까지 넣으려니 포장이 빡세네 ㅋㅋ','분위기 담당 지원합니다, 급여는 웃음으로 주세요 ㅋㅋ','한 줄만 쓰랬는데 드립 욕심은 세 줄이네 ㅋㅋ'],
+  warm_supporter:['서두르지 않아도 괜찮아요. 편하게 이어가요.','잠깐 쉬어가도 좋아요. 응원은 여기 둘게요.','부담은 조금 내려놓고, 즐거운 쪽으로 가봐요.','페이스는 천천히, 응원은 꾸준히 보낼게요.'],
+  hype_commentator:['자, 채팅 한 줄에 에너지 꽉 채워 갑니다!','분위기 담당 준비 완료! 힘차게 이어가보자!','응원 한 스푼으로는 부족하다! 한 국자 갑니다!','좋아, 오늘의 재미를 향해 출발합니다!'],
+  dry_comic:['분위기 담당입니다. 자격증은 없습니다.','한 줄입니다. 분량은 지켰습니다.','드립 대기 중. 진지함은 잠시 휴무.','말은 짧게 하겠습니다. 끝.']
 };
 const state = {busy:false,version:0,videoUrl:null,videoSession:'sample-1',sampleSerial:1,displayed:0,sequence:0,records:[],counters:{}};
 function status(message,kind='ready') { $('status').textContent=message; $('status').dataset.kind=kind; }
@@ -225,7 +229,7 @@ function addComment(record) {
   const item=document.createElement('article'); item.className='message'; item.dataset.requestId=record.request_id;
   const meta=document.createElement('div'); meta.className='message-meta';
   const name=document.createElement('span'); name.className='bot-name'; name.textContent='DEMO · 예시';
-  const tag=document.createElement('span'); tag.className='tag'; tag.textContent=`${presetNames[record.preset]} · ${toneNames[record.tone]}`;
+  const tag=document.createElement('span'); tag.className='tag'; tag.textContent=personaNames[record.persona];
   const stamp=document.createElement('span'); const at=videoTime(); stamp.textContent=at===null?'영상 없이 체험':`영상 ${at.toFixed(2)}초`;
   meta.append(name,tag,stamp);
   const bubble=document.createElement('div'); bubble.className='bubble'; bubble.textContent=record.comment;
@@ -242,8 +246,10 @@ function addComment(record) {
 async function generate() {
   if(state.busy) return;
   const clicked=performance.now(); const version=state.version;
-  const preset=$('preset').value, tone=$('tone').value;
-  const record={request_id:`demo-${++state.sequence}`,is_mock:true,ai_called:false,preset,tone,
+  const persona=document.querySelector('input[name="persona"]:checked').value;
+  const channel_context=$('channel_context').value.trim();
+  const record={request_id:`demo-${++state.sequence}`,is_mock:true,ai_called:false,persona,channel_context,
+    context_usage:'recorded_only_not_used_for_scripted_text',
     artificial_delay_ms:DELAY_MS,clicked_performance_ms:clicked,clicked_video_s:videoTime(),
     video_session_id:state.videoSession,button_to_dom_ms:null,displayed_video_s:null,status:'pending',comment:''};
   state.busy=true; refresh();
@@ -257,15 +263,16 @@ async function generate() {
     record.status='discarded'; record.discard_reason=reason;
     status(reason==='context_changed'?'영상이나 탭 상태가 바뀌어 이전 순간의 채팅은 표시하지 않았어요.':'잠시 자리를 비운 사이 응답이 늦어져 표시하지 않았어요.');
   } else {
-    const key=`${preset}:${tone}`; const count=state.counters[key]||0;
-    record.comment=lines[preset][tone][count%lines[preset][tone].length];
-    state.counters[key]=count+1;
+    const count=state.counters[persona]||0;
+    record.comment=lines[persona][count%lines[persona].length];
+    state.counters[persona]=count+1;
     addComment(record);
     status(`예시 채팅을 표시했어요. 약 ${Math.round(record.button_to_dom_ms)} ms · 모의 대기 650 ms 포함`);
   }
   state.records.push(record); state.busy=false; refresh();
 }
 $('trigger').addEventListener('click',generate);
+$('channel_context').addEventListener('input',()=>{ $('contextCount').textContent=`${$('channel_context').value.length.toLocaleString('ko-KR')} / 1,000`; });
 document.addEventListener('keydown',event=>{
   if(event.code!=='Space'||event.repeat||event.altKey||event.ctrlKey||event.metaKey) return;
   const target=event.target;
@@ -284,7 +291,7 @@ $('loadSample').addEventListener('click',showSample);
 $('clearVideo').addEventListener('click',()=>{
   invalidateVideo(); state.videoSession=null; video.removeAttribute('src'); video.load();
   video.hidden=true; $('emptyVideo').hidden=false; $('videoFile').value='';
-  $('sourceLabel').textContent='영상 없이 버튼만 체험 중'; status('상황을 고르고 바로 버튼을 눌러보세요.');
+  $('sourceLabel').textContent='영상 없이 버튼만 체험 중'; status('페르소나를 골라두고 바로 버튼을 눌러보세요.');
 });
 video.addEventListener('seeking',()=>{ state.version+=1; });
 video.addEventListener('error',()=>{

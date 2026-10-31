@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import csv
 import json
 from pathlib import Path
 import tempfile
@@ -38,7 +39,7 @@ class ControlledProvider:
             await self.release.wait()
         elif self.delay:
             await asyncio.sleep(self.delay)
-        return {"comment": "[MOCK] 실수도 방송 분량이 되는 순간 ㅋㅋ",
+        return {"comment": "[MOCK] 채팅창에 웃음 한 스푼 놓고 갑니다 ㅋㅋ",
                 "provider": self.provider, "model": self.model,
                 "generation_ms": (time.perf_counter() - started) * 1000,
                 "usage": {"is_ai": False}, "model_calls": 0}
@@ -48,9 +49,8 @@ class ControlledProvider:
 
 
 def trigger_payload(**changes):
-    result = {"client_request_id": str(uuid.uuid4()), "preset": "mistake",
-              "channel_context": "편하게 이야기하는 게임 방송", "situation": "",
-              "tone": "playful", "clicked_video_s": 6.25,
+    result = {"client_request_id": str(uuid.uuid4()), "persona": "witty_friend",
+              "channel_context": "편하게 이야기하는 게임 방송", "clicked_video_s": 6.25,
               "video_session_id": "local-clip-a"}
     result.update(changes)
     return result
@@ -76,6 +76,10 @@ class ManualFlowTests(unittest.IsolatedAsyncioTestCase):
         config_response = await client.get("/api/config")
         self.assertEqual(config_response.status, 200)
         config = await config_response.json()
+        self.assertEqual({item["id"] for item in config["personas"]},
+                         {"witty_friend", "warm_supporter", "hype_commentator", "dry_comic"})
+        self.assertEqual(config["default_persona"], "witty_friend")
+        self.assertTrue(all(set(item) == {"id", "name", "description"} for item in config["personas"]))
         headers = {"X-Demo-Token": config["session_token"]}
         return client, headers, directory
 
@@ -97,8 +101,9 @@ class ManualFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(data["status"], "ready", data)
         self.assertEqual(len(provider.calls), 1)
         self.assertEqual(set(provider.calls[0]), {
-            "request_id", "preset", "channel_context", "situation", "tone", "recent_comments"})
-        self.assertEqual(provider.calls[0]["preset"], "mistake")
+            "request_id", "persona", "channel_context", "recent_comments"})
+        self.assertEqual(provider.calls[0]["persona"], "witty_friend")
+        self.assertEqual(provider.calls[0]["channel_context"], payload["channel_context"])
         # Playback position is log metadata, never media/context for the model.
         self.assertNotIn("clicked_video_s", provider.calls[0])
         before = (await self.records(client))[0]
@@ -116,6 +121,13 @@ class ManualFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(after["displayed_video_s"], 6.2875)
         self.assertEqual(len(provider.calls), 1)
         self.assertTrue((directory / "events.jsonl").is_file())
+        self.assertEqual(after["persona"], "witty_friend")
+        self.assertEqual(after["channel_context"], payload["channel_context"])
+        with (directory / "events.csv").open(encoding="utf-8-sig", newline="") as handle:
+            csv_record = next(csv.DictReader(handle))
+        self.assertEqual(csv_record["persona"], "witty_friend")
+        self.assertEqual(csv_record["channel_context"], payload["channel_context"])
+        self.assertNotIn("preset", csv_record)
 
     async def test_concurrent_click_is_rejected_and_same_id_does_not_call_again(self):
         provider = ControlledProvider(hold=True)
@@ -135,18 +147,40 @@ class ManualFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(provider.calls), 1)
         self.assertEqual(len(await self.records(client)), 1)
 
-    async def test_wrong_token_and_media_payload_never_reach_provider(self):
+    async def test_wrong_token_media_and_invalid_persona_payload_never_reach_provider(self):
         provider = ControlledProvider()
         client, headers, _ = await self.open_client(provider)
         denied = await client.post("/api/trigger", json=trigger_payload(),
                                    headers={"X-Demo-Token": "not-the-session-token"})
         self.assertGreaterEqual(denied.status, 400)
-        for key, value in (("frames", []), ("audio_wav", "not-allowed")):
+        for key, value in (("frames", []), ("audio_wav", "not-allowed"),
+                           ("persona", "invented"), ("persona", []),
+                           ("preset", "mistake"), ("tone", "warm"), ("situation", "성공"),
+                           ("channel_context", "x" * 1001)):
             bad = trigger_payload(**{key: value})
             response = await client.post("/api/trigger", json=bad, headers=headers)
             self.assertGreaterEqual(response.status, 400, await response.text())
         self.assertEqual(provider.calls, [])
         self.assertEqual(await self.records(client), [])
+
+    async def test_persona_and_optional_info_are_snapshotted_at_trigger(self):
+        provider = ControlledProvider()
+        client, headers, directory = await self.open_client(provider)
+        supplied = "=방송 정보: 빵 굽기 연습\n시청자에게 알려줄 별명은 빵장"
+        first = await (await client.post("/api/trigger", headers=headers, json=trigger_payload(
+            persona="warm_supporter", channel_context=supplied))).json()
+        self.assertEqual(first["status"], "ready", first)
+        second = await (await client.post("/api/trigger", headers=headers, json=trigger_payload(
+            persona="dry_comic", channel_context="", clicked_video_s=None, video_session_id=None))).json()
+        self.assertEqual(second["status"], "ready", second)
+        self.assertEqual([(call["persona"], call["channel_context"]) for call in provider.calls],
+                         [("warm_supporter", supplied), ("dry_comic", "")])
+        records = await self.records(client)
+        self.assertEqual(records[0]["channel_context"], supplied)
+        self.assertEqual(records[1]["channel_context"], "")
+        with (directory / "events.csv").open(encoding="utf-8-sig", newline="") as handle:
+            exported = list(csv.DictReader(handle))
+        self.assertEqual(exported[0]["channel_context"], "'" + supplied)
 
     async def test_expired_and_timed_out_results_never_get_display_latency(self):
         for settings, expected in (({"max_age_s": 0.01, "timeout_s": 0.5}, "expired"),

@@ -28,9 +28,9 @@ from apps.desktop.overlay import Overlay
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "design" / "desktop"
 SOURCES = tuple("apps/desktop/" + name for name in
-                ("panel.py", "figma_ui.py", "overlay.py", "connection.py", "branding.py", "fonts.py",
+                ("panel.py", "figma_ui.py", "onboarding.py", "design_widgets.py", "overlay.py", "connection.py", "branding.py", "fonts.py",
                  "shell.py", "window/branding.py", "window/shell.py", "window/fonts.py",
-                 "mac/branding.py", "mac/shell.py", "mac/fonts.py"))
+                 "mac/branding.py", "mac/shell.py", "mac/fonts.py", "linux/branding.py", "linux/shell.py", "linux/fonts.py"))
 IGNORE_OPTIONS = {"command", "validatecommand", "invalidcommand", "postcommand", "xscrollcommand",
                   "yscrollcommand", "textvariable", "variable", "class", "container", "use"}
 
@@ -283,22 +283,23 @@ def export():
                                                            side_fade="abs(1 - 2*y/max(1,height-1))"))),
         window=dict(default_opacity=1, allowed_opacity=[.6, 1], default_topmost=True,
                     frameless=True, resizable=False, drag_header_height_px=62),
-        page_sizes_px=dict(main=[278,448], settings=[420,666], controls=[420,690], chat=[420,530]),
-        fonts=dict(default_family_preference=["Pretendard", "맑은 고딕"], default_size_pt=9,
-                   sizes_pt=[6,7,8,9,10,11], title_and_usage_family="Pretendard",
-                   bundled_weights=[400, 700], bundled_version="1.3.9", registration="process-private",
+        page_sizes_px=dict(main=[277,347], settings=[420,491], controls=[420,690], chat=[420,530],
+                           start=[277,347], start1=[339,430], start2=[339,775], start3=[339,286], start_end=[277,347]),
+        fonts=dict(default_family_preference=["Pretendard", "맑은 고딕"], default_size_px=12,
+                   sizes_px=[8,12,14,16,24], title_and_usage_family="Pretendard SemiBold",
+                   bundled_weights=[400, 600, 700], bundled_version="1.3.9", registration="process-private",
                    orb_shortcut_weight="bold", chat_name_weight="bold"),
         button_surface=dict(raster_size_px=[64,32], radius_px=8, border_px=1, stretch_border_px=8,
                             padding=[9,5]),
-        images=dict(orb_base=dict(file="orb-original-base.png", display_px=[196,196], alpha=.72, center=[99,100]),
-                    orb_glow=dict(file="orb-original-glow.png", display_px=[158,158], alpha=.72, center=[99,99]),
-                    orb_face=dict(file="orb-face.png", display_px=[84,81], center=[99,80]),
-                    header=dict(file="header.png", display_px=[70,21], position=[28,27]),
-                    settings=dict(file="settings.png", display_px=[15,15], slot=[197,29,18,18]),
-                    persona=dict(file="persona.png", display_px=[51,48], layout="pack left; padx=(0,8)")))
+        images=dict(orb_base=dict(file="v2-orb-base.png", display_px=[196,196], alpha=.72, center=[99,100]),
+                    orb_glow=dict(file="v2-orb-glow.png", display_px=[158,158], alpha=.72, center=[99,99]),
+                    orb_face=dict(file="v2-orb-face.png", display_px=[84,80], center=[99,80]),
+                    header=dict(file="v2-header.png", display_px=[70,21], position=[28,27]),
+                    settings=dict(file="v2-settings.png", display_px=[15,14], slot=[197,31,15,14]),
+                    persona=dict(file="v2-persona-*.png", display_px=[51,48], position=[28,355])))
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     result = dict(schema_version=1, exported_at=datetime.now(timezone.utc).isoformat(), git_revision=revision,
-                  scope="Main, Settings, Controls, Chat, service connection dialog; synthetic defaults/state variants",
+                  scope="Main, Settings, five onboarding screens, Controls, Chat, service connection dialog; synthetic states",
                   privacy=dict(user_settings_read=False, secrets_included=False, network_calls=0, screenshots=0),
                   tokens=tokens, runtime=runtime, source_inventory=source_inventory(), assets=asset_inventory(),
                   limitations=["Tk geometry/font pixel sizes depend on local DPI and installed fonts.",
@@ -312,7 +313,7 @@ def export():
     css += [f"  --tiki-panel-radius: {panel.RADIUS}px;", "  --tiki-button-radius: 8px;",
             "  --tiki-fill-2-opacity: 0.2;", "  --tiki-glass-fill-opacity: 0.2;",
             "  --tiki-orb-layer-opacity: 0.72;", '  --tiki-font-family: "Pretendard", "Malgun Gothic", sans-serif;',
-            "  --tiki-font-size: 9pt;", "}", ""]
+            "  --tiki-font-size: 12px;", "}", ""]
     (OUTPUT / "reference-tokens.css").write_text("\n".join(css), encoding="utf-8")
     archive = ROOT / "dist" / "tiki-desktop-design.zip"
     archive.parent.mkdir(exist_ok=True)

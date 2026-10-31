@@ -50,6 +50,27 @@ class AwsDeploymentTests(unittest.TestCase):
                 self.assertTrue(member.isfile())
         self.assertIn("Resources", json.loads(template.read_text()))
 
+    def test_web_build_contains_only_public_assets_with_binary_bytes_intact(self):
+        static = self.directory / "source/apps/web/dist"
+        static.mkdir(parents=True)
+        root = self.directory / "source"
+        (root / "backend").mkdir()
+        (root / "backend/server.py").write_text("# server")
+        for relative in RUNTIME_FILES:
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("# source")
+        (static / "index.html").write_text("<html>tiki</html>")
+        (static / "icon.png").write_bytes(b"\x89PNG\r\n\xff")
+        (static / ".env").write_text("private")
+        (static / "main.js.map").write_text("private source")
+        archive, _, _ = package(root, self.directory / "out")
+        with tarfile.open(archive) as bundle:
+            self.assertIn("apps/web/dist/index.html", bundle.getnames())
+            self.assertEqual(bundle.extractfile("apps/web/dist/icon.png").read(), b"\x89PNG\r\n\xff")
+            self.assertNotIn("apps/web/dist/.env", bundle.getnames())
+            self.assertNotIn("apps/web/dist/main.js.map", bundle.getnames())
+
     def test_runtime_config_is_filtered_validated_and_does_not_modify_local_env(self):
         path = self.env_file()
         before = path.read_bytes()

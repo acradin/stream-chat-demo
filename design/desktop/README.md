@@ -1,177 +1,60 @@
-# 데스크톱 앱 디자인 추출
+# 데스크톱 디자인 추출 — Figma v2
 
-현재 구현은 **Python Tk/ttk + Pillow**입니다. 실행 중 읽는 CSS는 없습니다.
-실제 코드와 격리된 앱 인스턴스에서 디자인 값을 추출했습니다. 앱 설정이나 인증 정보는 읽지 않았습니다.
+`prompt.zip`와 지정된 Figma Component/Main/Settings/Start 5개 화면을 기준으로 공통 데스크톱 UI를 수정했습니다.
+Windows, Mac, Linux X11은 같은 `figma_ui.py`, `onboarding.py`, `design_widgets.py`, `panel.py`를 사용합니다.
+웹 프론트 디자인은 변경하지 않았습니다. 실행 중 읽는 CSS는 없으며 Tk/ttk와 Pillow로 그립니다.
 
 ## 전달 파일
 
-- `desktop-design.json`: 토큰, 실제 위젯 속성·좌표·폰트·Canvas 항목, 상태별 ttk 스타일, 자산 크기/해시, 소스 위치.
-- `reference-tokens.css`: 디자인 이식에 사용할 CSS 변수. 앱이 읽는 스타일시트가 아닙니다.
-- `../../dist/tiki-desktop-design.zip`: 위 파일과 UI 소스, SVG/PNG/ICO, Pretendard TTF 및 라이선스를 담은 전달용 ZIP.
+- `desktop-design.json`: 토큰, 실제 위젯 좌표·폰트·Canvas 항목, 17개 화면/상태, 원본 자산 해시, 소스 위치.
+- `reference-tokens.css`: 다른 구현으로 이식하기 위한 참고 변수이며 앱이 읽는 CSS가 아닙니다.
+- `../../dist/tiki-desktop-design.zip`: 위 문서와 UI 소스, SVG/PNG/ICO/TTF 및 라이선스를 포함하는 전달용 파일.
 
-JSON의 `runtime.screens`에는 메인·설정·사용 방식·채팅의 기본 상태, 5명 선택,
-실시간 설정, 관찰 중/비활성 상태, 생성 중, 단축키 녹화, 서비스 연결 창을 포함한 12개 상태가 있습니다.
-`options`는 Tk의 실제 값, `layout`은 pack/place/grid 입력값, `bounds_px`는 측정된 배치입니다.
-각 `canvas_items`에 좌표·선/도형·텍스트·이미지·태그를 모두 남겼습니다.
-`source_inventory`는 조건부/초기화 값까지 포함하므로 나중에 덮어쓴 값이 함께 있을 수 있습니다.
-최종 화면에는 `runtime` 값이 우선합니다. 숨겨진 위젯의 측정 크기는 적용된 화면 크기를 뜻하지 않습니다.
+`runtime.screens`와 `source_inventory`가 상세 값의 기준입니다. 초기화 후 덮어쓴 값은 runtime 값을 사용합니다.
+추출은 임시 설정·가짜 서비스로 실행하므로 사용자 설정, 인증 정보, 화면 캡처, 네트워크 요청을 포함하지 않습니다.
 
-## 단위와 측정 환경
+## 화면과 글꼴
 
-위치/외곽 크기는 px, Tk의 양수 폰트 크기는 **pt**입니다. Entry/Button의 `width`는 문자 단위일 수 있으며
-Text의 `height`는 줄 수입니다. `bounds_px`와 혼동하지 마세요.
-현재 추출은 Windows에서 수행했고 실제 DPI·Tk 버전·선택한 폰트는 `runtime.environment`에 기록했습니다.
-Mac과 다른 DPI에서는 글자와 기본 컨트롤의 측정 크기가 달라질 수 있습니다.
-추출용 창의 alpha=0은 화면에 보이지 않게 측정하기 위한 값입니다. 앱의 기본 불투명도는 1입니다.
-
-## 공통 패널
-
-| 속성 | 구현값 |
+| Figma 화면 | 크기(px) |
 |---|---|
-| 모서리 | 26 px |
-| 전체 레이어 opacity | 1 |
-| 배경 합성 기준색 | RGB(22,24,26), `#16181a` |
-| 합성 후 배경색 | `#151619` |
-| Fill 1 | RGB(.15,.15,.15), opacity 1, COLOR_DODGE |
-| Fill 2 | 검정, opacity .2, NORMAL |
-| 별도 Glass Fill | 검정, opacity .2, SCREEN |
-| Drop shadow | 검정 alpha .12, x0/y8, blur40, spread0, NORMAL |
-| showShadowBehindNode | false |
-| Glass 실제 Stroke | 없음 |
+| Screen/Main | 277×347 |
+| Screen/Settings | 420×491 |
+| Screen/Start, Screen/StartEnd | 277×347 |
+| Screen/Start1 | 339×430 |
+| Screen/Start2 | 339×775 |
+| Screen/Start3 | 339×286 |
+| 추가 사용 방식, 채팅 보기 | 420×690, 420×530 |
 
-Fill 순서는 1→2입니다. 검정 20% NORMAL 배경과 검정 20% SCREEN Glass는 별도입니다.
-메인 패널의 배경 소유자는 `Screen/Main`, 설정은 내부 `Fill + Shadow`입니다.
-각 패널은 Drop shadow → 기본 배경 → Glass Effect의 별도 Canvas 이미지로 그립니다.
-설정 콘텐츠나 전체 창에 20% opacity를 적용하지 않습니다.
+Pretendard 1.3.9 Regular(400), SemiBold(600), Bold(700)를 동봉합니다. 새 Figma 화면은 음수 Tk 폰트 크기로
+픽셀 단위(8/12/14/16/24px)를 지정합니다. JSON에는 실제 선택된 family, weight, metrics가 있습니다.
+측정 환경의 DPI와 Tk scaling도 기록합니다. 다른 OS/DPI에서 기본 입력 컨트롤의 크기는 달라질 수 있습니다.
 
-Figma GLASS 메타데이터는 radius12, refraction1, depth16, lightAngle315,
-lightIntensity .67, dispersion0, splay .06입니다.
-코드는 이를 보관하지만 **실시간 굴절 효과를 구현한 것은 아닙니다.**
-Tk에서는 고정된 어두운 기준색에 Fill을 합성하고, 1px/alpha mask90의 가장자리 빛으로 근사합니다.
-가장자리 세기는 `abs(1 - 2*y/(height-1))`로 조정됩니다.
-그림자는 GaussianBlur(20)로 그리고 패널 내부를 지웁니다. 캔버스 밖 그림자는 재현되지 않습니다.
-밝은 회색 Fill은 없습니다. 배경을 그리기 위해 바탕 화면을 캡처하지 않습니다.
+## 배경과 자산
 
-## 색상
+- Main 루트와 Settings 내부 `Fill + Shadow`는 RGB(.15,.15,.15)/COLOR_DODGE + 검정 20%/NORMAL을 순서대로 합성합니다.
+- 별도 Glass 레이어는 검정 20%/SCREEN, radius 26입니다. 콘텐츠와 전체 창의 기본 opacity는 1입니다.
+- Start1–3은 수정 시안의 검정 40% 배경, Start/StartEnd는 80% 그라데이션을 사용합니다.
+- Glass 메타데이터: radius12, refraction1, depth16, lightAngle315, lightIntensity .67, dispersion0, splay .06.
+- Drop shadow 메타데이터: 검정 alpha .12, x0/y8, blur40, spread0, NORMAL, showShadowBehindNode=false.
+- Tk는 실제 광학 굴절이나 바탕화면을 투과하는 Figma GLASS를 구현하지 않습니다. 고정 어두운 기준색과 가장자리 빛으로 근사하며 캔버스 밖 그림자도 제한됩니다.
+- 원본 SVG/PNG와 정확한 crop/mask를 적용한 런타임 PNG는 `apps/assets/figma/v2-*`입니다. 화면 전체 이미지를 UI로 붙이지 않았습니다.
+- PNG 재생성: `python -B apps/desktop/packaging/rasterize_figma_v2.py` (Windows Edge 필요). 배포본은 생성된 PNG를 사용하므로 Edge가 필요 없습니다.
 
-| 용도 | 값 |
-|---|---|
-| 본문/아이콘 텍스트 | `#ffffff` |
-| 설명/상태 | `#c5c5c5` |
-| 입력/버튼 | `#303234` |
-| 강조/포커스/채팅 이름 | `#03ffd5` |
-| 버튼 hover | `#454749` |
-| 비활성 글자 | `#888888` |
-| 버튼/기본 테두리 | `#666666` |
-| 방송 설명 테두리 | `#777777` |
-| 슬라이더 트랙 | `#434547` |
-| 슬라이더 선택 구간 | `#00c5a5` |
-| 슬라이더 눈금 | `#8a8b8c` |
-| 슬라이더 손잡이 | `#2dff8f`, 흰 테두리 |
-| 오류 채팅 | `#ff938b` |
-| Demo/Online/Offline 배지 배경 | `#d52b30` |
-| 닫기 / 최소화 원 | `#ff736a` / `#febc2e` |
-| Windows 투명색 키 | `#010203` |
-| Mac 투명 배경 | `systemTransparent` |
+## 기능과 시안의 차이
 
-## 폰트
+시안에 표시된 Plus 잠금이나 가상의 월간 사용량을 실제 기능으로 표시하지 않습니다. 데모 인원은 기존대로 1–5명이며,
+사용량은 서버의 실제 요청 수와 `한도 미설정`을 표시합니다. 자세한 세 가지 사용량 지표는 사용 방식 화면에 있습니다.
+방송 설명은 기존 데이터와 API 계약을 보존해 최대 1,000자입니다. 시작 안내의 방송 링크는 앱 표시 모드에서 비워둘 수 있으며,
+링크 입력을 치지직 OAuth 승인으로 처리하지 않습니다. 기존 사용자는 설정을 유지하고, 새 사용자는 안내 5단계를 거칩니다.
 
-Pretendard 1.3.9 정적 TTF Regular(400), Bold(700)를 `apps/assets/fonts/pretendard`에 동봉합니다.
-Windows GDI/Mac CoreText로 앱 프로세스에만 등록합니다. 기본 글꼴과 Tk named font에도 같은 패밀리를 적용합니다.
-사용량 제목도 Pretendard를 사용합니다. 정확한 resolved font/metrics는 JSON에 있습니다.
+메인 로고 또는 우클릭 메뉴로 사용 방식·채팅 보기·설정 적용·치지직 연결 확인·안내 다시 보기에 접근합니다.
+설정은 Esc로 나가거나 다른 화면으로 이동할 때 저장합니다. 페르소나 편집은 설정의 수정 아이콘으로 엽니다.
 
-| 용도 | 크기/굵기 |
-|---|---|
-| 기본 컨트롤 | 9pt Regular |
-| 배지 | 6pt Regular |
-| 원형 버튼 안내, 1~5 눈금, 글자 수 | 7pt Regular |
-| 설명/상태/페르소나 요약 | 8pt Regular |
-| 채팅 멤버 제목 | 10pt Regular |
-| 원형 버튼 단축키 | 10pt Bold |
-| 사용량/채팅 제목 | 11pt Bold |
-| 채팅 이름, 사용량 표 헤더 | 9pt Bold |
-
-## 화면 크기와 공통 배치
-
-| 화면 | 크기(px) |
-|---|---|
-| Main | 278×448 |
-| Settings | 420×666 |
-| Controls(사용 방식) | 420×690 |
-| Chat | 420×530 |
-
-테두리 없는 고정 크기 창이며 기본 항상 위 표시입니다. 사용자 불투명도 범위는 .6~1, 기본 1입니다.
-상단 y<62 영역을 드래그할 수 있습니다.
-로고는 (28,27), 70×21. 배지는 (106,31).
-닫기/최소화는 (폭−53,32)/(폭−36,32)의 11×11 영역에 지름10 원을 그립니다.
-메인 설정 아이콘은 (197,29), 영역18×18/이미지15×15입니다.
-다른 화면의 뒤로 가기는 (폭−112,21), width2 문자입니다.
-
-설정/사용 방식 콘텐츠는 x28/y66, 폭364입니다. 세로 스크롤바 x400/폭10.
-설정 콘텐츠 높이500, 사용 방식600. 채팅 콘텐츠는 x28/y66/364×440입니다.
-
-## 메인
-
-| 요소 | 위치/크기/간격 |
-|---|---|
-| 원형 생성 Canvas | x40/y49, 198×198 |
-| 원형 base | 내부 중심99,100 / 196×196 / alpha .72 |
-| 원형 glow | 내부 중심99,99 / 158×158 / alpha .72 |
-| 얼굴 | 내부 중심99,80 / 84×81 |
-| 단축키 / 안내 | 내부99,130 / 99,150 |
-| 멤버 제목 | 48,257 / 왼쪽 정렬 |
-| 멤버 수 | 218,247 |
-| 슬라이더 | 46,274 / 186×24 |
-| 트랙 | 내부(7,12)→(179,12), 두께8, round |
-| 눈금 | x7,50,93,136,179 / y7→17 |
-| 손잡이 | 12×12, 중심 x=7+(인원−1)×43, y12 |
-| 1~5 숫자 | x53+i×42, y307 |
-| 데모 안내 | 139,329 |
-| 사용 방식 버튼 | 28,348 / 폭104 |
-| 채팅 보기 버튼 | 140,348 / 폭110 |
-| 상태 | 28,391 / 222×43 / 줄바꿈222 |
-
-원형 base/glow 원본은 각각 392×392/316×316이며 LANCZOS로 절반 크기를 만듭니다.
-키보드 포커스는 원형 버튼/슬라이더에 1px 강조색 외곽선으로 표시됩니다.
-
-## 설정·사용 방식·채팅
-
-- 기본 섹션 제목은 아래 간격5, 안내 글은 위4/아래12. 안내 줄바꿈 폭355.
-- 방송 링크 Entry는 남는 폭을 채우며 확인 버튼 width4 문자, 왼쪽 간격6.
-- 단축키 Entry width21 문자, 녹화 버튼 오른쪽 정렬.
-- 방송 설명 Text는 4줄, 내부 좌우12/상하10, flat, 테두리1, word wrap, 아래 간격12.
-- 페르소나 이미지는 51×48/오른쪽 간격8, 요약 줄바꿈208, 수정 버튼 width5 문자.
-- 사용량 제목 아래8, 기간 아래12/줄바꿈370. 표3행/행높이24, 열 기본폭240·100, 전체 폭에 맞게 stretch.
-- 설정 하단 버튼 줄 x28/y580/폭364, 상태 x28/y619/364×36.
-- 모드/출력 위치 Combobox는 readonly/가로 채움/아래10.
-- 페르소나 행은 선택한 1~5명만 표시, AI 레이블 width5 문자, 행 상단 간격6.
-- 실시간 창 선택 줄 아래4, 새로고침 버튼 왼쪽4. 분석 간격 width3 문자, 종료 시간 width4 문자.
-- 중지 버튼은 위6/가로 채움. 캡처 설명 위아래8. 연결/적용 버튼 줄 위10/아래6.
-- 채팅 Text 14줄, 가로·세로 확장, 내부 여백4, 기본 disabled/flat/word wrap.
-- 서비스 연결 대화창: 본문 여백5, 안내 줄바꿈380/아래12, 입력 width42 문자/상하4,
-  레이블 오른쪽8, 파일 불러오기 위10, 하단 버튼 좌우5/상하8. 연결 코드는 마스킹됩니다.
-
-모든 pack/grid 옵션과 DPI에 따른 실제 높이는 JSON에 포함됩니다.
-OS가 제공하는 파일 선택 창/오류 메시지 창의 장식은 운영체제 설정에 따라 달라집니다.
-
-## ttk 컨트롤
-
-테마는 `clam`입니다. 버튼은 64×32 RGBA 원본, radius8/테두리1을 8px 경계로 늘려 그립니다.
-버튼 padding9,5 / flat. disabled에서는 패널색, active에서는 hover색을 씁니다.
-Entry/Combobox padding5, 입력 배경과 흰 글자. Text 커서는 흰색.
-Treeview 외곽선0/행높이24, 헤더 flat. 가로 Scale trough는 입력색입니다.
-Combobox 펼침 목록도 입력색/흰색입니다.
-색상 map, 레이아웃 트리, normal/active/disabled/focus/readonly/selected의 해석값은 `runtime.styles`에 있습니다.
-
-## 자산과 다시 추출
-
-`assets`는 모든 원본 이미지·아이콘·글꼴의 상대 경로, 바이트 수, SHA-256,
-PNG 크기/모드, ICO 크기 목록, SVG 루트 속성을 포함합니다.
-SVG 원본과 래스터화 결과를 함께 담았습니다. 폰트 라이선스도 전달 ZIP에 포함됩니다.
+## 다시 추출
 
 ```powershell
 .\.venv\Scripts\python.exe -X utf8 -B -m apps.desktop.export_design
 ```
 
-임시 설정과 가짜 서비스를 사용하여 추출합니다. 네트워크/화면 캡처/실제 채팅 요청은 하지 않습니다.
-Git revision은 기준 커밋이며, 미커밋 UI 변경은 각 소스의 SHA-256과 포함된 소스 파일로 구분합니다.
+Git revision은 기준 커밋입니다. 미커밋 UI 변경은 각 소스 SHA-256으로 구분합니다. 추출용 창의 alpha=0은 측정 전용이며
+앱 기본값을 바꾸지 않습니다. OS 파일 선택창·메시지창·네이티브 창 관리 효과는 이 문서의 고정 디자인 범위 밖입니다.

@@ -1,0 +1,194 @@
+[
+  {
+    "file": "v2-arrow.png",
+    "sha256": "617388375310894da9b06a47fca162ed8ab73e6622c8dee6316b724d3b5e9a06",
+    "size": [
+      18,
+      20
+    ]
+  },
+  {
+    "file": "v2-crown.png",
+    "sha256": "cf32d4856220579241ebb4249f04e9c739d597687f5f609b92184fcbacf9ad3e",
+    "size": [
+      12,
+      12
+    ]
+  },
+  {
+    "file": "v2-edit.png",
+    "sha256": "eb7a4e818b155a2f6ecea1397b94b708e4d9f068d175c6366d6b9d71fd9901b3",
+    "size": [
+      14,
+      14
+    ]
+  },
+  {
+    "file": "v2-header.png",
+    "sha256": "ee468f6bfe562e30191da671621de8858f24a389749ba3a530cdb48828145377",
+    "size": [
+      70,
+      21
+    ]
+  },
+  {
+    "file": "v2-lock.png",
+    "sha256": "e6f1ad126ae4ea6f72fa01fb072dfb809f62c9398f1d3f67439c5e6b4a63b8c2",
+    "size": [
+      6,
+      6
+    ]
+  },
+  {
+    "file": "v2-orb-base.png",
+    "sha256": "76b32fb449798082dc7ff7018547c4f8c87054508716cbf97c47a230595a9c4c",
+    "size": [
+      392,
+      392
+    ]
+  },
+  {
+    "file": "v2-orb-face.png",
+    "sha256": "ba8ce86414b861db37ff910b627ae67881abcd8faa4c2e35eaa8c183e2e5918f",
+    "size": [
+      84,
+      80
+    ]
+  },
+  {
+    "file": "v2-orb-glow.png",
+    "sha256": "f379a4b8a8a81701979ad1047405a080ba92ca913762b9051fc88c1ae209ef47",
+    "size": [
+      316,
+      316
+    ]
+  },
+  {
+    "file": "v2-persona-analyst.png",
+    "sha256": "2811fe5d969e65731994a6e7c93eb5cedfc3ffdb22309ea7820a236b407de0b1",
+    "size": [
+      51,
+      48
+    ]
+  },
+  {
+    "file": "v2-persona-chatter.png",
+    "sha256": "fb5ab21b7b7eb6a30ed1ae10982ae2911b9c50bf6f09326c370b0db2588efebe",
+    "size": [
+      51,
+      48
+    ]
+  },
+  {
+    "file": "v2-persona-coach.png",
+    "sha256": "7706f3d46027cd6be6987d58e40e9ffe17efb04cb87a76059f536fa072e5a104",
+    "size": [
+      51,
+      48
+    ]
+  },
+  {
+    "file": "v2-persona-reaction.png",
+    "sha256": "7206bde7753a52d397dcb14a5b964ad9d8576522c160b4327ee0619c941e82e9",
+    "size": [
+      51,
+      48
+    ]
+  },
+  {
+    "file": "v2-persona-supporter.png",
+    "sha256": "25b3837f0c83432dc7166fe5d239e0ee1aadd8283d81353156b02c589c970355",
+    "size": [
+      51,
+      48
+    ]
+  },
+  {
+    "file": "v2-persona-witty.png",
+    "sha256": "8614519e3f59d4d1c2cd487b473116b58aef91442a28d4909008b0e7f259edc4",
+    "size": [
+      51,
+      48
+    ]
+  },
+  {
+    "file": "v2-settings.png",
+    "sha256": "b11fb7e5cf36a9c0194603d0bdc0c49316c240ed98557f493695eb3818a1ff6c",
+    "size": [
+      15,
+      14
+    ]
+  },
+  {
+    "file": "v2-source-persona-analyst.png",
+    "sha256": "a096f5e2876e810b90e9e5669d80c3da41621d4fb45432bd0134190de93cea81",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  {
+    "file": "v2-source-persona-chatter.png",
+    "sha256": "15c7ec985b62d7fb740958ef55b3c6f1dd97a07d4e063b4be3c3aef2173ab5dc",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  {
+    "file": "v2-source-persona-coach.png",
+    "sha256": "68cc28aba937eb0639fde8fe4078ba81f42685e1dc602f7c4ae27a538310404d",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  {
+    "file": "v2-source-persona-reaction.png",
+    "sha256": "369e67350a7bfe65efaae64f232329b0595a3311432cb062807f059b03c2bd1e",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  {
+    "file": "v2-source-persona-supporter.png",
+    "sha256": "063c25465ce6adce777d2cd3b888534524fdec87c48c24a6e24d4aaf70bee2d8",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  {
+    "file": "v2-source-persona-witty.png",
+    "sha256": "ced72ba4513b3f540f6325ed085f056af4df4a341fb4c1b2a385ffdf3461a9cd",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  {
+    "file": "v2-welcome-face.png",
+    "sha256": "878719117fcc71884f7cd8de995944ce1a862f58d72730347eabc2d61aefecc8",
+    "size": [
+      99,
+      95
+    ]
+  },
+  {
+    "file": "v2-welcome-logo.png",
+    "sha256": "540d3146dceed958a1773cf96bb7f6c8154b6c3068cac042ac1d0c796335766e",
+    "size": [
+      99,
+      118
+    ]
+  },
+  {
+    "file": "v2-wordmark.png",
+    "sha256": "961e3c9dcdeada4261464505a34acdb4ed77f8198580f843c1ff250a76ceec42",
+    "size": [
+      42,
+      18
+    ]
+  }
+]

@@ -4,9 +4,9 @@ macOS 14 Sonoma 이상을 대상으로 합니다. Windows와 공통 UI/서비스
 버튼 캡처, 창 선택 실시간 관찰, 멤버 1~5명, 페르소나, 방송 설명, 사용량,
 앱 표시/치지직 전송 전환, 방송 링크, 단축키, 항상 위 표시, 불투명도를 제공합니다.
 
-구현과 모의 API 계약 테스트는 완료했습니다. 현재 개발 PC가 Windows이므로 실제 Mac에서의
-화면 기록 권한·캡처 결과·전역 단축키·전체 화면 위 표시·설치본 실행은 아직 검증하지 못했습니다.
-이 파일은 그 검증을 위한 실행 방법도 포함합니다. Mac 설치 파일이 Windows에서 만들어진 것은 아닙니다.
+Apple Silicon과 Intel의 이전 UI 버전은 GitHub Actions 실행 `41223697521`에서 각각 네이티브 빌드와 숨긴 설치본 UI 검사를 통과했습니다.
+최신 Figma UI도 아래 워크플로로 검사합니다. 실제 사용자 Mac의 화면 기록 권한·캡처 결과·전역 단축키·전체 화면 위 표시는 수동 확인이 필요합니다.
+Mac 설치 파일은 macOS 러너에서 만들며 Windows/WSL에서 크로스 빌드하지 않습니다.
 
 ## GitHub에서 테스트용 설치 파일 받기
 
@@ -52,7 +52,7 @@ Finder에서 `.command`를 더블클릭하려면 최초 한 번 `chmod +x start_
 - `Cmd`, `Command`, `⌘`, `Option`, `Alt` 표기를 인식합니다. 예: `Cmd+Shift+G`.
   Mac 전역 이벤트 모니터는 키를 독점하지 않으므로 다른 앱/OS 단축키와 겹치지 않는 조합을 선택합니다.
 - ScreenCaptureKit으로 선택한 창 ID와 소유 프로세스를 확인합니다. 창이 사라지면 오류로 종료하며 다른 창이나 전체 화면으로 대체하지 않습니다.
-- Pretendard Regular/Bold는 앱에 동봉하여 프로세스 내부에만 등록합니다.
+- Pretendard Regular/SemiBold/Bold는 앱에 동봉하여 프로세스 내부에만 등록합니다.
 - 설치본 설정: `~/Library/Application Support/tiki/desktop/`. 소스 실행 설정은 기존 `runs/desktop/`을 사용합니다.
 
 ## .app / .dmg 만들기

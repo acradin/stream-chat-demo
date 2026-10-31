@@ -29,7 +29,7 @@ DEFAULT_SETTINGS = {"count": 1,
                     "personas": [DEFAULT_PERSONA, "warm_supporter", "hype_commentator", "dry_comic", DEFAULT_PERSONA],
                     "context": "", "hotkey": "Ctrl+Alt+Space", "topmost": True, "opacity": 1.0,
                     "mode": "manual", "interval": 5, "duration": 60,
-                    "destination": "app", "channel_url": ""}
+                    "destination": "app", "channel_url": "", "onboarding_complete": False}
 MODES = {"버튼 캡처 모드": "manual", "실시간 화면 모드": "realtime"}
 DESTINATIONS = {"앱에만 표시 (시연)": "app", "치지직에도 전송": "chzzk"}
 
@@ -52,6 +52,11 @@ def clean_settings(data: dict) -> dict:
         pass
     if type(data.get("topmost")) is bool:
         result["topmost"] = data["topmost"]
+    if type(data.get("onboarding_complete")) is bool:
+        result["onboarding_complete"] = data["onboarding_complete"]
+    elif data:
+        # Existing users keep their saved setup; welcome can be reopened in the menu.
+        result["onboarding_complete"] = True
     if type(data.get("opacity")) in (int, float) and .6 <= data["opacity"] <= 1:
         result["opacity"] = float(data["opacity"])
     if data.get("mode") in MODES.values():
@@ -293,6 +298,7 @@ class Overlay:
         selected = self.persona_vars[index].get()
         persona = next(persona for persona in PERSONAS.values() if persona["name"] == selected)
         self.persona_preview.set(f"AI {index + 1} · {persona['description']}")
+        self.view.refresh_persona(index)
 
     def change_count(self, delta):
         self.settings["count"] = max(1, min(MAX_PARTICIPANTS, self.settings["count"] + delta))
@@ -313,6 +319,7 @@ class Overlay:
         for key, label in self.usage_metrics:
             unit = "회" if key == "generation_requests" else "개"
             self.usage_table.item(key, values=(label, f"{usage[key]:,}{unit}" if usage else "—"))
+        self.view.refresh_usage(usage)
 
     def refresh_service_usage(self):
         if self.usage_loading or self.busy or self.closing or self.configuring:
@@ -355,7 +362,7 @@ class Overlay:
         if self.recording_hotkey:
             self.recording_hotkey = False
             self.next_trigger = max(self.next_trigger, time.monotonic() + .5)
-            self.hotkey_record.configure(text="키로 지정")
+            self.hotkey_record.configure(text="변경")
             self.hotkey_hint.set("설정 적용을 누르면 새 단축키가 등록됩니다.")
 
     def _hotkey_focus_lost(self, event):
@@ -382,14 +389,14 @@ class Overlay:
     def save_settings(self):
         if self.busy:
             self.status.set("생성이 끝나면 설정을 적용해주세요.")
-            return
+            return False
         try:
             hotkey = parse_hotkey(self.hotkey_var.get())[0]
             candidate = {**self._snapshot_settings(),
                          "hotkey": hotkey,
                          "topmost": self.topmost_var.get(), "opacity": self.opacity_var.get()}
             candidate = clean_settings(candidate)
-            if self.hotkey:
+            if self.hotkey and candidate["hotkey"] != self.settings["hotkey"]:
                 ok, error = self.hotkey.replace(candidate["hotkey"])
                 if not ok:
                     raise ValueError(error)
@@ -405,8 +412,10 @@ class Overlay:
             self._refresh_mode()
             self._register_hotkey()
             self.status.set("설정을 적용했습니다. 메인 원형 버튼으로 채팅을 생성하세요.")
+            return True
         except (ValueError, OSError) as exc:
             self.status.set(str(exc))
+            return False
 
     def show_page(self, page):
         self.view.show(page if isinstance(page, str) else "settings")

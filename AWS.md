@@ -11,7 +11,8 @@
 - 백엔드 설치와 내부 `/healthz`, 공개 HTTPS `/healthz`, 인증된 `/api/usage` 검사 통과. `check` 결과: `HTTPS and authenticated service verified`.
 - DuckDNS A 레코드는 `52.200.103.213`으로 반영됐습니다. 이 도메인을 쓰는 데 추가 도메인 구매나 Route 53 등록은 필요하지 않습니다.
 - Caddy 인증서 발급 완료. 치지직 콜백은 `https://tiki-chat.duckdns.org/oauth/chzzk/callback`이며 사용자가 개발자 센터 redirect URL 수정 완료를 확인했습니다. 원격 승인 왕복 검증은 아직 남아 있습니다.
-- 이 주소는 데스크톱 앱용 백엔드입니다. 루트 `/`는 인증 없이 볼 수 있는 서비스 안내 화면이며, `apps/web` 프론트엔드와는 별개입니다. 채팅·사용량 API는 계속 서비스 인증이 필요합니다. 브라우저 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
+- 루트 `/`는 `apps/web`의 React 프론트엔드입니다. 공개 웹은 예시 채팅을 생성하는 Mock 데모이며 유료 AI 호출·치지직 전송을 하지 않습니다. 데스크톱 생성·사용량·치지직 API는 계속 서비스 인증이 필요합니다. 상태 확인 주소는 `https://tiki-chat.duckdns.org/healthz`입니다.
+- 웹 세션은 Secure/HttpOnly 쿠키로 방문자마다 분리합니다. 서버 메모리에 최대 128세션, 세션당 100회 생성, 30분 비활성 만료로 제한하며 재배포 시 초기화됩니다. 웹 입력·예시 채팅을 서버 디스크에 기록하지 않습니다.
 
 초기 Ubuntu 설치에서 APT의 `awscli` 패키지를 찾지 못한 문제는 공식 AWS CLI v2 설치 파일로 수정했습니다. 같은 서버에서 초기 설정을 복구하고 백엔드를 설치했습니다. 이전 cloud-init 실패 기록이 있어도 완료 표시 파일이 있는 경우에만 배포를 계속합니다.
 
@@ -47,12 +48,13 @@ aws sts get-caller-identity --profile stream-chat
 `prepare_aws.cmd`를 더블클릭하거나 다음을 실행합니다.
 
 ```powershell
+npm.cmd --prefix apps/web run build
 .\.venv\Scripts\python.exe -B -m deploy.aws.deploy package
 ```
 
 결과는 `dist/aws/`에 있습니다.
 
-- `stream-chat-backend.tar.gz`: 백엔드와 서버 실행 파일만 포함.
+- `stream-chat-backend.tar.gz`: 백엔드, 웹용 Mock 세션 코드, 서버 실행 파일, 빌드된 `apps/web/dist` 공개 파일을 포함. 웹 빌드가 없으면 기존 안내 화면만 제공하므로 배포 전 위 빌드를 실행합니다.
 - `cloudformation.json`: 생성할 AWS 리소스 설정. 비밀 값 없음.
 - `manifest.json`: 파일 목록과 압축파일 SHA-256.
 

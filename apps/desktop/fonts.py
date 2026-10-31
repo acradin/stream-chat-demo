@@ -5,7 +5,7 @@ import sys
 from apps.desktop.branding import ASSETS
 
 FONT_FILES = tuple(ASSETS / "fonts" / "pretendard" / f"Pretendard-{weight}.ttf"
-                   for weight in ("Regular", "Bold"))
+                   for weight in ("Regular", "SemiBold", "Bold"))
 
 
 @lru_cache(maxsize=1)
@@ -14,6 +14,8 @@ def load_bundled_fonts():
         from apps.desktop.window.fonts import register_font
     elif sys.platform == "darwin":
         from apps.desktop.mac.fonts import register_font
+    elif sys.platform.startswith("linux"):
+        from apps.desktop.linux.fonts import register_font
     else:
         return ()
     loaded = []

@@ -7,5 +7,7 @@ APP_ID = "StreamChat.Desktop"
 
 if sys.platform == "darwin":
     from apps.desktop.mac.branding import apply_window_icon, set_app_identity
+elif sys.platform.startswith("linux"):
+    from apps.desktop.linux.branding import apply_window_icon, set_app_identity
 else:
     from apps.desktop.window.branding import apply_window_icon, set_app_identity

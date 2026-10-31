@@ -3,6 +3,13 @@
 팀원의 `feat/demo-frontend` 브랜치(`49b0d51`)를 `frontend/`에서 이 폴더로 통합했습니다.
 React 18 · TypeScript · Vite 5 · Tailwind CSS · Zustand를 사용합니다.
 
+## 인터넷 접속
+
+공개 AWS 주소: **https://tiki-chat.duckdns.org/**. 로그인 없이 예시 채팅을 체험하는 Mock 데모입니다.
+실제 AI 호출과 치지직 전송은 데스크톱 앱에서 사용합니다. 서버는 브라우저별 쿠키로 데이터를 분리하고,
+30분 비활성 세션을 만료시킵니다. 재배포하면 웹 데모 세션이 초기화되므로 페이지를 새로고침하세요.
+웹 화면 디자인은 팀원 버전을 유지하며 데스크톱 Figma 변경과 독립적입니다.
+
 ## Windows에서 실행
 
 프로젝트 루트의 첫 번째 터미널에서 로컬 Mock API를 실행합니다.
@@ -55,7 +62,9 @@ npm.cmd run preview
 
 빌드는 `apps/web/dist/`에 생성되고 미리보기는 **http://127.0.0.1:4173**입니다.
 미리보기에도 로컬 API가 필요합니다. Vite 개발/미리보기 서버는 인터넷 배포용 서버가 아닙니다.
-이번 통합은 AWS 백엔드 배포 패키지에 웹 정적 파일을 추가하지 않습니다.
+AWS 배포 패키지는 빌드된 `apps/web/dist` 파일과 공개 Mock API를 포함합니다. 배포 전 항상
+`npm.cmd --prefix apps/web run build`를 실행합니다. 서비스 인증 토큰이나 AI API 키를 Vite 환경변수에 넣지 않습니다.
+공개 웹 API와 데스크톱 API의 경계는 `backend/public_web.py`, 배포 절차는 루트 `AWS.md`에서 관리합니다.
 
 Figma의 정확한 다중 Fill/Glass 배경 수정은 Figma 원본에서 관리합니다.
 이 브랜치의 CSS는 팀원이 작성한 스타일이며 네이티브 앱/Figma와의 픽셀 일치를 주장하지 않습니다.

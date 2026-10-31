@@ -77,7 +77,7 @@ class ManualFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(config_response.status, 200)
         config = await config_response.json()
         self.assertEqual({item["id"] for item in config["personas"]},
-                         {"witty_friend", "warm_supporter", "hype_commentator", "dry_comic"})
+                         {"witty_friend", "warm_supporter", "hype_commentator", "dry_comic", "analyst", "coach", "chatter"})
         self.assertEqual(config["default_persona"], "witty_friend")
         self.assertTrue(all(set(item) == {"id", "name", "description"} for item in config["personas"]))
         headers = {"X-Demo-Token": config["session_token"]}

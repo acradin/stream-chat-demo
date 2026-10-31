@@ -9,7 +9,7 @@ data = [(str(root / "apps/assets" / name), "apps/assets")
 data += [(str(path), "apps/assets/figma") for path in (root / "apps/assets/figma").iterdir()
          if path.suffix in (".png", ".svg")]
 data += [(str(root / "apps/assets/fonts/pretendard" / name), "apps/assets/fonts/pretendard")
-         for name in ("Pretendard-Regular.ttf", "Pretendard-Bold.ttf", "LICENSE.txt")]
+         for name in ("Pretendard-Regular.ttf", "Pretendard-SemiBold.ttf", "Pretendard-Bold.ttf", "LICENSE.txt")]
 # Retain runtime dependency notices in the distributable.
 for package in ("aiohttp", "aiohappyeyeballs", "aiosignal", "attrs", "frozenlist",
                 "multidict", "propcache", "yarl", "idna", "Pillow"):

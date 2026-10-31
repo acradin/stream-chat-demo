@@ -6,7 +6,7 @@ The additional controls/log pages preserve capabilities absent from the mockup.
 
 import sys
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import ttk, scrolledtext, font, messagebox
 
 from PIL import Image, ImageTk
 
@@ -14,10 +14,15 @@ from apps.desktop.branding import ASSETS, apply_window_icon
 from apps.desktop.shell import configure_window, mapped
 from apps.desktop.panel import Panel, BG, INPUT, INK, MUTED, MINT, configure_theme
 from backend.personas import PERSONAS
+from apps.desktop.design_widgets import DesignButton, field, surface
+
+PERSONA_ASSETS = {"witty_friend": "persona-witty", "analyst": "persona-analyst",
+                  "coach": "persona-coach", "hype_commentator": "persona-reaction",
+                  "chatter": "persona-chatter", "warm_supporter": "persona-supporter"}
 
 
 def asset(master, name):
-    source = {"orb-base": "orb-original-base", "orb-glow": "orb-original-glow"}.get(name, name)
+    source = "v2-" + name
     with Image.open(ASSETS / "figma" / (source + ".png")) as image:
         if name in ("orb-base", "orb-glow"):
             image = image.resize((image.width//2, image.height//2), Image.Resampling.LANCZOS)
@@ -34,9 +39,9 @@ class GenerateOrb(tk.Canvas):
         self.create_image(99, 100, image=self.photos[0])
         self.create_image(99, 99, image=self.photos[1])
         self.create_image(99, 80, image=self.photos[2])
-        self.key_label = self.create_text(99, 130, fill=INK, font=(app.view.family, 10, "bold"),
+        self.key_label = self.create_text(99, 127, fill=INK, font=(app.view.semibold, -16),
                                           text=app.settings["hotkey"])
-        self.caption = self.create_text(99, 150, fill=INK, font=(app.view.family, 7), text="채팅을 생성하세요!")
+        self.caption = self.create_text(99, 146, fill=INK, font=(app.view.family, -8), text="채팅을 생성하세요!")
         self.bind("<Button-1>", self.invoke)
         self.bind("<Return>", self.invoke)
         self.bind("<space>", self.invoke)
@@ -67,55 +72,87 @@ class FigmaView:
         self.app, self.root = app, app.root
         app.view = self
         self.family = configure_theme(self.root)
+        self.semibold = "Pretendard SemiBold" if "Pretendard SemiBold" in font.families(self.root) else self.family
         self.root.title("tiki")
         self.root.resizable(False, False)
         self.root.minsize(1, 1)
         configure_window(self.root)
-        self.root.overrideredirect(True)
+        # Linux retains WM management for topmost/minimize, with Motif decorations disabled.
+        self.root.overrideredirect(not sys.platform.startswith("linux"))
         self.root.bind("<Map>", self._mapped, add="+")
         self.root.bind("<Alt-F4>", lambda _: app.close())
-        self.root.bind("<Escape>", lambda _: self.show("main") if not app.recording_hotkey else None)
+        self.root.bind("<Escape>", self._escape)
         self.pages = {}
         self.current = "main"
-        self.photos = {name: asset(self.root, name) for name in ("header", "settings", "persona")}
-        self.main = self._page("main", 278, 448)
-        self.settings = self._page("settings", 420, 666)
+        self.photos = {name: asset(self.root, name) for name in ("header", "settings", "welcome-logo", "arrow", "edit", "crown", *PERSONA_ASSETS.values())}
+        self.main = self._page("main", 277, 347)
+        self.settings = self._page("settings", 420, 491)
         self.controls = self._page("controls", 420, 690)
         self.chat = self._page("chat", 420, 530)
         self._main()
         self._settings()
         self._controls()
         self._chat()
-        self.show("main")
+        self._menu()
+        from apps.desktop.onboarding import Onboarding
+        self.onboarding = Onboarding(self)
+        self.show("main" if app.settings["onboarding_complete"] else "start")
         apply_window_icon(self.root)
 
-    def _page(self, name, width, height):
-        page = Panel(self.root, width, height, settings=name != "main")
+    def _page(self, name, width, height, *, variant="main", header=True):
+        page = Panel(self.root, width, height, settings=name == "settings", variant=variant)
         self.pages[name] = page
-        page.create_image(28, 27, anchor="nw", image=self.photos["header"])
-        badge = ttk.Label(page, text="Demo", foreground=INK, background="#d52b30", font=(self.family, 6))
-        badge.place(x=106, y=31)
+        if header:
+            logo = page.create_image(28, 28, anchor="nw", image=self.photos["header"])
+            page.tag_bind(logo,"<Button-1>",self.open_menu)
+            badge = ttk.Label(page, text="• Demo", foreground=INK, background="#d52b30", font=(self.family, -8))
+            badge.place(x=105, y=32, width=36, height=12)
         # The badge is truthful: service status switches it after usage returns.
         if not hasattr(self, "badges"):
             self.badges = []
-        self.badges.append(badge)
+        if header:
+            self.badges.append(badge)
         if name == "main":
             button = tk.Button(page, image=self.photos["settings"], command=lambda: self.show("settings"),
                                bg=BG, activebackground=INPUT, borderwidth=0, cursor="hand2", takefocus=1)
-            button.place(x=197, y=29, width=18, height=18)
-        else:
+            button.place(x=197, y=31, width=15, height=15)
+        elif header and name != "settings":
             ttk.Button(page, text="‹", width=2, command=lambda: self.show("main")).place(x=width-112, y=21)
         for x, color, command, symbol in ((width-53, "#ff736a", self.app.close, "×"),
                                           (width-36, "#febc2e", self.minimize, "−")):
-            dot = tk.Canvas(page, bg=BG, highlightthickness=0, borderwidth=0, cursor="hand2", takefocus=1)
-            dot.create_oval(0, 0, 10, 10, fill=color, outline="")
-            dot.bind("<Button-1>", lambda _, action=command: action())
-            dot.bind("<Return>", lambda _, action=command: action())
-            dot.bind("<space>", lambda _, action=command: action())
-            dot.place(x=x, y=32, width=11, height=11)
+            top = 30 if not header else 33
+            dot = page.create_oval(x, top, x+10, top+10, fill=color, outline="")
+            page.tag_bind(dot,"<Button-1>",lambda _,action=command: action())
+        page.bind("<Button-3>", self.open_menu)
         page.bind("<ButtonPress-1>", self._drag_start)
         page.bind("<B1-Motion>", self._drag)
         return page
+
+    def text(self,page,x,y,text,size=14,*,anchor="nw",weight=False,fill=INK,width=0):
+        return page.create_text(x,y,text=text,anchor=anchor,fill=fill,
+                                font=(self.semibold if weight else self.family,-size),width=width)
+
+    def _menu(self):
+        self.menu = tk.Menu(self.root,tearoff=False)
+        for title,name in (("메인","main"),("설정","settings"),("사용 방식 / 서비스 연결","controls"),("채팅 보기","chat")):
+            self.menu.add_command(label=title,command=lambda page=name: self.show(page))
+        self.menu.add_separator()
+        self.menu.add_command(label="설정 적용",command=self.app.save_settings)
+        self.menu.add_command(label="치지직 연결 확인",command=self.app.refresh_channel)
+        self.menu.add_command(label="시작 안내 다시 보기",command=lambda: self.onboarding.start())
+        self.menu.add_command(label="종료",command=self.app.close)
+
+    def open_menu(self,event):
+        if hasattr(self,"menu"):
+            try:
+                self.menu.tk_popup(event.x_root,event.y_root)
+            finally:
+                self.menu.grab_release()
+        return "break"
+
+    def _escape(self,event):
+        if not self.app.recording_hotkey:
+            self.show("main")
 
     def _drag_start(self, event):
         self.drag = (event.x_root-self.root.winfo_x(), event.y_root-self.root.winfo_y()) if event.y < 62 else None
@@ -126,7 +163,7 @@ class FigmaView:
 
     def _mapped(self, event):
         if event.widget is self.root and self.root.state() == "normal":
-            self.root.overrideredirect(True)
+            self.root.overrideredirect(not sys.platform.startswith("linux"))
             # Keep a frameless native window available in taskbar and Alt+Tab.
             mapped(self.root)
             apply_window_icon(self.root)
@@ -138,6 +175,10 @@ class FigmaView:
     def show(self, name):
         if name not in self.pages:
             return
+        if self.current == "settings" and name != "settings" and hasattr(self.app,"mode_var"):
+            if not self.app.save_settings():
+                messagebox.showerror("설정 확인",self.app.status.get(),parent=self.root)
+                return
         if self.app.recording_hotkey and name != "settings":
             self.app._finish_hotkey_recording()
         for page in self.pages.values():
@@ -145,7 +186,10 @@ class FigmaView:
         self.current = name
         page = self.pages[name]
         page.pack()
-        self.root.geometry(f"{page.cget('width')}x{page.cget('height')}+{max(0,self.root.winfo_x())}+{max(0,self.root.winfo_y())}")
+        width,height = int(page.cget("width")),int(page.cget("height"))
+        x = max(0,min(self.root.winfo_x(),self.root.winfo_screenwidth()-width))
+        y = max(0,min(self.root.winfo_y(),self.root.winfo_screenheight()-height-40))
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
 
     def _content(self, page, y=66, bottom=24):
         width = int(page.cget("width"))-56
@@ -184,105 +228,98 @@ class FigmaView:
     def _main(self):
         app = self.app
         app.trigger_button = GenerateOrb(self.main, app)
-        app.trigger_button.place(x=40, y=49)
-        self.main.create_text(48, 257, text="채팅 멤버", fill=INK, anchor="w", font=(self.family, 10))
-        ttk.Label(self.main, textvariable=app.count_text).place(x=218, y=247)
+        app.trigger_button.place(x=40, y=45)
+        self.text(self.main,50,239,"채팅 멤버")
+        ttk.Label(self.main,textvariable=app.count_text,font=(self.family,-14)).place(x=200,y=237,width=30,height=20)
         self.count = tk.IntVar(value=app.settings["count"])
-        self.slider = tk.Canvas(self.main, width=186, height=24, bg=BG, highlightthickness=0,
-                                takefocus=1, cursor="hand2")
-        self.slider.place(x=46, y=274)
-        self.slider.create_line(7, 12, 179, 12, fill="#434547", width=8, capstyle="round")
-        self.slider_active = self.slider.create_line(7, 12, 7, 12, fill="#00c5a5", width=8, capstyle="round")
-        for x in (7, 50, 93, 136, 179):
-            self.slider.create_line(x, 7, x, 17, fill="#8a8b8c")
-        self.slider_knob = self.slider.create_oval(1, 6, 13, 18, fill="#2dff8f", outline="#ffffff", width=1)
-        for event in ("<Button-1>", "<B1-Motion>"):
-            self.slider.bind(event, lambda e: self._count_changed(max(1, min(5, round((e.x-7)/43)+1))))
-        self.slider.bind("<Left>", lambda _: self._count_changed(max(1, self.count.get()-1)))
-        self.slider.bind("<Right>", lambda _: self._count_changed(min(5, self.count.get()+1)))
-        self.slider.bind("<FocusIn>", lambda _: self.slider.configure(highlightthickness=1, highlightbackground=MINT))
-        self.slider.bind("<FocusOut>", lambda _: self.slider.configure(highlightthickness=0))
-        self.count.trace_add("write", lambda *_: self._draw_count())
-        self._draw_count()
+        self.slider = tk.Canvas(self.main,width=181,height=32,bg=BG,highlightthickness=0,takefocus=1,cursor="hand2")
+        self.slider.place(x=48,y=267)
+        self.slider.create_line(4,6,177,6,fill="#434547",width=8,capstyle="round")
+        self.slider_active = self.slider.create_line(7,6,7,6,fill="#00c5a5",width=8,capstyle="round")
         for i in range(5):
-            self.main.create_text(53+i*42, 307, text=str(i+1), fill=INK, font=(self.family, 7))
-        self.main.create_text(139, 329, text="데모 · 1~5명 모두 사용할 수 있어요", fill=MUTED, font=(self.family, 7))
-        ttk.Button(self.main, text="사용 방식", command=lambda: self.show("controls")).place(x=28, y=348, width=104)
-        ttk.Button(self.main, text="채팅 보기", command=lambda: self.show("chat")).place(x=140, y=348, width=110)
-        app.footer = ttk.Label(self.main, textvariable=app.status, wraplength=222, foreground=MUTED,
-                               font=(self.family, 8))
-        app.footer.place(x=28, y=391, width=222, height=43)
+            x = 7+i*42
+            self.slider.create_line(x,1,x,11,fill="#8a8b8c")
+            self.slider.create_text(x,20,text=str(i+1),fill=INK,font=(self.family,-8))
+        self.slider_knob = self.slider.create_oval(1,0,13,12,fill="#2dff8f",outline=INK,width=1)
+        for event in ("<Button-1>","<B1-Motion>"):
+            self.slider.bind(event,lambda e:self._count_changed(max(1,min(5,round((e.x-7)/42)+1))))
+        self.slider.bind("<Left>",lambda _:self._count_changed(max(1,self.count.get()-1)))
+        self.slider.bind("<Right>",lambda _:self._count_changed(min(5,self.count.get()+1)))
+        self.count.trace_add("write",lambda *_:self._draw_count())
+        self._draw_count()
+        self.text(self.main,138.5,313,"데모 · 1~5명 모두 사용할 수 있어요",8,anchor="center")
 
     def _count_changed(self, value):
         self.count.set(value)
         self.app.change_count(value-self.app.settings["count"])
 
     def _draw_count(self):
-        x = 7 + (self.count.get()-1)*43
-        self.slider.coords(self.slider_active, 7, 12, x, 12)
-        self.slider.coords(self.slider_knob, x-6, 6, x+6, 18)
+        x = 7 + (self.count.get()-1)*42
+        self.slider.coords(self.slider_active, 7, 6, x, 6)
+        self.slider.coords(self.slider_knob, x-6, 0, x+6, 12)
 
     def _settings(self):
-        app, frame = self.app, self._content(self.settings, bottom=100)
-        app.settings_tab = frame
-        app.channel_controls = ttk.Frame(frame)
-        app.channel_controls.pack(fill="x")
-        self._label(app.channel_controls, "방송 링크")
-        row = ttk.Frame(app.channel_controls)
-        row.pack(fill="x")
+        app, page = self.app, self.settings
+        app.settings_tab = page
+        self.text(page,32,65,"방송 링크")
         app.channel_var = tk.StringVar(value=app.settings["channel_url"])
-        app.channel_entry = ttk.Entry(row, textvariable=app.channel_var)
-        app.channel_entry.pack(side="left", fill="x", expand=True)
-        app.channel_check = ttk.Button(row, text="확인", width=4, command=app.refresh_channel)
-        app.channel_check.pack(side="right", padx=(6, 0))
+        app.channel_entry = field(page,self,31,89,359,31,variable=app.channel_var,placeholder="https://chzzk.naver.com/")
         app.channel_info = tk.StringVar()
-        ttk.Label(app.channel_controls, textvariable=app.channel_info, wraplength=355,
-                  foreground=MUTED, font=(self.family, 8)).pack(fill="x", pady=(4, 12))
-        app.channel_var.trace_add("write", lambda *_: app._channel_link_changed())
-        self._label(frame, "단축키 설정")
-        row = ttk.Frame(frame)
-        row.pack(fill="x")
+        app.channel_var.trace_add("write",lambda *_:app._channel_link_changed())
+        self.text(page,30,136,"단축키 설정")
         app.hotkey_var = tk.StringVar(value=app.settings["hotkey"])
-        app.hotkey_entry = ttk.Entry(row, textvariable=app.hotkey_var, width=21)
-        app.hotkey_entry.pack(side="left")
-        app.hotkey_entry.bind("<KeyPress>", app._capture_hotkey)
-        app.hotkey_entry.bind("<FocusOut>", app._hotkey_focus_lost)
-        app.hotkey_record = ttk.Button(row, text="키로 지정", command=app.record_hotkey)
-        app.hotkey_record.pack(side="right")
-        app.hotkey_hint = tk.StringVar(value="직접 입력하거나 키 조합을 눌러 지정하세요.")
-        ttk.Label(frame, textvariable=app.hotkey_hint, foreground=MUTED, wraplength=355,
-                  font=(self.family, 8)).pack(anchor="w", pady=(4, 12))
-        row = ttk.Frame(frame)
-        row.pack(fill="x", pady=(0, 5))
-        ttk.Label(row, text="방송 설명").pack(side="left")
-        ttk.Label(row, textvariable=app.context_count, foreground=MUTED, font=(self.family, 7)).pack(side="right")
-        app.context = tk.Text(frame, height=4, bg=INPUT, fg=INK, insertbackground=INK, relief="flat",
-                              padx=12, pady=10, wrap="word", undo=True, highlightthickness=1,
-                              highlightbackground="#777777", highlightcolor=MINT)
-        app.context.pack(fill="x", pady=(0, 12))
-        app.context.insert("1.0", app.settings["context"])
-        app.context.bind("<<Modified>>", app._context_changed)
-        self._label(frame, "페르소나")
-        row = ttk.Frame(frame)
-        row.pack(fill="x", pady=(0, 12))
-        ttk.Label(row, image=self.photos["persona"]).pack(side="left", padx=(0, 8))
+        app.hotkey_entry = field(page,self,31,160,180,31,variable=app.hotkey_var,opacity=.3,component="Shortcut/KeyDisplay")
+        app.hotkey_entry.configure(justify="center")
+        app.hotkey_entry.bind("<KeyPress>",app._capture_hotkey)
+        app.hotkey_entry.bind("<FocusOut>",app._hotkey_focus_lost)
+        app.hotkey_record = DesignButton(page,self,"변경",app.record_hotkey,311,161,height=29)
+        app.hotkey_hint = tk.StringVar(value="키 조합을 입력하고 메인으로 돌아가면 저장됩니다.")
+        self.text(page,30,203,"방송 설명")
+        app.context = field(page,self,28,227,364,92,multiline=True,component="Settings/Description")
+        app.context.insert("1.0",app.settings["context"])
+        app.context.bind("<<Modified>>",app._context_changed)
+        app.context.design_surface.create_image(329,14,anchor="nw",image=self.photos["edit"])
+        counter = tk.Label(app.context.design_surface,textvariable=app.context_count,bg=app.context.cget("bg"),fg=INK,font=(self.family,-8))
+        counter.place(x=275,y=70,width=74,height=12)
+        self.text(page,30,331,"페르소나")
+        self.persona_image = page.create_image(28,355,anchor="nw",image=self.photos["persona-witty"])
+        self.persona_title = self.text(page,89,355,"")
+        self.persona_description = self.text(page,89,375,"",12,fill="#eaeaea")
         app.persona_preview = tk.StringVar()
-        ttk.Label(row, textvariable=app.persona_preview, wraplength=208, font=(self.family, 8)).pack(side="left")
-        ttk.Button(row, text="수정", width=5, command=lambda: self.show("controls")).pack(side="right")
-        app.usage_tab = ttk.Frame(frame)
-        app.usage_tab.pack(fill="x")
-        app._build_usage()
-        row = ttk.Frame(self.settings)
-        row.place(x=28, y=580, width=364)
-        ttk.Button(row, text="설정 적용", command=app.save_settings).pack(side="right")
-        ttk.Button(row, text="사용 방식 / 연결", command=lambda: self.show("controls")).pack(side="left")
-        ttk.Label(self.settings, textvariable=app.status, wraplength=355, foreground=MUTED,
-                  font=(self.family, 8)).place(x=28, y=619, width=364, height=36)
+        DesignButton(page,self,"수정",lambda:self.onboarding.select_personas(),313,365,height=29)
+        self.text(page,30,415,"사용량")
+        self.usage_caption = self.text(page,30,439,"이번 달 생성 요청",8)
+        self.usage_value = self.text(page,372,439,"—",8,anchor="ne")
+        self.usage_track = page.create_line(32,459,370,459,width=8,capstyle="round",fill="#3c3e40")
+        # There is no server quota contract yet; an empty rail must not imply a made-up limit.
+        for item in (self.usage_caption,self.usage_value,self.usage_track):
+            page.tag_bind(item,"<Button-1>",lambda _:self.show("controls"))
+
+    def refresh_persona(self,index=0):
+        selected = self.app.persona_vars[index].get()
+        key = next(key for key,p in PERSONAS.items() if p["name"] == selected)
+        persona = PERSONAS[key]
+        self.settings.itemconfigure(self.persona_title,text=persona["name"])
+        self.settings.itemconfigure(self.persona_description,text=persona["description"])
+        self.settings.itemconfigure(self.persona_image,image=self.photos[PERSONA_ASSETS.get(key,"persona-witty")])
+
+    def refresh_usage(self,usage):
+        label = "이번 달 생성 요청" + (" · 데모" if usage and usage["is_demo"] else "")
+        if self.app.usage_error:
+            label = "최근 확인한 사용량 · 연결 확인 필요"
+        self.settings.itemconfigure(self.usage_caption,text=label)
+        self.settings.itemconfigure(self.usage_value,text=f"{usage['generation_requests']:,}회 · 한도 미설정" if usage else "확인 중")
 
     def _controls(self):
         from apps.desktop.overlay import MODES, DESTINATIONS
         app, frame = self.app, self._content(self.controls)
         app.chat_tab = frame
+        app.channel_controls = ttk.Frame(frame)
+        app.channel_controls.pack(fill="x")
+        app.channel_check = ttk.Button(app.channel_controls,text="치지직 연결 확인",command=app.refresh_channel)
+        app.channel_check.pack(fill="x")
+        ttk.Label(app.channel_controls,textvariable=app.channel_info,wraplength=350).pack(fill="x",pady=6)
+        ttk.Label(frame,textvariable=app.hotkey_hint,wraplength=350,foreground=MUTED).pack(fill="x",pady=6)
         self._label(frame, "사용 방식")
         app.mode_var = tk.StringVar(value=next(label for label, value in MODES.items() if value == app.settings["mode"]))
         app.mode_selector = ttk.Combobox(frame, textvariable=app.mode_var, values=list(MODES), state="readonly")
@@ -338,6 +375,10 @@ class FigmaView:
         ttk.Button(row, text="설정 적용", command=app.save_settings).pack(side="right")
         ttk.Label(frame, textvariable=app.status, foreground=MUTED, wraplength=355, font=(self.family, 8)).pack(fill="x", pady=(6, 0))
 
+        app.usage_tab = ttk.Frame(frame)
+        app.usage_tab.pack(fill="x",pady=12)
+        app._build_usage()
+
     def _chat(self):
         app, frame = self.app, self._content(self.chat)
         self._label(frame, "생성된 채팅", font=(self.family, 11, "bold"))
@@ -352,5 +393,5 @@ class FigmaView:
     def refresh(self):
         usage = self.app.service.usage()
         for badge in self.badges:
-            badge.configure(text="Demo" if usage and usage["is_demo"] else "Online" if usage else "Offline")
+            badge.configure(text="• Demo" if usage and usage["is_demo"] else "• Online" if usage else "• Offline")
         self.app.trigger_button.itemconfigure(self.app.trigger_button.key_label, text=self.app.settings["hotkey"])

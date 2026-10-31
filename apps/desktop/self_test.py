@@ -110,7 +110,7 @@ def run(report_path: Path) -> int:
             app._restore_window = lambda: None  # Remain hidden through both flows.
             from apps.desktop.fonts import load_bundled_fonts
             from tkinter import font
-            if len(load_bundled_fonts()) != 2 or app.view.family != "Pretendard":
+            if len(load_bundled_fonts()) != 3 or app.view.family != "Pretendard":
                 raise ValueError("Bundled Pretendard fonts did not load")
             for weight in ("normal", "bold"):
                 resolved = font.Font(root=root, family=app.view.family, size=9, weight=weight).actual()
@@ -126,13 +126,22 @@ def run(report_path: Path) -> int:
             if "<svg" not in (ASSETS / "logo.svg").read_text(encoding="utf-8"):
                 raise ValueError("Original SVG is missing from the distribution")
             check_taskbar_identity(root)
+            if app.view.current != "start":
+                raise ValueError("A new installation did not open the welcome screen")
+            wizard = app.view.onboarding
+            wizard.to_personas()
+            wizard.to_link()
+            wizard.finish()
+            if not app.settings["onboarding_complete"] or app.view.current != "start_end":
+                raise ValueError("Onboarding did not save without a broadcast link")
+            app.view.show("main")
             if app.view.current != "main" or app.view.main.background_owner != "Screen/Main":
                 raise ValueError("Figma main panel was not installed")
             if app.view.settings.background_owner != "Fill + Shadow":
                 raise ValueError("Settings background was duplicated on its root")
             if root.attributes("-alpha") != 1.0:
                 raise ValueError("Panel paint opacity leaked into window/content opacity")
-            for page in ("settings", "controls", "chat", "main"):
+            for page in ("start", "start1", "start2", "start3", "start_end", "settings", "controls", "chat", "main"):
                 app.view.show(page)
                 root.update_idletasks()
                 if app.view.current != page:
@@ -173,8 +182,15 @@ def run(report_path: Path) -> int:
             app.next_trigger = 0
             app.generate()
             pump_until(lambda: not app.busy)
+            if sys.platform.startswith("linux"):
+                # X11 acknowledges topmost only on mapped, WM-managed windows.
+                root.attributes("-alpha",0)
+                root.deiconify()
+                pump_until(lambda: bool(root.attributes("-topmost")))
             if service.manual_calls != 2 or service.stop_requested.is_set() or not root.attributes("-topmost"):
                 raise ValueError("Mode switching or topmost failed")
+            if sys.platform.startswith("linux"):
+                root.withdraw()
             app.channel_var.set("https://chzzk.naver.com/live/" + "B" * 32 + "?share=1")
             app.destination_var.set("치지직에도 전송")
             app._destination_changed()
@@ -227,7 +243,7 @@ def run(report_path: Path) -> int:
         atomic_json(report_path, {"status": "ok", "frozen": bool(getattr(sys, "frozen", False)),
                                   "python": sys.version.split()[0], "tk": tk.TkVersion,
                                   "state_directory": str(state_directory()),
-                                  "checks": ["tls", "jpeg", "bundled_pretendard_regular_bold", "font_license", "app_icons", "bundled_original_svg", "figma_panels", "page_navigation", "member_slider", "content_opacity", "hidden_overlay", "topmost", "manual_generation",
+                                  "checks": ["tls", "jpeg", "bundled_pretendard_regular_semibold_bold", "font_license", "app_icons", "bundled_original_svg", "figma_panels", "onboarding_without_broadcast_link", "page_navigation", "member_slider", "content_opacity", "hidden_overlay", "topmost", "manual_generation",
                                              "realtime_start_stop_restart", "mode_switch", "output_switch",
                                              "channel_link_extraction", "broadcast_link_always_visible", "custom_hotkey", "settings_save"]
                                             + (["titlebar_icon", "taskbar_identity"] if sys.platform == "win32" else []),

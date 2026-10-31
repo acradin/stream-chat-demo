@@ -39,9 +39,10 @@ def composite(color, paint):
     return tuple(result)
 
 
-def panel_color():
+def panel_color(variant="main"):
     color = BACKDROP
-    for paint in FILLS:
+    paints = FILLS if variant == "main" else (FILLS[0], (0., 0., 0., .4, "NORMAL"))
+    for paint in paints:
         color = composite(color, paint)
     return color
 
@@ -55,10 +56,10 @@ def configure_theme(root):
     family = "Pretendard" if "Pretendard" in font.families(root) else "맑은 고딕"
     for name in font.names(root):
         font.nametofont(name, root=root).configure(family=family)
-    root.option_add("*Font", (family, 9))
+    root.option_add("*Font", (family, -12))
     style = ttk.Style(root)
     style.theme_use("clam")
-    style.configure(".", background=BG, foreground=INK, bordercolor="#666666", font=(family, 9))
+    style.configure(".", background=BG, foreground=INK, bordercolor="#666666", font=(family, -12))
     style.configure("TFrame", background=BG)
     style.configure("TLabel", background=BG, foreground=INK)
     style.configure("TButton", background=INPUT, foreground=INK, padding=(9, 5), relief="flat")
@@ -92,12 +93,19 @@ def configure_theme(root):
 
 
 @lru_cache(maxsize=8)
-def paint_layers(width, height):
+def paint_layers(width, height, variant="main"):
     # Separate base, shadow and glass images; content never inherits their alpha.
     size = width, height
     mask = Image.new("L", size)
     ImageDraw.Draw(mask).rounded_rectangle((1, 1, width-2, height-2), RADIUS, fill=255)
-    base = Image.new("RGBA", size, panel_color() + (255,))
+    base = Image.new("RGBA", size, panel_color(variant) + (255,))
+    if variant == "welcome":
+        draw = ImageDraw.Draw(base)
+        backdrop = composite(BACKDROP, FILLS[0])
+        for y in range(height):
+            t = y / max(1, height - 1)
+            color = tuple(round((1-t)*start + t*end) for start, end in zip((3,255,213), (45,255,143)))
+            draw.line((0, y, width, y), fill=tuple(round(.8*c + .2*b) for c,b in zip(color, backdrop)))
     base.putalpha(mask)
     shadow = Image.new("L", size)
     ImageDraw.Draw(shadow).rounded_rectangle((1, 9, width-2, height+6), RADIUS,
@@ -124,12 +132,15 @@ def paint_layers(width, height):
 
 
 class Panel(tk.Canvas):
-    def __init__(self, parent, width, height, *, settings=False):
+    def __init__(self, parent, width, height, *, settings=False, variant="main"):
         super().__init__(parent, width=width, height=height, bg=transparent_color(),
                          highlightthickness=0, borderwidth=0)
         self.design_node = "Screen/Settings" if settings else "Screen/Main"
         self.background_owner = "Fill + Shadow" if settings else "Screen/Main"
         self.layer_opacity = 1.0
-        self.images = [ImageTk.PhotoImage(layer, master=self) for layer in paint_layers(width, height)]
+        layers = paint_layers(width, height, variant)
+        self.surface = layers[1]
+        self.variant = variant
+        self.images = [ImageTk.PhotoImage(layer, master=self) for layer in layers]
         for photo, name in zip(self.images, ("Drop shadow", self.background_owner, "Glass Effect")):
             self.create_image(0, 0, image=photo, anchor="nw", tags=(name,))

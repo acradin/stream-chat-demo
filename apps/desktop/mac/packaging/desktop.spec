@@ -12,7 +12,7 @@ data = [(str(assets / name), "apps/assets") for name in
         ("logo.svg", "app.svg", "app.ico", "app-16.png", "app-32.png", "app-48.png", "app-256.png", "app-512.png")]
 data += [(str(path), "apps/assets/figma") for path in (assets / "figma").iterdir() if path.suffix in (".png", ".svg")]
 data += [(str(assets / "fonts/pretendard" / name), "apps/assets/fonts/pretendard") for name in
-         ("Pretendard-Regular.ttf", "Pretendard-Bold.ttf", "LICENSE.txt")]
+         ("Pretendard-Regular.ttf", "Pretendard-SemiBold.ttf", "Pretendard-Bold.ttf", "LICENSE.txt")]
 for distribution in importlib.metadata.distributions():
     name = distribution.metadata["Name"]
     for item in distribution.files or ():

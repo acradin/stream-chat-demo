@@ -1,0 +1,41 @@
+name: Build Linux desktop
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/desktop-linux.yml'
+      - 'apps/desktop/**'
+      - 'apps/assets/**'
+      - 'backend/personas.py'
+      - 'backend/env.py'
+      - 'backend/storage.py'
+      - 'tests/test_linux_desktop.py'
+      - '*desktop_linux.sh'
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Install X11 test environment and client dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth openbox libx11-6 libxcomposite1 libxext6 libfontconfig1 libxtst6
+          python -m venv .venv-linux
+          .venv-linux/bin/python -m pip install -r apps/desktop/linux/requirements.txt -r apps/desktop/packaging/requirements-build.txt
+      - name: Validate native X11 adapters and build with packaged UI self-test
+        run: xvfb-run -a bash apps/desktop/linux/packaging/check.sh --build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tiki-linux-development-x86_64
+          path: |
+            dist/linux/*.tar.gz
+            dist/linux/*.sha256
+            dist/linux/*.self-test.json
+          if-no-files-found: error

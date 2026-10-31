@@ -5,5 +5,7 @@ from apps.desktop.capture_types import WindowSource
 
 if sys.platform == "darwin":
     from apps.desktop.mac.capture import capture_primary_screen, capture_window, list_windows
+elif sys.platform.startswith("linux"):
+    from apps.desktop.linux.capture import capture_primary_screen, capture_window, list_windows
 else:
     from apps.desktop.window.capture import capture_primary_screen, capture_window, list_windows

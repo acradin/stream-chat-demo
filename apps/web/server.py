@@ -56,7 +56,7 @@ def _stats(values: list[float]) -> dict:
 
 class ManualSession:
     def __init__(self, provider, run_dir: str | Path, *, cooldown_s: float = 1,
-                 max_age_s: float = 8, timeout_s: float = 20):
+                 max_age_s: float = 8, timeout_s: float = 20, persist: bool = True):
         self.provider = provider
         self.cooldown_s = _number(cooldown_s, "cooldown_s")
         self.max_age_s = _number(max_age_s, "max_age_s")
@@ -64,9 +64,11 @@ class ManualSession:
         if not max_age_s or not timeout_s:
             raise ValueError("max_age_s and timeout_s must be positive")
         self.directory = Path(run_dir).resolve()
-        if self.directory.exists() and any(self.directory.iterdir()):
+        self.persist = persist
+        if persist and self.directory.exists() and any(self.directory.iterdir()):
             raise ValueError("Output directory is not empty; choose a new --output")
-        self.directory.mkdir(parents=True, exist_ok=True)
+        if persist:
+            self.directory.mkdir(parents=True, exist_ok=True)
         self.session_token = secrets.token_urlsafe(32)
         self.started = time.monotonic()
         self.created_at = datetime.now(timezone.utc).isoformat()
@@ -212,6 +214,8 @@ class ManualSession:
         return "".join(json.dumps(r, ensure_ascii=False, allow_nan=False) + "\n" for r in self.records.values())
 
     def _persist(self) -> None:
+        if not self.persist:
+            return
         records = list(self.records.values())
         counts = {status: sum(r["status"] == status for r in records) for status in
                   ("generating", "ready", "displayed", "discarded", "expired", "duplicate", "error")}

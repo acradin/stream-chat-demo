@@ -41,7 +41,8 @@ def validate_accounts(accounts):
 
 
 def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
-               service_factory=DesktopService, realtime_factory=None, delivery_factory=None, public_url=None):
+               service_factory=DesktopService, realtime_factory=None, delivery_factory=None, public_url=None,
+               web_dir=None):
     accounts = validate_accounts(accounts)
     if provider not in ("openai", "mock"):
         raise ValueError("잘못된 서버 생성 모드입니다.")
@@ -54,11 +55,19 @@ def create_app(state_dir, *, accounts, provider="openai", model=DEFAULT_MODEL,
                                          state_dir=Path(state_dir) / hashlib.sha256(account.encode()).hexdigest()))
                   for account in accounts}
     remote_auth = RemoteAuthorization(public_url, deliveries) if public_url else None
+    public_web = None
+    if web_dir is not None:
+        from backend.public_web import PublicWeb
+        if not public_url:
+            raise ValueError("The public web demo requires its HTTPS origin.")
+        public_web = PublicWeb(web_dir, public_url)
     # RequestKey was added after aiohttp 3.9, our supported minimum.
     account_key = web.RequestKey("service_account", str) if hasattr(web, "RequestKey") else "service_account"
 
     @web.middleware
     async def authenticate(request, handler):
+        if public_web and public_web.handles(request):
+            return await public_web.dispatch(request)
         if request.method in ("GET", "HEAD") and request.path == "/":
             return await handler(request)
         if request.method in ("GET", "HEAD") and request.path == "/healthz":
@@ -197,8 +206,10 @@ def main():
         model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
         if args.provider == "openai":
             OpenAIScreenshotProvider(model=model)  # Fail before serving if operator credentials are missing.
+        web_dir = Path(__file__).resolve().parents[1] / "apps/web/dist"
         app = create_app(args.state_dir, accounts=accounts, provider=args.provider, model=model,
-                         public_url=os.environ.get("CHAT_PUBLIC_URL") or None)
+                         public_url=os.environ.get("CHAT_PUBLIC_URL") or None,
+                         web_dir=web_dir if (web_dir / "index.html").is_file() and os.environ.get("CHAT_PUBLIC_URL") else None)
     except ValueError as exc:
         parser.error(str(exc))
     web.run_app(app, host=args.host, port=args.port, access_log=None, handler_cancellation=True)

@@ -25,7 +25,8 @@ from deploy.aws.template import build_template
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "dist" / "aws"
 RUNTIME_FILES = ("deploy/__init__.py", "deploy/aws/__init__.py", "deploy/aws/run_server.py",
-                 "deploy/aws/install_release.sh", "deploy/aws/stream-chat.service", "deploy/aws/requirements.txt")
+                 "deploy/aws/install_release.sh", "deploy/aws/stream-chat.service", "deploy/aws/requirements.txt",
+                 "apps/__init__.py", "apps/web/__init__.py", "apps/web/server.py")
 
 
 def validate_domain(domain):
@@ -44,6 +45,11 @@ def package(root=ROOT, output=OUTPUT):
                    if path.name != "desktop_demo.py") + list(RUNTIME_FILES)
     if "backend/server.py" not in files:
         raise ValueError("Backend source is missing")
+    static = root / "apps/web/dist"
+    if (static / "index.html").is_file():
+        files += [path.relative_to(root).as_posix() for path in static.rglob("*")
+                  if path.is_file() and path.suffix in {".html", ".js", ".css", ".svg", ".png", ".jpg", ".webp", ".woff2", ".ttf"}
+                  and not any(part.startswith(".") for part in path.relative_to(static).parts)]
     archive = output / "stream-chat-backend.tar.gz"
     with tarfile.open(archive, "w:gz") as bundle:
         for name in sorted(files):
@@ -51,7 +57,8 @@ def package(root=ROOT, output=OUTPUT):
             if source.is_symlink() or not source.resolve().is_relative_to(root):
                 raise ValueError("Refusing to bundle files outside the project")
             # Normalize Windows checkouts for Linux shell and systemd files.
-            payload = source.read_text(encoding="utf-8-sig").replace("\r\n", "\n").encode("utf-8")
+            payload = (source.read_bytes() if name.startswith("apps/web/dist/") else
+                       source.read_text(encoding="utf-8-sig").replace("\r\n", "\n").encode("utf-8"))
             info = tarfile.TarInfo(name)
             info.size, info.mode, info.mtime = len(payload), 0o644, 0
             bundle.addfile(info, io.BytesIO(payload))

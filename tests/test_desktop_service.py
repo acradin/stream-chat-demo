@@ -34,6 +34,14 @@ class FakeProvider:
 
 
 class DesktopServiceTests(unittest.IsolatedAsyncioTestCase):
+    def test_onboarding_migration_preserves_existing_setup(self):
+        self.assertFalse(clean_settings({})["onboarding_complete"])
+        prior = clean_settings({"count":3,"context":"기존 방송 설명"})
+        self.assertTrue(prior["onboarding_complete"])
+        self.assertEqual((prior["count"],prior["context"]),(3,"기존 방송 설명"))
+        self.assertFalse(clean_settings({"count":3,"onboarding_complete":False})["onboarding_complete"])
+        self.assertTrue(clean_settings({"onboarding_complete":True})["onboarding_complete"])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

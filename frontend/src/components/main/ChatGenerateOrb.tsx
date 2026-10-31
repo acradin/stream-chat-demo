@@ -39,12 +39,18 @@ export function ChatGenerateOrb({ onGenerate }: ChatGenerateOrbProps) {
       style={{
         background: disabled
           ? "radial-gradient(circle at 50% 32%, #4a4a4a, #3a3a3a 70%)"
-          : "radial-gradient(circle at 50% 30%, #2DFF8F 0%, #12cf9f 55%, #07b892 100%)",
+          : "transparent",
         boxShadow: disabled
           ? "inset 0 0 0 1px rgba(255,255,255,0.08)"
-          : "inset 0 0 0 1.5px rgba(255,255,255,0.35), 0 0 48px -4px rgba(45,255,143,0.55), 0 18px 46px -16px rgba(3,255,213,0.55)",
+          : "0 0 32px -4px rgba(3,255,213,0.18)",
       }}
     >
+      {!disabled && (
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <img src="/brand/orb-base.png" alt="" className="absolute inset-0 h-full w-full opacity-[0.72]" draggable={false} />
+          <img src="/brand/orb-glow.png" alt="" className="absolute inset-[10%] h-[80%] w-[80%] opacity-[0.72]" draggable={false} />
+        </span>
+      )}
       {/* 호버 글로우 */}
       {!disabled && (
         <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100"
@@ -52,15 +58,15 @@ export function ChatGenerateOrb({ onGenerate }: ChatGenerateOrbProps) {
         />
       )}
 
-      <span className="flex flex-col items-center gap-2 px-6 text-center">
+      <span className="relative flex w-full flex-col items-center gap-2 text-center">
         {inFlight ? (
           <Loader2 className="h-[46px] w-[46px] animate-spin text-white" />
         ) : (
           <img
-            src="/tiki-character.svg"
+            src="/brand/generate-face.svg"
             alt=""
             aria-hidden="true"
-            className="h-[52px] w-auto object-contain drop-shadow-sm"
+            className="h-auto w-[43%] object-contain"
             draggable={false}
           />
         )}

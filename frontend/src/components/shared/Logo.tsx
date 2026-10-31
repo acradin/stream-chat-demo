@@ -9,8 +9,10 @@ export function Logo({ showStatus = true }: { showStatus?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
       <img
-        src="/AppHeader.svg"
+        src="/brand/app-header.svg"
         alt="tiki"
+        width={70}
+        height={21}
         className="h-[26px] w-auto select-none object-contain"
         draggable={false}
       />

@@ -12,7 +12,7 @@ export function TraitSelect() {
   const toggleTrait = useUiStore((s) => s.toggleTrait);
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
       {TRAITS.map((t) => {
         const active = traitIds.includes(t.id);
         return (
@@ -22,7 +22,7 @@ export function TraitSelect() {
             aria-pressed={active}
             onClick={() => toggleTrait(t.id)}
             className={cn(
-              "relative flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition",
+              "relative flex items-start gap-2.5 rounded-xl border p-3 text-left transition",
               active
                 ? "border-transparent"
                 : "border-line-soft bg-base-850 hover:border-line-strong",
@@ -36,15 +36,20 @@ export function TraitSelect() {
                 : undefined
             }
           >
-            <span
-              className="grid h-8 w-8 place-items-center rounded-lg text-[15px] font-bold"
-              style={{ color: t.accent, background: `${t.accent}1a` }}
-            >
-              {t.glyph}
-            </span>
-            <span className="text-[13px] font-semibold text-ink">{t.label}</span>
-            <span className="text-[10px] leading-snug text-ink-faint">
-              {t.description}
+            <img
+              src={t.image}
+              alt=""
+              aria-hidden="true"
+              width={51}
+              height={48}
+              className="h-10 w-10 flex-none select-none object-contain"
+              draggable={false}
+            />
+            <span className="min-w-0 flex-1 pr-1">
+              <span className="block text-[13px] font-semibold text-ink">{t.label}</span>
+              <span className="mt-1 block break-keep text-[10px] leading-snug text-ink-faint">
+                {t.description}
+              </span>
             </span>
             {active && (
               <span

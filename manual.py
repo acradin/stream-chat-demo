@@ -23,7 +23,7 @@ from urllib.parse import urlsplit
 
 from aiohttp import web
 
-from manual_provider import GeminiManualProvider, MockManualProvider
+from manual_provider import DEFAULT_PERSONA, PERSONAS, GeminiManualProvider, MockManualProvider
 from providers import ProviderError, InvalidResponseError
 
 
@@ -80,30 +80,29 @@ class ManualSession:
     def config(self) -> dict:
         return {"provider": self.provider.provider, "model": self.provider.model,
                 "is_mock": self.provider.provider == "mock", "session_token": self.session_token,
-                "cooldown_s": self.cooldown_s, "max_age_s": self.max_age_s}
+                "cooldown_s": self.cooldown_s, "max_age_s": self.max_age_s,
+                "default_persona": DEFAULT_PERSONA,
+                "personas": [{"id": key, "name": value["name"], "description": value["description"]}
+                             for key, value in PERSONAS.items()]}
 
     @staticmethod
     def _validate_trigger(payload: dict) -> dict:
-        required = {"client_request_id", "preset", "channel_context", "situation", "tone",
+        required = {"client_request_id", "persona", "channel_context",
                     "clicked_video_s", "video_session_id"}
         if not isinstance(payload, dict) or set(payload) != required:
             raise ValueError("Trigger accepts only the documented text fields and timing metadata; no media")
         client_id = _text(payload["client_request_id"], "client_request_id", 128, allow_empty=False)
-        preset = payload["preset"]
-        if preset not in ("reaction", "mistake", "success", "surprise"):
-            raise ValueError("Unknown situation preset")
-        tone = payload["tone"]
-        if tone not in ("playful", "warm", "hype"):
-            raise ValueError("Unknown tone")
+        persona = payload["persona"]
+        if not isinstance(persona, str) or persona not in PERSONAS:
+            raise ValueError("Unknown persona")
         video_id = payload["video_session_id"]
         if video_id is not None:
             video_id = _text(video_id, "video_session_id", 128, allow_empty=False)
         video_s = _number(payload["clicked_video_s"], "clicked_video_s", optional=True)
         if (video_s is None) != (video_id is None):
             raise ValueError("Video time and video session ID must be provided together")
-        return {"client_request_id": client_id, "preset": preset, "tone": tone,
+        return {"client_request_id": client_id, "persona": persona,
                 "channel_context": _text(payload["channel_context"], "channel_context", 1000),
-                "situation": _text(payload["situation"], "situation", 500),
                 "clicked_video_s": video_s, "video_session_id": video_id}
 
     @staticmethod
@@ -135,8 +134,8 @@ class ManualSession:
             recent = [r["comment"] for r in self.records.values() if r["status"] == "displayed"][-8:]
             # Only these human-supplied text fields enter the model. Video time,
             # filename, local URL and media bytes are NEVER forwarded.
-            context = {"request_id": request_id, "preset": data["preset"], "tone": data["tone"],
-                       "channel_context": data["channel_context"], "situation": data["situation"],
+            context = {"request_id": request_id, "persona": data["persona"],
+                       "channel_context": data["channel_context"],
                        "recent_comments": recent}
             record = {"request_id": request_id, **data, "status": "generating", "comment": "",
                       "provider": self.provider.provider, "model": self.provider.model,
@@ -221,7 +220,7 @@ class ManualSession:
             for key, value in record["usage"].items():
                 if key.endswith("TokenCount") and isinstance(value, int) and not isinstance(value, bool):
                     usage[key] = usage.get(key, 0) + value
-        report = {"schema_version": 2, "mode": "manual_text", "created_at": self.created_at,
+        report = {"schema_version": 3, "mode": "manual_text", "created_at": self.created_at,
                   "provider": self.provider.provider, "model": self.provider.model,
                   "is_mock": self.provider.provider == "mock", "input_media_sent_to_model": False,
                   "settings": {"cooldown_s": self.cooldown_s, "max_age_s": self.max_age_s, "timeout_s": self.timeout_s},
@@ -238,13 +237,13 @@ class ManualSession:
         content = {"run.json": json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
                    "events.jsonl": self.export()}
         buf = io.StringIO(newline="")
-        keys = ["request_id", "status", "preset", "tone", "clicked_video_s", "displayed_video_s",
+        keys = ["request_id", "status", "persona", "channel_context", "clicked_video_s", "displayed_video_s",
                 "api_latency_ms", "button_to_display_ms", "client_acknowledged", "comment", "error"]
         writer = csv.DictWriter(buf, fieldnames=keys, extrasaction="ignore")
         writer.writeheader()
         for record in records:
             row = {key: record.get(key) for key in keys}
-            for key in ("comment", "error"):
+            for key in ("comment", "error", "channel_context"):
                 if isinstance(row[key], str) and row[key].lstrip().startswith(("=", "+", "-", "@")):
                     row[key] = "'" + row[key]
             writer.writerow(row)
